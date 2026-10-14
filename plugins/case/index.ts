@@ -98,8 +98,10 @@ export default function init(host: Host) {
       const inset = [from.top - p.top, p.right - from.right, p.bottom - from.bottom, from.left - p.left].map((v) => `${Math.max(0, v)}px`).join(" ");
       panel.animate([{ clipPath: `inset(${inset} round 6px)` }, { clipPath: "inset(0 0 0 0 round 10px)" }], { duration: 760, easing: "cubic-bezier(.76,0,.24,1)" });
     }
+    // The top line holds the close cross, pinned to the screen on tablets and phones; a transform
+    // on that line would carry the cross along, so the line only fades in.
     [...body.children].forEach((child, i) =>
-      child.animate([{ transform: "translateY(26px)", opacity: 0.001 }, { transform: "none", opacity: 1 }], {
+      child.animate(child.contains(closeBtn) ? [{ opacity: 0.001 }, { opacity: 1 }] : [{ transform: "translateY(26px)", opacity: 0.001 }, { transform: "none", opacity: 1 }], {
         duration: 620,
         delay: (from ? 380 : 80) + i * 55,
         easing: "cubic-bezier(.2,.8,.2,1)",
