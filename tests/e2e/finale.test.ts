@@ -1,5 +1,6 @@
 // The finale: the whale slingshot under the footer. Keyboard launch, a pointer shot aimed at the
 // studio name (the pull is computed here from the page geometry and the slingshot's physics),
+// the first pull launches (whale caught as it drops in, pressed at its tail or nose, on a phone),
 // plan B, calm, phone layout.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";
@@ -26,8 +27,8 @@ async function toFinale(page: Page) {
 
 const countText = (page: Page) => page.locator(".ss-count").textContent();
 
-// The pull that sends the whale through the middle of the studio name, without the rocket.
-async function pullAtName(page: Page): Promise<Vec> {
+// The sling as the slingshot lays it out: its geometry, the pocket's rest point on screen, the page.
+async function slingAt(page: Page) {
   const m = await page.evaluate(() => {
     const s = document.querySelector<HTMLElement>("#finale")!;
     const copy = s.querySelector<HTMLElement>(".ss-copy")!;
@@ -48,7 +49,12 @@ async function pullAtName(page: Page): Promise<Vec> {
     };
   });
   const geo = layout(m.W, m.H, m.vw <= 700 ? 140 : 64, m.copyBottom, m.copyRight);
-  const R = { x: m.left + geo.R.x, y: m.top + geo.R.y };
+  return { m, geo, R: { x: m.left + geo.R.x, y: m.top + geo.R.y } };
+}
+
+// The pull that sends the whale through the middle of the studio name, without the rocket.
+async function pullAtName(page: Page): Promise<Vec> {
+  const { m, geo, R } = await slingAt(page);
   const g = gravity(m.vh);
   const vmax = maxSpeed(g, R.y, geo.whaleH, m.vh);
   const cx = (m.logo.left + m.logo.right) / 2;
@@ -80,6 +86,51 @@ async function shootWith(page: Page, pull: Vec) {
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x + pull.x, y + pull.y, { steps: 10 });
+  await page.mouse.up();
+}
+
+// The whale as drawn on the finale canvas (its cobalt body), in viewport px: centre, tail tip, nose tip.
+function drawnWhale(page: Page) {
+  return page.evaluate(() => {
+    const c = document.querySelector<HTMLCanvasElement>(".ss-canvas")!;
+    const r = c.getBoundingClientRect();
+    const k = c.width / r.width;
+    const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
+    let n = 0;
+    let sx = 0;
+    let sy = 0;
+    let tail = { x: Infinity, y: 0 };
+    let nose = { x: -Infinity, y: 0 };
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 250 || Math.abs(d[i] - 0x2f) > 24 || Math.abs(d[i + 1] - 0x4b) > 24 || d[i + 2] < 230) continue;
+      const x = r.left + ((i / 4) % c.width) / k;
+      const y = r.top + Math.floor(i / 4 / c.width) / k;
+      n++;
+      sx += x;
+      sy += y;
+      if (x < tail.x) tail = { x, y };
+      if (x > nose.x) nose = { x, y };
+    }
+    if (!n) throw new Error("No whale on the finale canvas");
+    return { centre: { x: sx / n, y: sy / n }, tail, nose };
+  });
+}
+
+// The page's clock stopped, scroll to the end and let `ms` of it run: the whale is `ms` into its drop.
+async function toFinaleDropping(page: Page, ms: number) {
+  await page.clock.install();
+  await page.reload({ waitUntil: "load" });
+  await page.evaluate(() => document.fonts.ready);
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100);
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+  await page.waitForTimeout(200); // the scroll event and the sling's first frame on screen
+  await page.clock.runFor(ms);
+}
+
+async function mousePull(page: Page, at: Vec, pull: Vec) {
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.down();
+  await page.mouse.move(at.x + pull.x, at.y + pull.y, { steps: 10 });
   await page.mouse.up();
 }
 
@@ -133,6 +184,112 @@ describe("finale", () => {
     expect(await page.locator(".toast").textContent()).toBe("Прямо в название! +100");
     expect(await page.locator(".ss-score b").textContent()).toBe("100");
     expect(await page.evaluate(() => localStorage.getItem("nws.best"))).toBe("100");
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a press on the whale as it drops in catches it, and the first pull launches", async () => {
+    const { context, page } = await open(browser, server.url);
+    await toFinaleDropping(page, 550);
+    const { geo, R } = await slingAt(page);
+    const whale = await drawnWhale(page);
+    // In the air: more than a whale's height above its place in the sling.
+    expect(whale.centre.y).toBeLessThan(R.y - geo.S * 0.14 - geo.whaleH);
+    await mousePull(page, whale.centre, { x: -60, y: 90 });
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    await context.close();
+  });
+
+  test("a press at the tip of the whale's tail or nose launches", async () => {
+    for (const tip of ["tail", "nose"] as const) {
+      const { context, page, errors } = await open(browser, server.url);
+      await toFinale(page);
+      const whale = await drawnWhale(page);
+      const at = { x: whale[tip].x + (tip === "tail" ? 2 : -2), y: whale[tip].y };
+      await mousePull(page, at, { x: -60, y: 90 });
+      expect(await countText(page), tip).toBe("Китов запущено: 1");
+      expect(errors).toEqual([]);
+      await context.close();
+    }
+  });
+
+  test("phone: a touch pull launches on the first try, even on the whale as it drops in", async () => {
+    const { context, page } = await open(browser, server.url, phone);
+    const cdp = await context.newCDPSession(page);
+    const touch = (type: "touchStart" | "touchMove" | "touchEnd", x = 0, y = 0) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
+    await toFinaleDropping(page, 600);
+    const { geo, R } = await slingAt(page);
+    const whale = await drawnWhale(page);
+    expect(whale.centre.y).toBeLessThan(R.y - geo.S * 0.14 - geo.whaleH);
+    const before = await page.evaluate(() => scrollY);
+    await touch("touchStart", whale.centre.x, whale.centre.y);
+    for (let i = 1; i <= 10; i++) await touch("touchMove", whale.centre.x - i * 5, whale.centre.y + i * 9);
+    await touch("touchEnd");
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    // The pull moved the whale, not the page.
+    expect(await page.evaluate(() => scrollY)).toBe(before);
+    await context.close();
+  });
+
+  test("a press on the whale lying on the ground catches it, and the pull launches", async () => {
+    const { context, page, errors } = await open(browser, server.url);
+    await toFinale(page);
+    const { centre } = await drawnWhale(page);
+    await mousePull(page, centre, { x: 0, y: -40 }); // pulled up: a weak shot into the ground
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    await page.waitForTimeout(1000); // it bounces, then lies still (it pops home only after 2.5 s)
+    const lying = await drawnWhale(page);
+    expect(Math.hypot(lying.centre.x - centre.x, lying.centre.y - centre.y)).toBeGreaterThan(20);
+    await mousePull(page, lying.centre, { x: -60, y: 90 });
+    expect(await countText(page)).toBe("Китов запущено: 2");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a click or a pull under 16 px is not a shot; a pull after it is", async () => {
+    const { context, page, errors } = await open(browser, server.url);
+    await toFinale(page);
+    const { centre } = await drawnWhale(page);
+    await page.mouse.click(centre.x, centre.y);
+    await mousePull(page, centre, { x: -6, y: 9 });
+    await page.waitForTimeout(300);
+    expect(await countText(page)).toBe("Китов запущено: 0");
+    await mousePull(page, centre, { x: -60, y: 90 });
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("mouse: one stray move with no button keeps the pull; two in a row (a lost button-up) put the whale back", async () => {
+    const { context, page, errors } = await open(browser, server.url);
+    await toFinale(page);
+    await page.evaluate(() => {
+      document.addEventListener("pointerdown", (e) => ((window as unknown as { __pid: number }).__pid = e.pointerId), true);
+    });
+    const { centre } = await drawnWhale(page);
+    const stray = (n: number) =>
+      page.evaluate(
+        ([n, x, y]) => {
+          const pointerId = (window as unknown as { __pid: number }).__pid;
+          const grab = document.querySelector(".ss-grab")!;
+          for (let i = 0; i < n; i++) grab.dispatchEvent(new PointerEvent("pointermove", { pointerId, pointerType: "mouse", isPrimary: true, buttons: 0, clientX: x, clientY: y, bubbles: true }));
+        },
+        [n, centre.x - 20, centre.y + 30],
+      );
+    const pullWith = async (n: number) => {
+      await page.mouse.move(centre.x, centre.y);
+      await page.mouse.down();
+      await page.mouse.move(centre.x - 20, centre.y + 30, { steps: 4 });
+      await stray(n);
+      await page.mouse.move(centre.x - 60, centre.y + 90, { steps: 6 });
+      await page.mouse.up();
+    };
+    await pullWith(2);
+    expect(await countText(page)).toBe("Китов запущено: 0");
+    await page.waitForTimeout(500);
+    await pullWith(1);
     expect(await countText(page)).toBe("Китов запущено: 1");
     expect(errors).toEqual([]);
     await context.close();

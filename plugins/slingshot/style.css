@@ -20,9 +20,12 @@
 .ss-sub { font-weight: 500; max-width: 36ch; margin-top: 18px; }
 .ss-out { margin-top: 6px; font-size: 18px; }
 
-.ss-grab { position: absolute; left: 0; top: 0; z-index: 2; padding: 0; border: 0; border-radius: 45%; background: transparent; touch-action: none; cursor: grab; }
+/* The hit area is a plain box (rounded corners would cut off the whale's nose and tail); the focus ring is the oval round its body. */
+.ss-grab { position: absolute; left: 0; top: 0; z-index: 2; padding: 0; border: 0; background: transparent; touch-action: none; cursor: grab; }
+.ss-grab::after { content: ""; position: absolute; left: 50%; bottom: var(--ring-b, 0px); width: var(--ring-w, 100%); height: var(--ring-h, 100%); translate: -50% 0; border-radius: 45%; pointer-events: none; }
 .ss-grab:active { cursor: grabbing; }
-.ss-grab:focus-visible { outline: 3px dashed var(--focus); outline-offset: 6px; border-radius: 45%; }
+.ss-grab:focus-visible { outline: none; }
+.ss-grab:focus-visible::after { outline: 3px dashed var(--focus); outline-offset: 6px; }
 
 .ss-hint { position: absolute; left: 0; top: 0; z-index: 1; background: var(--lemon); border-radius: 99px; padding: 7px 12px 6px; rotate: -5deg; white-space: nowrap; box-shadow: 0 0 0 3px #fff, var(--die); pointer-events: none; animation: ss-nudge 1.8s cubic-bezier(0.3, 1.6, 0.5, 1) infinite; transition: opacity 0.3s; }
 .finale.ss-launched .ss-hint { opacity: 0; }

@@ -153,6 +153,10 @@ export default function init(host: Host) {
     };
   };
 
+  // The grab is a plain box round the whole whale (tilted in the sling) and a margin, so a press
+  // on its nose or tail reaches it too.
+  const grabW = () => geo.whaleW * 1.25 + 24;
+  const grabH = () => geo.whaleH * 1.45 + 24;
   // Layout: the sling follows the section's size and the copy's height.
   function measure() {
     const W = section.clientWidth;
@@ -175,8 +179,11 @@ export default function init(host: Host) {
       whale.x = pocket.x;
       whale.y = pocket.y;
     }
-    grab.style.width = `${geo.whaleW * 0.9}px`;
-    grab.style.height = `${geo.whaleH * 1.25}px`;
+    grab.style.width = `${grabW()}px`;
+    // The focus ring keeps to the whale's body, at the foot of the grab (which grows upward while the whale drops in).
+    grab.style.setProperty("--ring-w", `${geo.whaleW * 0.9}px`);
+    grab.style.setProperty("--ring-h", `${geo.whaleH * 1.25}px`);
+    grab.style.setProperty("--ring-b", `${(grabH() - geo.whaleH * 1.25) / 2}px`);
     placeAside(copyBottom);
     draw();
     wake();
@@ -228,9 +235,10 @@ export default function init(host: Host) {
     if (!still()) raf = requestAnimationFrame(frame);
   }
 
+  // The whale drops in as soon as the tips of the sling come on screen.
   const slingVisible = () => {
     const r = section.getBoundingClientRect();
-    return r.bottom > 0 && r.top + geo.R.y + geo.S * 1.1 < innerHeight;
+    return r.bottom > 0 && r.top + geo.R.y - geo.S * 0.61 < innerHeight;
   };
   const settled = () =>
     Math.abs(pocket.x - geo.R.x) + Math.abs(pocket.y - geo.R.y) + Math.abs(pocket.vx) + Math.abs(pocket.vy) < 0.05 &&
@@ -338,12 +346,18 @@ export default function init(host: Host) {
     sound().play("boing");
   }
 
-  // Input: pointer on the whale, or keys on the focused sling.
+  // Input: pointer on the whale, or keys on the focused sling. A press on the whale while it
+  // drops in or lies on the ground, or on the empty sling after it popped, catches it: it is in
+  // the pocket at once and the pull starts.
+  let upMoves = 0;
   grab.addEventListener("pointerdown", (e) => {
-    if (mode !== "rest" || e.button !== 0) return;
+    if (!["rest", "drop", "roll", "gone"].includes(mode) || e.button !== 0) return;
     e.preventDefault();
     grab.setPointerCapture(e.pointerId);
+    if (mode === "roll" || mode === "gone") drop();
+    if (mode === "drop") land();
     pointerId = e.pointerId;
+    upMoves = 0;
     keyboard = false;
     const r = section.getBoundingClientRect();
     grabOff = { x: pocket.x - (e.clientX - r.left), y: pocket.y - (e.clientY - r.top) };
@@ -355,10 +369,13 @@ export default function init(host: Host) {
   grab.addEventListener("pointermove", (e) => {
     if (mode !== "drag" || keyboard || e.pointerId !== pointerId) return;
     // The button came up where we did not hear it (a Mac ctrl-click menu): put the whale back.
+    // Only on the second such move in a row: one odd move from a trackpad never drops a real pull.
     if (e.pointerType === "mouse" && e.buttons === 0) {
+      if (++upMoves < 2) return;
       pointerId = -1;
       return cancelAim();
     }
+    upMoves = 0;
     const r = section.getBoundingClientRect();
     setPull(e.clientX - r.left + grabOff.x - geo.R.x, e.clientY - r.top + grabOff.y - geo.R.y);
   });
@@ -840,10 +857,14 @@ export default function init(host: Host) {
   }
 
   function placeGrab() {
-    const at = mode === "rest" || mode === "drag" ? whale : geo.R;
-    const w = geo.whaleW * 0.9;
-    const gh = geo.whaleH * 1.25;
-    grab.style.translate = `${at.x - w / 2}px ${at.y - geo.S * 0.14 - gh / 2}px`;
+    const at = mode === "rest" || mode === "drag" || mode === "roll" ? whale : geo.R;
+    const w = grabW();
+    const gh = grabH();
+    // While the whale drops in, the grab also reaches up over it and the last 0.2 s of its fall
+    // (the eye and the finger lag behind it).
+    const up = mode === "drop" ? clamp(geo.R.y - whale.y + whale.vy * 0.2, 0, geo.H) : 0;
+    grab.style.height = `${gh + up}px`;
+    grab.style.translate = `${at.x - w / 2}px ${at.y - up - geo.S * 0.14 - gh / 2}px`;
   }
 
   // Watchers
