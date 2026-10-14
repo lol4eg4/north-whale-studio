@@ -198,7 +198,7 @@ describe("player", () => {
     await context.close();
   });
 
-  test("UNIUN (case 5) is a picture without a player", async () => {
+  test("UNION (case 5) is a picture without a player", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`);
     await page.waitForSelector("dialog.case[open]");
     expect(await page.getAttribute("dialog.case .case-pic", "src")).toBe("/media/c5-full.webp");
