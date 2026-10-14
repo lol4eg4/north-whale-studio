@@ -1,4 +1,4 @@
-// The ring text round «Ныряй наугад», drawn once onto a canvas (CSS turns the canvas, so
+// The ring text round «Рандомный кейс», drawn once onto a canvas (CSS turns the canvas, so
 // nothing repaints per frame). 200-unit box, radius 80, text from 9 o'clock clockwise over the
 // top, letters spaced to fill the circle (T§2.9).
 export function drawRing(canvas: HTMLCanvasElement, text: string, cssSize: number, fontUnits: number, colour: string, family: string) {

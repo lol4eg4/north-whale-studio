@@ -1,5 +1,5 @@
 // Play: drag with the mouse (5 px threshold, a drop never opens a case), touch hold-to-lift
-// versus a plain swipe that scrolls, a lost button-up, «Ныряй наугад» (animated and calm) and
+// versus a plain swipe that scrolls, a lost button-up, «Рандомный кейс» (animated and calm) and
 // «Прибраться».
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";

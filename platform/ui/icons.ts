@@ -16,6 +16,7 @@ export const icons = {
   arrowUp: '<svg viewBox="0 0 70 44"><path d="M60 40C52 22 38 10 12 6M12 6L24 0M12 6L22 16" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>',
   retry: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  dice: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="8.2" cy="8.2" r="1.8" fill="currentColor"/><circle cx="15.8" cy="8.2" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="8.2" cy="15.8" r="1.8" fill="currentColor"/><circle cx="15.8" cy="15.8" r="1.8" fill="currentColor"/></svg>',
   check: '<svg viewBox="0 0 16 16"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 } as const;
 export type IconName = keyof typeof icons;

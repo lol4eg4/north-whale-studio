@@ -1,4 +1,4 @@
-// «Ныряй наугад» decisions, pure so they are tested directly (T§4.3).
+// «Рандомный кейс» decisions, pure so they are tested directly (T§4.3).
 export type Rand = () => number;
 
 // A random case, never the one picked or opened last.

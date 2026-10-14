@@ -1,6 +1,6 @@
 // Dive and tidy: the dock in the bottom-right corner (T§2.9) and the dive block on the wall.
 //
-//   «Ныряй наугад»  pick a case (never the last one) -> tidy -> shuffle the wall with the target
+//   «Рандомный кейс»  pick a case (never the last one) -> tidy -> shuffle the wall with the target
 //                   between two cases -> scroll to it -> spotlight roulette (desktop) or slot
 //                   reel in the tile (phone) -> open the case. Calm: open a random case at once.
 //   «Прибраться»    every moved piece home, the wall back in its order, toast with the count.
@@ -33,9 +33,10 @@ export default function init(host: Host) {
   const ring = h("canvas", { class: "dive-ring", "aria-hidden": "true" });
   const coreTop = h("span");
   const coreBottom = h("span");
-  const diveBtn = h("button", { type: "button", class: "dive-btn" }, ring, h("span", { class: "dive-core", "aria-hidden": "true" }, coreTop, coreBottom));
+  const core = h("span", { class: "dive-core", "aria-hidden": "true" }, coreTop, coreBottom, icon("dice", 30));
+  const diveBtn = h("button", { type: "button", class: "dive-btn" }, ring, core);
   t.bind(diveBtn, "dive.title", "aria-label");
-  t.bind(diveBtn, "cursor.dive", "data-cursor");
+  t.bind(diveBtn, "cursor.spin", "data-cursor");
 
   const badge = h("span", { class: "tidy-n", "aria-hidden": "true", hidden: true });
   const tidyBtn = h("button", { type: "button", class: "tidy-btn" }, h("span", { class: "tidy-ico" }, icon("broom", 20)), t.bind(h("span", { class: "tidy-t" }), "tidy.label"), badge);
@@ -55,6 +56,16 @@ export default function init(host: Host) {
     const [first, ...rest] = content.text("dive.title").split(" ");
     coreTop.textContent = first;
     coreBottom.textContent = rest.join(" ");
+    fitCore();
+  };
+  // The label stays inside the ink disc: a long word gets a smaller size, never under 10 px.
+  // Phones show a die there instead and say the name on the ring.
+  const fitCore = () => {
+    core.style.fontSize = "";
+    if (phone.matches) return;
+    const room = core.clientWidth * 0.84;
+    const wide = coreTop.offsetWidth; // both lines share the widest line's width
+    if (wide > room) core.style.fontSize = `${Math.max(10, (parseFloat(getComputedStyle(core).fontSize) * room) / wide)}px`;
   };
   showCore();
 
@@ -65,7 +76,7 @@ export default function init(host: Host) {
     const size = phone.matches ? 84 : tablet.matches ? 128 : 156;
     const css = getComputedStyle(root);
     // At least 10 px letters (DESIGN.md); the smaller rings say it once.
-    const words = content.text(size < 156 ? "dive.ringShort" : "dive.ring");
+    const words = content.text(phone.matches ? "dive.ringPhone" : size < 156 ? "dive.ringShort" : "dive.ring");
     drawRing(ring, words, size, Math.max(14.5, (10 * 200) / size), css.getPropertyValue("--ink").trim(), css.getPropertyValue("--mono").trim());
   };
   const fonts = document.fonts;
@@ -75,9 +86,13 @@ export default function init(host: Host) {
     .then(() => {
       fontsReady = true;
       paintRing();
+      fitCore();
     });
-  phone.addEventListener("change", paintRing);
-  tablet.addEventListener("change", paintRing);
+  for (const mq of [phone, tablet])
+    mq.addEventListener("change", () => {
+      paintRing();
+      fitCore();
+    });
 
   // ---- Mess badge: how many pieces are away from home.
   let shown = 0;
@@ -401,7 +416,7 @@ export default function init(host: Host) {
       t.bind(h("b", { class: "dive-card-title" }), "dive.title"),
       h("span", { class: "dive-card-sub mono arrowed" }, t.bind(h("span"), "dive.sub"), icon("arrowRight", 14)),
     );
-    t.bind(card, "cursor.dive", "data-cursor");
+    t.bind(card, "cursor.spin", "data-cursor");
     card.addEventListener("click", () => void dive(card));
     place.append(card);
     motion.add(card, { kind: "block", raise: place });

@@ -95,7 +95,7 @@ const EN = {
   slogan: "Dive deeper",
   letters: "Divedeeper",
   footNav: ["Cases", "Services", "Manifesto", "Team", "Contact"],
-  dive: "Lucky dive",
+  dive: "Random case",
   tidy: "Tidy up",
   hint: "Drag anything. The whale doesn’t mind.",
 };
