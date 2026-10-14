@@ -1,0 +1,5 @@
+{
+  "cmd": "bun serve.ts",
+  "url_path": "/",
+  "check_path": "/health"
+}
