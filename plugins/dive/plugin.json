@@ -14,7 +14,9 @@
     "listens": [
       "language-changed",
       "case-opened",
-      "case-closed"
+      "case-closed",
+      "piece-dropped",
+      "whale-hit"
     ]
   },
   "slots": {

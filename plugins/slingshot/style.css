@@ -18,7 +18,7 @@
 .finale h2 { font: 900 clamp(34px, 5.4vw, 84px)/1.15 var(--display); letter-spacing: -0.02em; margin: 14px 0 0; max-width: 15ch; }
 .ss-stk { display: inline-block; background: var(--jellyfish); padding: 0.02em 0.2em 0.08em; border-radius: 0.2em; line-height: 1.12; box-shadow: 0 0 0 0.07em #fff, var(--die); }
 .ss-sub { font-weight: 500; max-width: 36ch; margin-top: 18px; }
-.ss-out { display: inline-block; margin-top: 6px; font-size: 18px; }
+.ss-out { margin-top: 6px; font-size: 18px; }
 
 .ss-grab { position: absolute; left: 0; top: 0; z-index: 2; padding: 0; border: 0; border-radius: 45%; background: transparent; touch-action: none; cursor: grab; }
 .ss-grab:active { cursor: grabbing; }
@@ -42,14 +42,14 @@ html.paused .ss-hint { animation: none; }
 .ss-count { position: absolute; left: 216px; bottom: 14px; z-index: 3; margin: 0; }
 
 /* The whale's flight over the page. */
-.ss-sky { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 80; pointer-events: none; }
+/* Sized like innerWidth x innerHeight, which the backing store uses (dvh follows a phone's toolbar). */
+.ss-sky { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 80; pointer-events: none; }
 .ss-sky[hidden] { display: none; }
 .ss-flash { position: fixed; inset: 0; z-index: 85; background: var(--lemon); opacity: 0; pointer-events: none; }
 
 /* Score sticker (T§4.5): under the top bar, five seconds. */
 .ss-score { position: fixed; left: var(--g); top: 84px; z-index: 90; display: grid; justify-items: center; gap: 2px; min-width: 96px; padding: 8px 14px 9px; border: 3px solid #fff; border-radius: 14px; background: var(--lemon); color: var(--ink); box-shadow: var(--die); rotate: -4deg; pointer-events: none; transition: opacity 0.4s, translate 0.4s; }
-.ss-score b { font: 900 30px/1 var(--display); }
-.ss-score .ss-best { font-size: 9px; }
+.ss-score b { font: 900 30px/1 var(--display); font-variant-numeric: tabular-nums; }
 .ss-score.out { opacity: 0; translate: 0 -12px; }
 
 @media (max-width: 700px) {

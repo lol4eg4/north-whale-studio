@@ -7,7 +7,7 @@
 //   release   clicks swallowed for 350 ms, so a dropped tile never opens
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h } from "../../platform/ui/parts.ts";
+import { h, isTouch } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import { createGesture, HOLD_MS, type PointerKind, type Step } from "./gesture.ts";
 import "./style.css";
@@ -21,6 +21,7 @@ interface Hand {
   x0: number;
   y0: number;
   sy0: number;
+  pageH: number; // page height when grabbed (a dragged piece must not stretch it)
   x: number;
   y: number;
   grabbed: boolean;
@@ -32,7 +33,7 @@ export default function init(host: Host) {
   const t = binder(content.text);
   const root = document.documentElement;
   const gesture = createGesture();
-  const touchDevice = matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+  const touchDevice = isTouch();
 
   let hand: Hand | null = null;
   let caseOpen = false;
@@ -51,14 +52,16 @@ export default function init(host: Host) {
     let x = hand.base.x + hand.x - hand.x0;
     let y = hand.base.y + hand.y - hand.y0 + (hand.fixed ? 0 : scrollY - hand.sy0);
     motion.moveTo(hand.id, x, y);
-    if (!hand.fixed) return;
-    // Fixed pieces stay fully on screen, below the top bar.
+    // Pieces stay on the page (fixed ones on screen, below the top bar): a piece dragged past an
+    // edge would be out of reach and would make the page scroll sideways.
     const r = hand.el.getBoundingClientRect();
     const w = root.clientWidth;
+    const top = hand.fixed ? 50 : -scrollY;
+    const bottom = hand.fixed ? innerHeight : hand.pageH - scrollY;
     if (r.left < 0) x -= r.left;
     else if (r.right > w) x -= r.right - w;
-    if (r.top < 50) y += 50 - r.top;
-    else if (r.bottom > innerHeight) y -= r.bottom - innerHeight;
+    if (r.top < top) y += top - r.top;
+    else if (r.bottom > bottom) y -= r.bottom - bottom;
     motion.moveTo(hand.id, x, y);
   };
 
@@ -140,20 +143,22 @@ export default function init(host: Host) {
 
   document.addEventListener("pointerdown", (e) => {
     if (hand || !e.isPrimary || e.button !== 0) return;
-    if (caseOpen || root.classList.contains("dive-rolling")) return;
+    if (caseOpen || motion.held) return;
     const target = e.target instanceof Element ? e.target : null;
     if (!target || target.closest("dialog[open]")) return;
     const id = motion.idOf(target);
     if (id === undefined) return;
     const el = motion.el(id)!;
     const kind: PointerKind = e.pointerType === "touch" ? "touch" : e.pointerType === "pen" ? "pen" : "mouse";
-    hand = { id, el, pointerId: e.pointerId, fixed: isFixed(el), base: motion.offset(id), x0: e.clientX, y0: e.clientY, sy0: scrollY, x: e.clientX, y: e.clientY, grabbed: false };
+    hand = { id, el, pointerId: e.pointerId, fixed: isFixed(el), base: motion.offset(id), x0: e.clientX, y0: e.clientY, sy0: scrollY, pageH: root.scrollHeight, x: e.clientX, y: e.clientY, grabbed: false };
     gesture.down(kind, e.clientX, e.clientY, e.timeStamp);
     if (kind === "touch") holdTimer = window.setTimeout(() => act(gesture.timer(performance.now())), HOLD_MS);
   });
 
   window.addEventListener("pointermove", (e) => {
     if (!hand || e.pointerId !== hand.pointerId) return;
+    // The button came up where we did not hear it (a Mac ctrl-click menu, outside the window).
+    if (e.pointerType === "mouse" && e.buttons === 0) return act(gesture.up(e.timeStamp));
     hand.x = e.clientX;
     hand.y = e.clientY;
     act(gesture.move(e.clientX, e.clientY, e.timeStamp), e.pointerId);

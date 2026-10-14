@@ -11,11 +11,10 @@ export const icons = {
   motionPause: '<svg viewBox="0 0 18 18"><rect x="3" y="2" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="11" y="2" width="4" height="14" rx="1.5" fill="currentColor"/></svg>',
   motionPlay: '<svg viewBox="0 0 18 18"><path d="M4 2.5v13l11-6.5z" fill="currentColor"/></svg>',
   broom: '<svg viewBox="0 0 24 24"><path d="M19 3l-7.5 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M10.2 9.4l4.4 4.4c-.9 3.4-3.6 6.6-7.6 7.7L3.4 18c1.6-1 2.6-2.4 2.4-4.5 1.3-2.4 2.6-3.7 4.4-4.1z" fill="#FFE14D" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M6.8 15.2l3 3M9 13.4l3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  arrowRight: '<svg viewBox="0 0 24 24"><path d="M4 12.5c5-.4 10-.6 15-.5M13.5 6l6 6-6.5 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   arrowLeft: '<svg viewBox="0 0 90 60"><path d="M80 6C70 30 48 46 14 48M14 48L28 38M14 48L27 58" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>',
   arrowUp: '<svg viewBox="0 0 70 44"><path d="M60 40C52 22 38 10 12 6M12 6L24 0M12 6L22 16" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>',
-  arrowRight: '<svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   retry: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  link: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
   check: '<svg viewBox="0 0 16 16"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 } as const;

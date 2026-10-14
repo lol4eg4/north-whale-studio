@@ -1,6 +1,7 @@
 // Footer: the giant slogan fitted to the width, one piece per letter (T§4.12), and the row
 // below: copyright, section links, the Telegram placeholder. Every item is a piece.
 import type { Host } from "../../platform/host.ts";
+import { SECTIONS } from "../../platform/frame/frame.ts";
 import type { PieceKind } from "../../platform/motion.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { h, stamp } from "../../platform/ui/parts.ts";
@@ -8,13 +9,6 @@ import type { ContentApi } from "../content/api.ts";
 import { splitLetters } from "./letters.ts";
 import "./style.css";
 
-const SECTIONS: [string, string][] = [
-  ["#cases", "nav.cases"],
-  ["#services", "nav.services"],
-  ["#manifesto", "nav.manifesto"],
-  ["#team", "nav.team"],
-  ["#contacts", "nav.contacts"],
-];
 
 export default function init(host: Host) {
   const content = host.use<ContentApi>("content");
@@ -34,7 +28,7 @@ export default function init(host: Host) {
 
   const links = SECTIONS.flatMap(([href, key], i) => {
     const a = piece(t.bind(h("a", { href }), key), "word");
-    return i ? [h("span", { class: "foot-dot", "aria-hidden": "true" }, "·"), a] : [a];
+    return i ? [h("span", { class: "dot foot-dot", "aria-hidden": "true" }), a] : [a];
   });
   const nav = t.bind(h("nav", { class: "foot-nav" }, ...links), "nav.sections", "aria-label");
   const telegram = piece(h("span", { class: "foot-tg" }, "Telegram", t.bind(stamp(""), "placeholder.stamp")), "word");
@@ -55,7 +49,6 @@ export default function init(host: Host) {
               {
                 class: `fl${l.up ? " up" : ""}`,
                 "aria-hidden": "true",
-                "data-note": l.note,
                 "data-cursor": label,
                 style: `--c:${l.colour};--rr:${l.turn}deg;--r:${l.tilt}deg`,
               },

@@ -127,7 +127,7 @@ describe("links and history", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
     expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Next case →");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Next case");
     await page.keyboard.press("Escape");
     await waitClosed(page);
     expect(page.url()).toBe(`${srv.url}/?lang=en`);
@@ -213,8 +213,7 @@ describe("copy link", () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`, { permissions: ["clipboard-read", "clipboard-write"] });
     await openTile(page, 7);
     await page.click("dialog.case .link-copy");
-    await page.waitForSelector(".toast:not([hidden])");
-    expect(await page.textContent(".toast")).toBe("Ссылка на кейс скопирована");
+    await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Ссылка на кейс скопирована", { timeout: 2000 });
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`${srv.url}/?lang=ru#case-7`);
     expect(errors).toEqual([]);
     await context.close();
@@ -235,7 +234,7 @@ describe("copy link", () => {
     expect(field.value).toBe(`${srv.url}/?lang=ru#case-7`);
     expect(field.selected).toBe(field.value.length);
     expect(field.focused).toBe(true);
-    expect(await page.textContent(".toast")).toBe("Скопируйте ссылку вручную");
+    await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Скопируйте ссылку вручную", { timeout: 2000 });
     await context.close();
   });
 });

@@ -1,4 +1,7 @@
-/* Frame: top bar, menu, bottom corners. z-index map: nav 40, dock 60, corner-left 70, menu 80, dialogs 88, toast 90, cursor 1000. */
+/* Frame: top bar, menu, bottom corners.
+   z-index map: nav 40, lifted piece 50, dock 60, corner-left 70, finale sky 80, finale flash 85,
+   toast and score 90, cursor 1000. Dialogs (menu, case, service) sit in the browser's top layer
+   above all of these; the toast and the cursor move into an open dialog. */
 .nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 20px; padding: 14px var(--g); background: var(--paper); }
 .logo { font: 900 clamp(20px, 1.9vw, 28px)/1 var(--display); letter-spacing: -0.01em; margin-right: auto; display: flex; align-items: center; gap: 10px; min-height: 44px; white-space: nowrap; text-transform: uppercase; transform-origin: 0 70%; }
 .links { display: flex; gap: 4px; }
@@ -9,6 +12,7 @@
 .nav-lang:empty { display: none; }
 .plus { display: none; flex: none; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--ink); color: var(--paper); padding: 0; transition: rotate 0.35s var(--ease-spring), background 0.2s; }
 .plus.open, .plus[aria-expanded="true"] { rotate: 45deg; background: var(--buoy); color: var(--ink); }
+@media (pointer: coarse) { .links a { display: inline-flex; align-items: center; min-height: 44px; } }
 @media (hover: hover) {
   .logo:hover { rotate: -3deg; scale: 1.06; }
   .links a:hover { background: var(--lemon); rotate: -4deg; scale: 1.08; }
@@ -25,6 +29,8 @@ dialog.menu::backdrop { background: transparent; }
 .menu-links a { font: 900 min(46px, 12vw)/1.08 var(--display); letter-spacing: -0.02em; padding: 6px 0; transition: translate 0.3s var(--ease-spring), rotate 0.3s var(--ease-spring); }
 .menu-links a:nth-child(2n) { margin-left: 28px; }
 .menu-links a:hover, .menu-links a:active { translate: 8px 0; rotate: -2deg; }
+html.calm :is(.logo, .links a, .hello-pill, .hello-short, .plus, .menu-links a) { transition: none; }
+html.calm :is(.logo, .links a, .hello-pill, .menu-links a):is(:hover, :active) { rotate: none; scale: none; translate: none; }
 .menu-lang { display: flex; align-items: center; gap: 12px; }
 .menu-foot { margin-top: auto; border-top: 2px solid var(--ink); padding-top: 14px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 .menu-foot .hello-pill { display: inline-flex; }

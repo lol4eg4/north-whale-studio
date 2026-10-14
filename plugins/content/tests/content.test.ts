@@ -71,12 +71,5 @@ describe("studio data", () => {
     expect(s.services().map((x) => x.title).slice(0, 2)).toEqual(["Сайты под ключ", "Упаковка бизнеса"]);
     expect(s.services()[0].main).toBe(true);
     expect(s.team()).toHaveLength(6);
-    expect(s.contacts().placeholder).toBe(true);
-  });
-
-  test("the placeholder list names every place waiting for the studio's data", () => {
-    const list = store("ru").placeholders();
-    expect(list).toHaveLength(8 + 3);
-    expect(list[0]).toEqual({ where: "Кейс 1, Waldorf Astoria Berlin", what: "задача, что сделали, результат" });
   });
 });

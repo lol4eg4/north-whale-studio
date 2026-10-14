@@ -60,7 +60,7 @@ export default function init(host: Host) {
   );
 
   // The menu (<= 1100 px) shows the address too, in mono, with the same stamp.
-  host.region("menu-foot").append(h("p", { class: "menu-mail mono" }, h("a", { href: mailto }, data.email), " · ", stamped()));
+  host.region("menu-foot").append(h("p", { class: "menu-mail mono" }, h("a", { href: mailto }, data.email), h("span", { class: "dot", "aria-hidden": "true" }), stamped()));
 
   // Headline words: one piece each, rebuilt when the language changes.
   let words: number[] = [];

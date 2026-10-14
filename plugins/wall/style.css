@@ -31,12 +31,12 @@
 .wall .client.sh-pill { width: 94cqw; height: min(56cqh, 46cqw); border-radius: 999px; padding: 0 9%; }
 .wall .client.sh-circle { width: 80cqmin; height: 80cqmin; border-radius: 50%; padding: 8%; }
 .wall .client b { font: 900 clamp(11px, min(10cqmin, 9cqw), 22px)/1 var(--display); letter-spacing: -0.01em; }
-.wall .client .ck { font: 500 clamp(10px, 5cqmin, 11px)/1.2 var(--mono); letter-spacing: 0.16em; opacity: 0.85; margin-top: 6%; text-transform: uppercase; }
+.wall .client .ck { font: 500 clamp(10px, 5cqmin, 11px)/1.2 var(--mono); letter-spacing: 0.16em; opacity: 0.92; margin-top: 6%; text-transform: uppercase; }
 .wall .deeper b { width: min-content; }
 
 /* Services */
 .wall .svc { width: 92cqw; height: 70cqh; border-radius: var(--rounded-sticker); padding: 8% 9%; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left; background: var(--c); color: var(--f); font: inherit; cursor: pointer; margin: 0; }
-.wall .svc .mono { font-size: clamp(10px, 6.5cqmin, 11px); opacity: 0.8; }
+.wall .svc .mono { font-size: clamp(10px, 6.5cqmin, 11px); opacity: 0.9; }
 .wall .svc b { font: 700 clamp(13px, 12cqmin, 24px)/1.02 var(--sans); letter-spacing: -0.02em; }
 .wall .svc2 { width: 96cqw; height: 84cqh; border-radius: 12px; padding: 4% 5%; background: var(--ink); color: var(--paper); display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left; font: inherit; cursor: pointer; margin: 0; }
 .wall .svc2 .mono { color: var(--lemon); font-size: 11px; }
@@ -59,10 +59,10 @@ html.calm .hello-spin { animation: none; }
 
 /* Blocks: team, and the whale block standing in for "dive" when that plugin is off. */
 .wall .team-block, .wall .whale-block { position: absolute; inset: 0; border-radius: var(--rounded-tile); padding: clamp(14px, 5cqmin, 26px); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
-.wall .team-block { background: var(--cobalt); color: var(--paper); cursor: pointer; }
+.wall .team-block { background: var(--cobalt); color: var(--paper); cursor: pointer; border: 0; text-align: start; }
 .team-big { margin: 0; font: 600 clamp(16px, 6.2cqmin, 28px)/1.15 var(--sans); }
 .team-big b { display: block; font: 900 clamp(44px, 24cqmin, 120px)/0.9 var(--display); color: var(--lemon); letter-spacing: -0.03em; margin-bottom: 0.12em; }
-.team-more { opacity: 0.8; }
+.team-more { opacity: 0.9; }
 .wall .whale-block { background: var(--buoy); align-items: center; justify-content: center; }
 .whale-disc { width: 62cqmin; aspect-ratio: 1; border-radius: 50%; background: var(--cobalt); box-shadow: 0 0 0 5px var(--ink), 0 0 0 11px var(--paper); display: grid; place-items: center; overflow: hidden; }
 .whale-disc img { width: 86%; rotate: -8deg; }

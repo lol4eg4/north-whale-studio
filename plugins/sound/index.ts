@@ -84,11 +84,11 @@ export default function init(host: Host) {
   const btn = h("button", { type: "button", class: "cbtn sound-btn" });
   const divider = h("span", { class: "divider", "aria-hidden": "true" });
   host.region("corner-left").prepend(btn, divider);
-  const label = () => host.use<ContentApi>("content").text(on ? "sound.off" : "sound.on");
+  // One name, the state in aria-pressed: "Site sound, toggle button, pressed".
   const show = () => {
     btn.setAttribute("aria-pressed", String(on));
     btn.replaceChildren(icon(on ? "soundOn" : "soundOff", 24));
-    btn.setAttribute("aria-label", label());
+    btn.setAttribute("aria-label", host.use<ContentApi>("content").text("sound.label"));
   };
   host.ready(show);
   host.on("language-changed", show);
@@ -117,6 +117,7 @@ export default function init(host: Host) {
   for (const type of ["pointerdown", "pointerup", "keydown", "touchend"]) window.addEventListener(type, onGesture, { capture: true, passive: true });
 
   document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopSong();
     if (!engine) return;
     if (document.hidden) engine.ctx.suspend().catch(() => {});
     else if (on) engine.ctx.resume().catch(() => {});

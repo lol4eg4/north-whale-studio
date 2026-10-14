@@ -2,7 +2,7 @@
 .hero { position: relative; max-width: 1680px; margin: 0 auto; padding: clamp(24px, 3vw, 44px) var(--g) clamp(20px, 2.4vw, 32px); }
 .hero .kicker { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
 .hero .kicker span { display: inline-block; }
-.hero .kicker span + span::before { content: "•"; color: var(--buoy); margin-right: 14px; }
+.hero .kicker span + span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--buoy); vertical-align: middle; margin: -0.15em 14px 0 0; }
 .hero-title { font: 900 clamp(44px, 8.2vw, 138px)/0.93 var(--display); letter-spacing: -0.02em; margin: 0; max-width: 13ch; }
 .hero-title .hw { display: inline-block; }
 .peel-slot { display: inline-block; position: relative; margin-top: 0.2em; }
@@ -27,7 +27,7 @@
 .hero-side { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 .hero .watch { font-size: 20px; padding: 10px 22px 10px 10px; min-height: 44px; background: var(--paper); box-shadow: var(--die); border: 2px solid var(--ink); transition: background 0.2s, scale 0.25s; }
 .hero .watch .badge { width: 34px; height: 34px; }
-.hero .believe { font-size: 18px; display: inline-block; }
+.hero .believe { font-size: 18px; }
 @media (hover: hover) {
   .hero .watch:hover { background: var(--lemon); }
 }

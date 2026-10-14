@@ -39,7 +39,6 @@ export interface Member {
   name: string;
   role: string;
   color: string; // token name
-  placeholder: true;
 }
 
 export interface Client {
@@ -52,15 +51,9 @@ export interface Client {
 }
 
 export interface Contacts {
-  placeholder: true;
   email: string;
   messengers: { name: string; handle: string }[];
   socials: { name: string }[];
-}
-
-export interface Placeholder {
-  where: string;
-  what: string;
 }
 
 export interface ContentApi {
@@ -74,5 +67,4 @@ export interface ContentApi {
   team(): Member[];
   clients(): Client[];
   contacts(): Contacts;
-  placeholders(): Placeholder[];
 }

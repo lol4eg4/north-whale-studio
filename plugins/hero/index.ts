@@ -3,11 +3,10 @@
 // Every word is a piece; under the sticker the same word stays printed as an outline.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, icon } from "../../platform/ui/parts.ts";
+import { h, icon, isTouch } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import "./style.css";
 
-const touch = () => matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 
 // Where the marker note goes (the mock's placeNote):
 //   room >= 260 px right of the sticker: beside it, arrow to the left
@@ -39,7 +38,8 @@ export default function init(host: Host) {
   const lede = h("p", { class: "lede" });
   const watchText = h("span");
   const watch = h("a", { class: "pill watch", href: "#cases", style: "--r:-1.5deg" }, h("span", { class: "badge", "aria-hidden": "true" }), watchText);
-  const how = h("a", { class: "link-under believe", href: "#manifesto" });
+  const howText = h("span");
+  const how = h("a", { class: "link-under believe arrowed", href: "#manifesto" }, howText, icon("arrowRight", 18));
   const section = h(
     "section",
     { class: "hero", "aria-labelledby": "hero-title" },
@@ -98,8 +98,8 @@ export default function init(host: Host) {
     t.bind(k2, "hero.kicker2");
     t.bind(lede, "hero.lede");
     t.bind(watchText, "hero.watch");
-    t.bind(how, "hero.how");
-    t.bind(noteText, touch() ? "hero.noteCoarse" : "hero.noteFine");
+    t.bind(howText, "hero.how");
+    t.bind(noteText, isTouch() ? "hero.noteCoarse" : "hero.noteFine");
     for (const el of [k1, k2, lede]) {
       motion.add(el, { kind: "word" });
       t.bind(el, "cursor.drag", "data-cursor");
@@ -110,7 +110,11 @@ export default function init(host: Host) {
     buildTitle();
     placeNote();
     document.fonts?.ready.then(placeNote);
-    addEventListener("resize", placeNote);
+    let queued = 0; // one placement per frame, however many resize events come
+    addEventListener("resize", () => {
+      cancelAnimationFrame(queued);
+      queued = requestAnimationFrame(placeNote);
+    });
   });
 
   host.on("language-changed", () => {

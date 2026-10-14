@@ -8,6 +8,7 @@
 
 .contact-row { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
 .contact-email { font: 900 clamp(22px, 4vw, 56px)/1.1 var(--display); background: var(--lemon); padding: 0.08em 0.3em 0.14em; border-radius: 0.18em; user-select: all; -webkit-user-select: all; word-break: break-all; max-width: 100%; transition: rotate 0.3s var(--ease-spring), scale 0.3s var(--ease-spring); }
+@media (pointer: coarse) { .contact-email { display: inline-block; min-height: 44px; } }
 @media (hover: hover) { .contact-email:hover { rotate: -1.5deg; scale: 1.02; } }
 .contact .contact-copy svg { display: none; }
 .contact .contact-copy.done, .contact .contact-copy.done:hover { background: var(--mint); border-color: var(--mint); color: var(--ink); }
@@ -23,7 +24,7 @@
 .menu-mail { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
 .menu-mail a { display: inline-flex; align-items: center; min-height: 24px; }
 @media (pointer: coarse) { .menu-mail a { min-height: 44px; } }
-.menu-mail .stamp { font-size: 12px; text-transform: none; }
+.menu-mail .stamp { font-size: 12px; text-transform: none; background: var(--paper); }
 
 @media (max-width: 700px) {
   .contact { padding-right: var(--g); }

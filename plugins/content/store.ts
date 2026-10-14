@@ -1,6 +1,6 @@
 // The content itself: texts in two languages and the studio's data, read in the chosen language.
 // Pure (no DOM), so it is tested directly.
-import type { CaseItem, Client, Contacts, Lang, Member, Placeholder, Service } from "./api.ts";
+import type { CaseItem, Client, Contacts, Lang, Member, Service } from "./api.ts";
 import casesData from "./data/cases.json";
 import clientsData from "./data/clients.json";
 import contactsData from "./data/contacts.json";
@@ -66,23 +66,10 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
 
   const services = (): Service[] =>
     servicesData.map((s) => ({ id: s.id, main: s.main, title: local(s.title), phrase: local(s.phrase), includes: s.includes.map(local) }));
-  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, placeholder: true }));
+  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color }));
   const clients = (): Client[] =>
     clientsData.map((c) => ({ caseId: c.caseId, name: local(c.name), shape: c.shape as Client["shape"], bg: c.bg, fg: c.fg, phone: c.phone }));
-  const contacts = (): Contacts => ({ ...(contactsData as Omit<Contacts, "placeholder">), placeholder: true });
-
-  // What still waits for the studio's own data.
-  const placeholders = (): Placeholder[] => {
-    const ru = getLang() === "ru";
-    const list: Placeholder[] = cases().map((c) => ({
-      where: ru ? `Кейс ${c.id}, ${c.client}` : `Case ${c.id}, ${c.client}`,
-      what: ru ? "задача, что сделали, результат" : "brief, what we did, result",
-    }));
-    list.push({ where: ru ? "Стена, команда" : "Wall, team", what: ru ? `${teamData.length} имён и должностей` : `${teamData.length} names and roles` });
-    list.push({ where: ru ? "Манифест" : "Manifesto", what: ru ? "история студии" : "studio story" });
-    list.push({ where: ru ? "Контакты" : "Contact", what: ru ? "почта, Telegram, WhatsApp, соцсети" : "email, Telegram, WhatsApp, socials" });
-    return list;
-  };
+  const contacts = (): Contacts => contactsData;
 
   return {
     text,
@@ -93,6 +80,5 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
     team,
     clients,
     contacts,
-    placeholders,
   };
 }

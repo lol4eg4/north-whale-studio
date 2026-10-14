@@ -98,7 +98,13 @@ export function createHost(regions: Partial<Record<RegionName, HTMLElement>>, mo
         console.error(`Plugin "${p.name}" failed to start`, e);
       }
     }
-    for (const [name, { place, fallback }] of slots) (fills.get(name) ?? fallback)(place);
+    for (const [name, { place, fallback }] of slots) {
+      try {
+        (fills.get(name) ?? fallback)(place);
+      } catch (e) {
+        console.error(`Slot "${name}" failed to fill`, e);
+      }
+    }
     for (const fn of readyFns) {
       try {
         fn();

@@ -22,6 +22,9 @@ export interface Motion {
   readonly calm: boolean;
   readonly paused: boolean;
   setPaused(on: boolean): void;
+  // While held (the dive is rearranging the wall), nobody picks pieces up.
+  readonly held: boolean;
+  hold(on: boolean): void;
   onChange(fn: () => void): () => void;
   add(el: HTMLElement, info: PieceInfo): number;
   remove(id: number): void;
@@ -64,6 +67,7 @@ export function createMotion(memory: Memory, win: Window = window): Motion {
   let nextId = 1;
   let zTop = 5;
   let paused = memory.get("paused") === "1";
+  let held = false;
 
   const changed = () => {
     doc.documentElement.classList.toggle("calm", reduce.matches);
@@ -95,6 +99,12 @@ export function createMotion(memory: Memory, win: Window = window): Motion {
       paused = on;
       memory.set("paused", on ? "1" : "0");
       changed();
+    },
+    get held() {
+      return held;
+    },
+    hold(on) {
+      held = on;
     },
     onChange(fn) {
       listeners.add(fn);
@@ -163,34 +173,37 @@ export function createMotion(memory: Memory, win: Window = window): Motion {
     },
     moved: () => [...pieces].filter(([, p]) => p.x || p.y || p.spin).map(([id]) => id),
     tidy() {
-      const moved = motion.moved();
-      let popped = 0;
-      for (const id of moved) {
-        const p = pieces.get(id)!;
-        const from = { x: p.x, y: p.y, spin: p.spin };
-        const visible = onScreen(p.el);
+      // Reads, then writes, then one more read: two layouts in all, however many pieces moved.
+      const moved = motion.moved().map((id) => pieces.get(id)!);
+      const was = moved.map((p) => ({ p, from: { x: p.x, y: p.y, spin: p.spin }, visible: onScreen(p.el) }));
+      for (const { p } of was) {
         p.x = p.y = p.spin = 0;
         write(p);
         (p.info.raise ?? p.el).style.zIndex = "";
-        if (reduce.matches) continue;
-        if (visible) {
-          p.el.animate(
-            [
-              { translate: `${from.x}px ${from.y}px`, transform: `rotate(${from.spin}deg)` },
-              { translate: "0px 0px", transform: "rotate(0deg)" },
-            ],
-            { duration: 700, easing: p.info.kind === "nav" ? NAV_HOME_EASE : HOME_EASE },
-          );
-        } else if (onScreen(p.el)) {
-          // It was away from the screen but its home is on screen: pop back in.
-          p.el.animate(
-            [
-              { scale: 0.15, opacity: 0, transform: `rotate(${popped % 2 ? 40 : -40}deg)` },
-              { scale: 1, opacity: 1, transform: "rotate(0deg)" },
-            ],
-            { duration: 650, easing: spring.easing, delay: 40 * popped++, fill: "backwards" },
-          );
-        }
+      }
+      if (!reduce.matches) {
+        const homeOnScreen = was.map(({ p, visible }) => !visible && onScreen(p.el));
+        let popped = 0;
+        was.forEach(({ p, from, visible }, i) => {
+          if (visible) {
+            p.el.animate(
+              [
+                { translate: `${from.x}px ${from.y}px`, transform: `rotate(${from.spin}deg)` },
+                { translate: "0px 0px", transform: "rotate(0deg)" },
+              ],
+              { duration: 700, easing: p.info.kind === "nav" ? NAV_HOME_EASE : HOME_EASE },
+            );
+          } else if (homeOnScreen[i]) {
+            // It was away from the screen but its home is on screen: pop back in.
+            p.el.animate(
+              [
+                { scale: 0.15, opacity: 0, transform: `rotate(${popped % 2 ? 40 : -40}deg)` },
+                { scale: 1, opacity: 1, transform: "rotate(0deg)" },
+              ],
+              { duration: 650, easing: spring.easing, delay: 40 * popped++, fill: "backwards" },
+            );
+          }
+        });
       }
       zTop = 5;
       return moved.length;

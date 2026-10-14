@@ -8,8 +8,8 @@ export interface Cue {
   pitch?: number;
 }
 
-// pitch per sound: peel = x position 0..1, note/roll = scale step, whoosh = power 0..1,
-// hit = 1 for a scoring hit, click = loudness and brightness (1 = full).
+// pitch per sound: peel = x position 0..1, whoosh = power 0..1, hit = 1 for a scoring hit,
+// click = loudness and brightness (1 = full).
 export function cueFor<K extends keyof PageEvents>(type: K, detail: PageEvents[K], x = 0.5): Cue | null {
   switch (type) {
     case "piece-grabbed":
@@ -17,6 +17,8 @@ export function cueFor<K extends keyof PageEvents>(type: K, detail: PageEvents[K
     case "piece-dropped":
       return { name: "drop" };
     case "case-opened":
+      // A dive ends on a chime: the roulette has landed on this case.
+      return { name: (detail as PageEvents["case-opened"]).from === "dive" ? "land" : "pop" };
     case "service-opened":
       return { name: "pop" };
     case "case-closed":
@@ -43,7 +45,7 @@ export const isOn = (stored: string | null) => stored === "1";
 export const toStored = (on: boolean) => (on ? "1" : "0");
 
 // The same sound plays at most once per gap (ms): hovers and knocks come in bursts.
-const GAP: Partial<Record<SoundName, number>> = { tick: 55, click: 40, note: 0, roll: 0, hit: 90 };
+const GAP: Partial<Record<SoundName, number>> = { tick: 55, click: 40, hit: 90 };
 export function gate() {
   const last = new Map<SoundName, number>();
   return (name: SoundName, now: number) => {

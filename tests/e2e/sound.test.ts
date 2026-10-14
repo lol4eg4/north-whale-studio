@@ -44,12 +44,12 @@ describe("sound", () => {
       "cbtn pause-btn",
     ]);
     expect(await btn.getAttribute("aria-pressed")).toBe("false");
-    expect(await btn.getAttribute("aria-label")).toBe("Включить звук");
+    expect(await btn.getAttribute("aria-label")).toBe("Звук сайта");
     expect(await contexts(page)).toEqual([]);
 
     await btn.click();
     expect(await btn.getAttribute("aria-pressed")).toBe("true");
-    expect(await btn.getAttribute("aria-label")).toBe("Выключить звук");
+    expect(await btn.getAttribute("aria-label")).toBe("Звук сайта");
     await page.waitForFunction(() => (window as unknown as { __contexts: AudioContext[] }).__contexts[0]?.state === "running");
     expect(await contexts(page)).toEqual(["running"]);
 
@@ -86,11 +86,11 @@ describe("sound", () => {
   test("the label follows the language", async () => {
     const { context, page } = await open(browser, `${server.url}/?lang=en`);
     const btn = page.locator(".ctrl .sound-btn");
-    expect(await btn.getAttribute("aria-label")).toBe("Turn sound on");
+    expect(await btn.getAttribute("aria-label")).toBe("Site sound");
     await btn.click();
-    expect(await btn.getAttribute("aria-label")).toBe("Turn sound off");
+    expect(await btn.getAttribute("aria-pressed")).toBe("true");
     await page.locator(".nav-lang button[lang=ru]").click();
-    expect(await btn.getAttribute("aria-label")).toBe("Выключить звук");
+    expect(await btn.getAttribute("aria-label")).toBe("Звук сайта");
     await context.close();
   });
 

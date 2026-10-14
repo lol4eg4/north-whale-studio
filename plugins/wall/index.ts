@@ -5,7 +5,7 @@
 //   loops: videos.ts decides which tiles load and play
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, note } from "../../platform/ui/parts.ts";
+import { h, icon, isTouch, note } from "../../platform/ui/parts.ts";
 import { caseTile } from "../../platform/ui/tile.ts";
 import { ticker } from "../../platform/ui/ticker.ts";
 import type { CaseApi } from "../case/api.ts";
@@ -17,7 +17,6 @@ import { createVideos } from "./videos.ts";
 import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
-const touch = () => matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 const DARK = ["cobalt", "ink", "signal"];
 
 export default function init(host: Host) {
@@ -37,7 +36,7 @@ export default function init(host: Host) {
   wall.append(diveCell);
 
   host.slot("wall-hint", hint, (place) => {
-    place.append(t.bind(h("p", { class: "mono" }), touch() ? "wall.hintCoarse" : "wall.hintFine"));
+    place.append(t.bind(h("p", { class: "mono" }), isTouch() ? "wall.hintCoarse" : "wall.hintFine"));
   });
   host.slot("wall-dive", diveCell, (place) => {
     const block = h(
@@ -220,19 +219,14 @@ export default function init(host: Host) {
         }
         case "team": {
           const el = h(
-            "div",
-            { class: "team-block on-cobalt", role: "button", tabindex: "0" },
+            "button",
+            { type: "button", class: "team-block on-cobalt" },
             t.bind(h("span", { class: "mono" }), "team.kicker"),
-            h("p", { class: "team-big" }, t.bind(h("b"), "team.hello"), t.bind(h("span"), "team.body")),
-            t.bind(h("span", { class: "mono team-more" }), "team.more"),
+            h("span", { class: "team-big" }, t.bind(h("b"), "team.hello"), t.bind(h("span"), "team.body")),
+            h("span", { class: "mono team-more arrowed" }, t.bind(h("span"), "team.more"), icon("arrowRight", 14)),
           );
           t.bind(el, "cursor.meet", "data-cursor");
           el.addEventListener("click", () => roll());
-          el.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter" && e.key !== " ") return;
-            e.preventDefault();
-            roll();
-          });
           teamCell = cell("sz-fam", el, "block");
           teamCell.id = "team";
           return teamCell;
@@ -253,7 +247,7 @@ export default function init(host: Host) {
       const a = (e.target as Element | null)?.closest?.('a[href="#team"]');
       if (!a || e.defaultPrevented) return;
       e.preventDefault();
-      roll();
+      if (!motion.held) roll();
     });
 
     // Ticker and star start 2 s after load so the hero sticker is noticed first; asleep off screen.

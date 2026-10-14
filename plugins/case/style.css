@@ -13,7 +13,8 @@ dialog.sheet.case { padding: 28px; }
 .case-art.still .case-video, .case-art.err .case-video { display: none; }
 .case-err { display: none; position: absolute; left: 50%; bottom: 32px; translate: -50% 0; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 32px); background: var(--paper); color: var(--ink); border-radius: 99px; padding: 6px 6px 6px 16px; font: 600 15px/1.3 var(--sans); box-shadow: var(--die); }
 .case-art.err .case-err { display: flex; }
-.btn.case-retry { min-height: 40px; padding: 6px 14px; font-size: 15px; }
+.case-err :focus-visible { outline-color: var(--cobalt); }
+.btn.case-retry { padding: 6px 14px; font-size: 15px; }
 .case-art.err .player { visibility: hidden; }
 
 .player { display: flex; align-items: center; gap: 14px; padding: 0 28px 24px; color: var(--paper); }
@@ -21,6 +22,7 @@ dialog.sheet.case { padding: 28px; }
 .go { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 11px 18px 11px 14px; border: 0; border-radius: 99px; background: var(--lemon); color: var(--ink); font: 700 15px/1.2 var(--sans); white-space: nowrap; transition: scale 0.25s var(--ease-spring); }
 .go-ico { display: grid; place-items: center; }
 .seek { flex: 1; min-width: 40px; height: 24px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+@media (pointer: coarse) { .seek { height: 44px; } }
 .seek::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(var(--lemon), var(--lemon)) 0 / var(--p, 0%) 100% no-repeat, rgba(255, 255, 255, 0.28); }
 .seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--lemon); border: 0; }
 .seek::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.28); }
@@ -49,7 +51,7 @@ dialog.sheet.case { padding: 28px; }
 .case-story .ph-box { font-size: 16px; }
 .case-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: auto; }
 .btn.case-talk { white-space: normal; }
-.link-copy { min-height: 44px; padding: 12px 4px; border: 0; background: none; color: var(--paper); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 0.2em; }
+.link-copy { min-height: 44px; padding: 12px 4px; border: 0; background: none; color: var(--paper); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 0.18em; }
 .case-link { flex: 1 1 100%; min-height: 44px; padding: 8px 12px; border: 2px solid var(--paper); border-radius: 10px; background: var(--paper); color: var(--ink); font: 500 14px var(--mono); }
 .case-link[hidden] { display: none; }
 

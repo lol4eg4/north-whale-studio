@@ -24,7 +24,7 @@ html.dive-rolling .dive-core { animation: dive-jitter 0.12s steps(2) infinite; }
 .dock .tidy-btn.messy { background: var(--lemon); }
 .tidy-ico { display: grid; }
 .tidy-ico svg { transition: rotate 0.25s; transform-origin: 80% 15%; }
-.tidy-n { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; margin-left: 2px; border-radius: 99px; background: var(--ink); color: var(--paper); font: 600 12px var(--mono); font-variant-numeric: tabular-nums; }
+.tidy-n { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; margin-left: 2px; border-radius: 99px; background: var(--ink); color: var(--paper); font: 500 12px var(--mono); font-variant-numeric: tabular-nums; }
 .tidy-n[hidden] { display: none; }
 @media (hover: hover) {
   .dock .tidy-btn:not(.lifted):hover { background: var(--mint); --r: -3deg; }
@@ -43,6 +43,8 @@ html.calm .tidy-btn.sweep .tidy-ico svg { animation: none; }
 .dive-dim.dive-lit { opacity: 1; scale: 1.04; z-index: 60 !important; }
 .dive-lit > :first-child { outline: 5px solid var(--ink); outline-offset: 4px; }
 html.calm .dive-dim { transition: none; }
+html.calm :is(.dive-btn, .dive-core) { transition: none; }
+html.calm .dive-btn:hover .dive-core { rotate: -8deg; }
 
 /* Phone slot reel over the picked tile. */
 .dive-slot { position: absolute; z-index: 5; overflow: hidden; border-radius: var(--rounded-tile); background: var(--ink); pointer-events: none; }

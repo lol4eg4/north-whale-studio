@@ -1,9 +1,10 @@
 // Wall loops: which tile videos get a source and which play.
 //
 //   near (within one viewport) + 2 s after load  -> attach src (max 3 loading at once)
+//   still loading but no longer near              -> drop the source, the slot frees
 //   visible + ready                               -> play (max 6, 4 on phones)
 //   case open, paused, calm, hidden tab           -> pause all, attach nothing
-//   play() refused or error                       -> poster stays, never retried
+//   play() refused, error or 20 s without a frame -> poster stays, never retried
 //
 // schedule() is the pure decision; createVideos() keeps the state and does it.
 
@@ -27,17 +28,20 @@ export interface Policy {
 
 export interface Plan {
   attach: number[];
+  drop: number[];
   play: number[];
   pause: number[];
 }
 
 // Tiles come in wall order; earlier tiles win ties.
 export function schedule(tiles: TileState[], p: Policy): Plan {
-  if (p.blocked) return { attach: [], play: [], pause: tiles.filter((t) => t.playing).map((t) => t.id) };
+  if (p.blocked) return { attach: [], drop: [], play: [], pause: tiles.filter((t) => t.playing).map((t) => t.id) };
 
+  // A source still loading for a tile that left the screen's reach gives its slot back.
+  const drop = tiles.filter((t) => t.loading && !t.failed && !t.near && !t.visible).map((t) => t.id);
   const attach: number[] = [];
   if (p.armed) {
-    const free = p.maxLoading - tiles.filter((t) => t.loading && !t.failed).length;
+    const free = p.maxLoading - tiles.filter((t) => t.loading && !t.failed && !drop.includes(t.id)).length;
     const wanted = tiles
       .filter((t) => t.near && !t.attached && !t.failed)
       .map((t, i) => ({ t, i }))
@@ -54,16 +58,18 @@ export function schedule(tiles: TileState[], p: Policy): Plan {
     .map(({ t }) => t.id);
   const play = tiles.filter((t) => chosen.includes(t.id) && !t.playing).map((t) => t.id);
   const pause = tiles.filter((t) => t.playing && !chosen.includes(t.id)).map((t) => t.id);
-  return { attach, play, pause };
+  return { attach, drop, play, pause };
 }
 
 interface Entry {
   state: TileState;
   video: HTMLVideoElement;
-  el: HTMLElement;
   src: { wide: string; phone: string };
   drawing(on: boolean): void;
+  stall: number; // timer: a source with no playable frame in 20 s counts as failed
 }
+
+const STALL_MS = 20_000;
 
 export function createVideos(opts: { phone: MediaQueryList; blocked: () => boolean }) {
   const entries: Entry[] = [];
@@ -79,6 +85,7 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     );
     const get = (id: number) => entries.find((e) => e.state.id === id)!;
     for (const id of plan.pause) pause(get(id));
+    for (const id of plan.drop) detach(get(id));
     for (const id of plan.attach) attach(get(id));
     for (const id of plan.play) play(get(id));
   };
@@ -100,12 +107,17 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     e.state.attached = e.state.loading = true;
     e.video.preload = "auto";
     e.video.src = opts.phone.matches ? e.src.phone : e.src.wide;
+    clearTimeout(e.stall);
+    e.stall = window.setTimeout(() => e.state.loading && fail(e), STALL_MS);
   };
   const play = (e: Entry) => {
     e.state.playing = true;
     e.video.play().then(
-      () => e.state.playing && e.drawing(true),
-      () => {
+      // On phones the round badge stays a still frame (DESIGN.md, case tile).
+      () => e.state.playing && !opts.phone.matches && e.drawing(true),
+      (err: unknown) => {
+        // A pause that came first is not a failure.
+        if (err instanceof DOMException && err.name === "AbortError") return;
         // Refused (low-power mode, no autoplay): the poster stays, no retry loop.
         if (e.state.playing) fail(e);
       },
@@ -117,6 +129,7 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     e.video.pause();
   };
   const detach = (e: Entry) => {
+    clearTimeout(e.stall);
     pause(e);
     e.state.attached = e.state.loading = e.state.ready = e.state.failed = false;
     e.video.preload = "none";
@@ -161,12 +174,13 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
       const e: Entry = {
         state: { id, near: false, visible: 0, attached: false, loading: false, ready: false, playing: false, failed: false },
         video,
-        el,
         src,
         drawing,
+        stall: 0,
       };
       video.addEventListener("canplay", () => {
         if (!e.state.attached || e.state.failed) return;
+        clearTimeout(e.stall);
         e.state.loading = false;
         e.state.ready = true;
         update();

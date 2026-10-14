@@ -23,7 +23,8 @@ test("copy with clipboard permission: «Скопировано», the toast, the
   expect(await copy.textContent()).toBe("Скопировать почту");
   await copy.click();
   await page.waitForFunction(() => document.querySelector(".contact-copy")?.textContent === "Скопировано", undefined, { timeout: 2000 });
-  expect(await page.locator(".toast").textContent()).toBe("Почта скопирована. Ждём письма!");
+  // The toast text comes a frame after the toast is placed (so it is read out).
+  await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Почта скопирована. Ждём письма!", { timeout: 2000 });
   expect(await page.locator(".toast").isVisible()).toBe(true);
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(EMAIL);
   // The label comes back after 2.4 s.
@@ -45,7 +46,7 @@ test("clipboard refused: the address is selected and the hint shows", async () =
   await page.locator(".contact-copy").scrollIntoViewIfNeeded();
   await page.click(".contact-copy");
   await page.waitForFunction(() => getSelection()?.toString() === "hello@northwhale.studio", undefined, { timeout: 2000 });
-  expect(await page.locator(".toast").textContent()).toBe("Почта выделена: скопируйте её вручную");
+  await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Почта выделена: скопируйте её вручную", { timeout: 2000 });
   expect(await page.locator(".contact-copy").textContent()).toBe("Скопировать почту");
   expect(errors).toEqual([]);
   await context.close();

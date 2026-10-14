@@ -6,7 +6,7 @@
 import type { CaseFrom } from "../../platform/events.ts";
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { button, h, icon, overlay, placeholderBox, toast } from "../../platform/ui/parts.ts";
+import { button, goTo, h, icon, overlay, placeholderBox, toast } from "../../platform/ui/parts.ts";
 import type { CaseItem, ContentApi } from "../content/api.ts";
 import type { CaseApi } from "./api.ts";
 import { onLoad, onNavigate, onNext, onOpen, onRequestClose, type Act } from "./history.ts";
@@ -14,9 +14,12 @@ import { createPlayer } from "./player.ts";
 import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
-const address = (hash: string) => location.pathname + location.search + hash;
-// Same as following a link to that anchor, without reading anyone's markup.
-const goTo = (hash: string) => h("a", { href: hash }).click();
+// Absolute, so it never leaves the site whatever the path looks like ("//x" would be another host).
+const address = (hash: string) => {
+  const url = new URL(location.href);
+  url.hash = hash;
+  return url.href;
+};
 
 export default function init(host: Host) {
   const { motion } = host;
@@ -35,9 +38,11 @@ export default function init(host: Host) {
   const sub = h("div", { class: "case-sub" });
   const story = h("div", { class: "case-story" });
   const talk = button("", "action", { class: "case-talk" });
+  const nextText = h("span");
   const next = button("", "ghost", { class: "case-next" });
+  next.append(nextText, icon("arrowRight", 18));
   const copy = h("button", { type: "button", class: "link-copy" });
-  const field = h("input", { class: "case-link", type: "text", readonly: true, hidden: true });
+  const field = t.bind(h("input", { class: "case-link", type: "text", readonly: true, hidden: true }), "case.copyLink", "aria-label");
   const body = h(
     "div",
     { class: "case-body" },
@@ -163,7 +168,7 @@ export default function init(host: Host) {
   next.addEventListener("click", () => run(onNext(ctx())));
   copy.addEventListener("click", async () => {
     if (openId === null) return;
-    const link = location.origin + address(`#case-${openId}`);
+    const link = address(`#case-${openId}`);
     try {
       await navigator.clipboard.writeText(link);
       field.hidden = true;
@@ -177,13 +182,19 @@ export default function init(host: Host) {
     }
   });
 
-  const navigate = () => run(onNavigate(location.hash, ctx()));
+  const navigate = () => {
+    const acts = onNavigate(location.hash, ctx());
+    // The step back we waited for has come, wherever it landed.
+    closing = false;
+    clearTimeout(closeTimer);
+    run(acts);
+  };
   addEventListener("popstate", navigate);
   addEventListener("hashchange", navigate);
 
   const api: CaseApi = {
-    open(id, from, from_el) {
-      if (openId === null) opener = from_el ?? (document.activeElement as HTMLElement | null);
+    open(id, from, openerEl) {
+      if (openId === null) opener = openerEl ?? (document.activeElement as HTMLElement | null);
       run(onOpen(id, from, ctx()));
     },
     close: () => requestClose(),
@@ -198,7 +209,7 @@ export default function init(host: Host) {
     t.bind(closeBtn, "case.close", "aria-label");
     t.bind(closeBtn, "cursor.close", "data-cursor");
     t.bind(talk, "case.discuss");
-    t.bind(next, "case.next");
+    t.bind(nextText, "case.next");
     t.bind(copy, "case.copyLink");
     run(onLoad(location.hash, ctx()));
   });

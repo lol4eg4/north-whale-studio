@@ -6,6 +6,7 @@ describe("sound cues", () => {
     expect(cueFor("piece-grabbed", { piece: 3 }, 0.25)).toEqual({ name: "peel", pitch: 0.25 });
     expect(cueFor("piece-dropped", { piece: 3 })).toEqual({ name: "drop" });
     expect(cueFor("case-opened", { id: 1, from: "tile" })).toEqual({ name: "pop" });
+    expect(cueFor("case-opened", { id: 4, from: "dive" })).toEqual({ name: "land" }); // the dive lands on a chime
     expect(cueFor("service-opened", { id: 1 })).toEqual({ name: "pop" });
     expect(cueFor("case-closed", { id: 1 })).toEqual({ name: "click", pitch: 0.6 }); // a soft click
     expect(cueFor("tile-hovered", { id: 2 })).toEqual({ name: "tick" });
@@ -34,8 +35,6 @@ describe("sound cues", () => {
     expect(open("tick", 1056)).toBe(true);
     expect(open("hit", 1000)).toBe(true);
     expect(open("hit", 1080)).toBe(false); // a row of knocked pieces gives one knock
-    expect(open("note", 1000)).toBe(true);
-    expect(open("note", 1000)).toBe(true); // notes never wait
     expect(open("pop", 1000)).toBe(true);
     expect(open("pop", 1020)).toBe(false);
   });

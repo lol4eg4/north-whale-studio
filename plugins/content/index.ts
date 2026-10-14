@@ -49,6 +49,11 @@ export default function init(host: Host) {
     ...store,
   };
   host.provide("content", api);
+  // Back and Forward bring back an address with its own ?lang: the page follows it.
+  addEventListener("popstate", () => {
+    const asked = new URLSearchParams(location.search).get("lang");
+    if (asked === "ru" || asked === "en") api.setLanguage(asked);
+  });
 
   function switcher() {
     const buttons = LANGS.map((l) => {

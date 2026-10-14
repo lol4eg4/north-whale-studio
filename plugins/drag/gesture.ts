@@ -91,4 +91,3 @@ export function createGesture() {
     },
   };
 }
-export type Gesture = ReturnType<typeof createGesture>;

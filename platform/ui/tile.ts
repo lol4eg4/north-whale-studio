@@ -62,6 +62,7 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const ctx = ring.getContext("2d");
   let drawingOn = false;
   let frameHandle = 0;
+  let videoFrames = false; // the handle came from requestVideoFrameCallback, not requestAnimationFrame
 
   // Close-up: a square around the ring point, a little under half of the short side.
   const draw = (source: HTMLVideoElement | HTMLImageElement) => {
@@ -82,12 +83,12 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const loop = () => {
     if (!drawingOn) return;
     draw(video);
-    frameHandle = "requestVideoFrameCallback" in video ? video.requestVideoFrameCallback(loop) : requestAnimationFrame(loop);
+    videoFrames = "requestVideoFrameCallback" in video;
+    frameHandle = videoFrames ? video.requestVideoFrameCallback(loop) : requestAnimationFrame(loop);
   };
-  const stopLoop = () => {
-    if ("cancelVideoFrameCallback" in video) video.cancelVideoFrameCallback(frameHandle);
-    cancelAnimationFrame(frameHandle);
-  };
+  // Each handle goes back to the API that gave it: the id spaces overlap, and a wrong cancel
+  // would stop some other animation loop.
+  const stopLoop = () => (videoFrames ? video.cancelVideoFrameCallback(frameHandle) : cancelAnimationFrame(frameHandle));
 
   poster.addEventListener("load", () => {
     el.classList.remove("no-poster");

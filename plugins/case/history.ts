@@ -9,8 +9,8 @@
 import type { CaseFrom } from "../../platform/events.ts";
 
 export type Act =
-  | { t: "push"; id: number } // pushState({nwsCase: id}, path + search + "#case-id")
-  | { t: "replace"; hash: string; id?: number } // replaceState(path + search + hash); id keeps our entry's mark
+  | { t: "push"; id: number } // pushState({nwsCase: id}, the page's address with "#case-id")
+  | { t: "replace"; hash: string; id?: number } // replaceState(the page's address with hash); id keeps our entry's mark
   | { t: "back" }
   | { t: "show"; id: number; from: CaseFrom }
   | { t: "hide" }

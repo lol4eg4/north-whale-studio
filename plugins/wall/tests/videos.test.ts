@@ -33,6 +33,18 @@ describe("attaching sources", () => {
     expect(schedule(busy, policy()).attach).toEqual([3]);
   });
 
+  test("a tile still loading that left the screen's reach is dropped and frees its slot", () => {
+    const tiles = [
+      tile(1, { attached: true, loading: true }),
+      tile(2, { near: true, attached: true, loading: true }),
+      tile(3, { near: true, attached: true, loading: true }),
+      tile(4, { near: true }),
+    ];
+    const plan = schedule(tiles, policy());
+    expect(plan.drop).toEqual([1]);
+    expect(plan.attach).toEqual([4]);
+  });
+
   test("attached or failed tiles are never attached again", () => {
     const tiles = [tile(1, { near: true, attached: true, ready: true }), tile(2, { near: true, failed: true })];
     expect(schedule(tiles, policy()).attach).toEqual([]);
@@ -42,7 +54,7 @@ describe("attaching sources", () => {
 describe("playing", () => {
   test("only visible ready tiles play", () => {
     const tiles = [tile(1, { visible: 1, ready: true, attached: true }), tile(2, { visible: 0, ready: true, attached: true }), tile(3, { visible: 0.4, attached: true, loading: true })];
-    expect(schedule(tiles, policy())).toEqual({ attach: [], play: [1], pause: [] });
+    expect(schedule(tiles, policy())).toEqual({ attach: [], drop: [], play: [1], pause: [] });
   });
 
   test("a tile that leaves the screen pauses", () => {
@@ -62,7 +74,7 @@ describe("playing", () => {
 
   test("failed tiles keep the poster and never play", () => {
     const tiles = [tile(1, { visible: 1, ready: false, failed: true, attached: true })];
-    expect(schedule(tiles, policy())).toEqual({ attach: [], play: [], pause: [] });
+    expect(schedule(tiles, policy())).toEqual({ attach: [], drop: [], play: [], pause: [] });
   });
 
   test("blocked (case open, paused, calm, hidden tab): pause everything, attach nothing", () => {
@@ -71,6 +83,6 @@ describe("playing", () => {
       tile(2, { visible: 1, ready: true, attached: true }),
       tile(3, { near: true }),
     ];
-    expect(schedule(tiles, policy({ blocked: true }))).toEqual({ attach: [], play: [], pause: [1] });
+    expect(schedule(tiles, policy({ blocked: true }))).toEqual({ attach: [], drop: [], play: [], pause: [1] });
   });
 });

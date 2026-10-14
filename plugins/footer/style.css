@@ -16,7 +16,7 @@ html.calm .foot .fl { transition: none; }
 .foot .foot-row > span, .foot .foot-nav a { display: inline-block; }
 .foot .foot-row > .foot-tg { display: inline-flex; align-items: center; gap: 12px; }
 .foot-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
-.foot-dot { color: var(--text-muted); }
+.foot .foot-row .foot-dot { width: 5px; height: 5px; background: var(--text-muted); }
 .foot .foot-nav a { position: relative; padding: 2px 0; }
 .foot-nav a::before { content: ""; position: absolute; inset: 15% -4px 5%; background: var(--lemon); z-index: -1; border-radius: 3px; scale: 1 0; transform-origin: 50% 100%; transition: scale 0.28s cubic-bezier(0.3, 1.5, 0.5, 1); }
 @media (hover: hover) {

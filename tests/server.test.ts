@@ -35,13 +35,27 @@ describe("serve.ts", () => {
     expect(html).not.toContain("evil.example");
   });
 
-  test("bundle is gzipped when asked and cached for good", async () => {
-    const res = await fetch(`${server.url}/app.js`, { headers: { "Accept-Encoding": "gzip" }, decompress: false });
+  test("bundle is gzipped when asked and cached for good only under its own hash", async () => {
+    const v = /\/app\.js\?v=([0-9a-f]{10})/.exec(await (await fetch(`${server.url}/`)).text())![1];
+    const res = await fetch(`${server.url}/app.js?v=${v}`, { headers: { "Accept-Encoding": "gzip" }, decompress: false });
     expect(res.headers.get("content-encoding")).toBe("gzip");
     expect(res.headers.get("cache-control")).toContain("immutable");
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");
-    const css = await fetch(`${server.url}/app.css`);
+    for (const query of ["", "?v=0000000000"]) {
+      const other = await fetch(`${server.url}/app.js${query}`);
+      expect(other.headers.get("cache-control"), query).toBe("no-cache");
+    }
+    const css = await fetch(`${server.url}/app.css?v=${v}`);
     expect(css.headers.get("content-type")).toContain("text/css");
+    expect(css.headers.get("cache-control")).toContain("immutable");
+  });
+
+  test("gzip only when accepted: q=0 refuses it", async () => {
+    const plain = await fetch(`${server.url}/`, { headers: { "Accept-Encoding": "gzip;q=0, identity" }, decompress: false });
+    expect(plain.headers.get("content-encoding")).toBeNull();
+    expect(await plain.text()).toContain("<!doctype html>");
+    const gz = await fetch(`${server.url}/`, { headers: { "Accept-Encoding": "br, gzip" }, decompress: false });
+    expect(gz.headers.get("content-encoding")).toBe("gzip");
   });
 
   test("files answer byte ranges (Safari video needs it)", async () => {
@@ -51,10 +65,20 @@ describe("serve.ts", () => {
     expect(res.headers.get("cache-control")).toContain("max-age=86400");
   });
 
-  test("traversal, broken encoding and unknown paths are 404", async () => {
-    for (const path of ["/../serve.ts", "/%2e%2e/serve.ts", "/%E0%A4%A", "/nope.txt"]) {
+  test("traversal, broken encoding, null bytes, folders and unknown paths are 404", async () => {
+    for (const path of ["/../serve.ts", "/%2e%2e/serve.ts", "/%E0%A4%A", "/%00", "/fonts/", "/%69ndex.html", "/nope.txt"]) {
       const res = await fetch(`${server.url}${path}`);
       expect(res.status, path).toBe(404);
     }
+  });
+
+  test("only the plain address gets the page: a path that normalizes to / is 404", async () => {
+    // The page builds links from location.pathname; "//host/..%2f" would make them leave the site.
+    for (const path of ["//evil.example/..%2f", "//evil.example/x/..%2f..%2f"]) {
+      const res = await fetch(`${server.url}${path}`, { redirect: "manual" });
+      expect(res.status, path).toBe(404);
+      expect(await res.text(), path).not.toContain("app.js");
+    }
+    expect((await fetch(`${server.url}/index.html`)).status).toBe(200);
   });
 });

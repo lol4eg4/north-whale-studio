@@ -24,9 +24,6 @@ export function createBits(palette: () => string[]) {
     get count() {
       return list.length;
     },
-    clear() {
-      list.length = 0;
-    },
     // A burst away from (ux, uy): the shot's recoil, a landing, a pop.
     burst(x: number, y: number, count: number, ux: number, uy: number, k = 1, spread = 2.4) {
       const colors = palette();
@@ -93,7 +90,13 @@ export function createBits(palette: () => string[]) {
             }
             c.closePath();
           } else if (b.shape === "dot") c.arc(0, 0, b.r * 0.6, 0, Math.PI * 2);
-          else if (b.shape === "pill") c.roundRect(-b.r, -b.r * 0.4, b.r * 2, b.r * 0.8, b.r * 0.4);
+          else if (b.shape === "pill") {
+            // Two half circles joined (no roundRect: Safari before 16 lacks it).
+            const h = b.r * 0.4;
+            c.arc(h - b.r, 0, h, Math.PI / 2, Math.PI * 1.5);
+            c.arc(b.r - h, 0, h, -Math.PI / 2, Math.PI / 2);
+            c.closePath();
+          }
           else c.rect(-b.r * 0.6, -b.r * 0.6, b.r * 1.2, b.r * 1.2);
           c.fillStyle = b.color;
           c.lineWidth = b.shape === "star" ? 4 : 2.5;
@@ -106,4 +109,3 @@ export function createBits(palette: () => string[]) {
     },
   };
 }
-export type Bits = ReturnType<typeof createBits>;

@@ -27,15 +27,10 @@ export function icon(name: IconName, size = 20): SVGSVGElement {
   return svg;
 }
 
-export type ButtonKind = "outline" | "dark" | "action" | "ghost";
+export type ButtonKind = "outline" | "action" | "ghost";
 export function button(label: string, kind: ButtonKind = "outline", attrs: Attrs = {}): HTMLButtonElement {
-  const cls = { outline: "btn", dark: "btn btn-dark", action: "btn btn-action", ghost: "btn btn-ghost" }[kind];
+  const cls = { outline: "btn", action: "btn btn-action", ghost: "btn btn-ghost" }[kind];
   return h("button", { type: "button", ...attrs, class: `${cls} ${attrs.class ?? ""}`.trim() }, label);
-}
-
-// Paper sticker with the white die-cut edge. Tilt goes into --r so a lift still tilts it.
-export function sticker(className: string, tilt: number, ...children: Child[]): HTMLDivElement {
-  return h("div", { class: `sticker ${className}`, style: `--r:${tilt.toFixed(1)}deg` }, ...children);
 }
 
 // Hand-written marker note with an arrow (left or up).
@@ -54,20 +49,34 @@ export function placeholderBox(text: string, tag: "div" | "p" = "div"): HTMLElem
   return h(tag, { class: "ph-box" }, text);
 }
 
+// A touch screen, phone or tablet (headless browsers report hover:none, so not that).
+export const isTouch = () => matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+
+// Go to an anchor the way a link does: it scrolls there even when the address already has it.
+export const goTo = (hash: string) => h("a", { href: hash }).click();
+
+// Where floating things go: into the open modal dialog (the browser's top layer), else the page.
+export const topLayer = (): HTMLElement => [...document.querySelectorAll<HTMLElement>("dialog[open]")].pop() ?? document.body;
+
 // Toast: one polite live region for the whole page.
 let toastEl: HTMLDivElement | null = null;
 let toastTimer = 0;
 export function toast(text: string, ms = 2200) {
-  if (!toastEl) {
-    toastEl = h("div", { class: "toast", role: "status", "aria-live": "polite", hidden: true });
-    document.body.append(toastEl);
-  }
-  toastEl.textContent = text;
-  toastEl.hidden = false;
-  if (!document.documentElement.classList.contains("calm"))
-    toastEl.animate([{ transform: "translateY(-12px) scale(.9)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.34,1.56,.64,1)" });
-  clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => (toastEl!.hidden = true), ms);
+  const el = (toastEl ??= h("div", { class: "toast", role: "status", "aria-live": "polite", hidden: true }));
+  const show = () => {
+    el.textContent = text;
+    el.hidden = false;
+    if (!document.documentElement.classList.contains("calm"))
+      el.animate([{ transform: "translateY(-12px) scale(.9)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.34,1.56,.64,1)" });
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => (el.hidden = true), ms);
+  };
+  // Inside an open modal dialog, so it is seen and read there. A live region that just moved is
+  // read only when its text changes after it is in place: the text comes a frame later.
+  const layer = topLayer();
+  if (el.parentElement === layer) return show();
+  layer.append(el);
+  requestAnimationFrame(show);
 }
 
 // Window over the page (native modal dialog: focus stays inside, the page behind is inert).
@@ -75,19 +84,19 @@ export function toast(text: string, ms = 2200) {
 export function overlay(className: string, onRequestClose: () => void) {
   const el = h("dialog", { class: `sheet ${className}` });
   let opener: HTMLElement | null = null;
+  let downOutside = false;
   el.addEventListener("cancel", (e) => {
     e.preventDefault();
     onRequestClose();
   });
+  // Outside means pressed and released there: a text selection let go past the edge stays open.
+  el.addEventListener("pointerdown", (e) => (downOutside = e.target === el));
   el.addEventListener("click", (e) => {
-    if (e.target === el) onRequestClose();
+    if (e.target === el && downOutside) onRequestClose();
   });
   document.body.append(el);
   return {
     el,
-    get isOpen() {
-      return el.open;
-    },
     open(from?: HTMLElement | null) {
       opener = from ?? (document.activeElement as HTMLElement | null);
       if (!el.open) el.showModal();
@@ -97,9 +106,5 @@ export function overlay(className: string, onRequestClose: () => void) {
       el.close();
       if (returnFocus && opener?.isConnected) opener.focus({ preventScroll: true });
     },
-    setOpener(from: HTMLElement | null) {
-      opener = from;
-    },
   };
 }
-export type Overlay = ReturnType<typeof overlay>;

@@ -12,7 +12,8 @@ import type { Motion } from "../motion.ts";
 import type { RegionName } from "../host.ts";
 import { h, icon } from "../ui/parts.ts";
 
-const SECTIONS: [string, string][] = [
+// The page's sections in order, with their label keys (the footer lists them too).
+export const SECTIONS: [string, string][] = [
   ["#cases", "nav.cases"],
   ["#services", "nav.services"],
   ["#manifesto", "nav.manifesto"],

@@ -9,7 +9,7 @@
 //                                    \-> rocket -> top -> wait  (page follows it up; not in calm)
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, toast } from "../../platform/ui/parts.ts";
+import { h, icon, toast } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import type { SoundApi } from "../sound/api.ts";
 import { createBits } from "./bits.ts";
@@ -55,7 +55,8 @@ export default function init(host: Host) {
   const stk = h("span", { class: "ss-stk" });
   const h2 = h("h2", { id: "finale-title" }, titleText, " ", stk);
   const sub = h("p", { class: "ss-sub" });
-  const out = h("a", { class: "link-under ss-out", href: "#contacts" });
+  const outText = h("span");
+  const out = h("a", { class: "link-under ss-out arrowed", href: "#contacts" }, outText, icon("arrowRight", 18));
   const copy = h("div", { class: "ss-copy" }, kicker, h2, sub, out);
   const canvas = h("canvas", { class: "ss-canvas", "aria-hidden": "true" });
   const grab = h("button", { type: "button", class: "ss-grab" });
@@ -96,7 +97,7 @@ export default function init(host: Host) {
     t.bind(titleText, "finale.title");
     t.bind(stk, "finale.sticker");
     t.bind(sub, "finale.sub");
-    t.bind(out, "finale.out");
+    t.bind(outText, "finale.out");
     t.bind(caption, "finale.planB");
     t.bind(grab, "finale.sling", "aria-label");
     t.bind(grab, "cursor.pull", "data-cursor");
@@ -353,6 +354,11 @@ export default function init(host: Host) {
   });
   grab.addEventListener("pointermove", (e) => {
     if (mode !== "drag" || keyboard || e.pointerId !== pointerId) return;
+    // The button came up where we did not hear it (a Mac ctrl-click menu): put the whale back.
+    if (e.pointerType === "mouse" && e.buttons === 0) {
+      pointerId = -1;
+      return cancelAim();
+    }
     const r = section.getBoundingClientRect();
     setPull(e.clientX - r.left + grabOff.x - geo.R.x, e.clientY - r.top + grabOff.y - geo.R.y);
   });
@@ -361,6 +367,7 @@ export default function init(host: Host) {
     pointerId = -1;
     release();
   });
+  grab.addEventListener("contextmenu", (e) => e.preventDefault());
   grab.addEventListener("pointercancel", () => {
     if (mode === "drag" && !keyboard) mode = "rest";
     pointerId = -1;

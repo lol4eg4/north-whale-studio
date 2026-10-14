@@ -145,7 +145,7 @@ export function createEngine(Ctor: typeof AudioContext) {
     }
   }
 
-  const GUT = 0.45; // the roulette sits 7 dB under the rest
+  const GUT = 0.45; // the dive's shuffle and chime sit 7 dB under the rest
   const effects: Record<SoundName | "on", (t: number, p: number) => void> = {
     click(t, p) {
       const k = p || 1;
@@ -160,9 +160,6 @@ export function createEngine(Ctor: typeof AudioContext) {
       marimba(5, t, 0.5);
       marimba(8, t + 0.07, 0.5);
       noise(t, 0.17, "bandpass", 900, 0.6, 0.05, 0.08, 3500, 0.25);
-    },
-    note(t, p) {
-      marimba(p, t, 0.75);
     },
     peel(t, p) {
       // Glue letting go: micro-ticks that speed up, then a little rising tone.
@@ -181,9 +178,6 @@ export function createEngine(Ctor: typeof AudioContext) {
     },
     shuffle(t) {
       for (let k = 0; k < 9; k++) wood(hz(Math.floor(Math.random() * 10)), t + k * 0.05 * (1 + k * 0.06), 0.3 * GUT);
-    },
-    roll(t, p) {
-      wood(hz(3 + (Math.round(p) % 8)), t, 0.28 * GUT);
     },
     land(t) {
       piano(hz(10), t, 0.8 * GUT);

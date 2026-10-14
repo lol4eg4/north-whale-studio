@@ -63,11 +63,14 @@ export default function init(host: Host) {
   const paintRing = () => {
     if (!fontsReady) return;
     const size = phone.matches ? 84 : tablet.matches ? 128 : 156;
-    const ink = getComputedStyle(root).getPropertyValue("--ink").trim() || "#0E0E0E";
-    drawRing(ring, content.text("dive.ring"), size, phone.matches ? 17 : 14.5, ink);
+    const css = getComputedStyle(root);
+    // At least 10 px letters (DESIGN.md); the smaller rings say it once.
+    const words = content.text(size < 156 ? "dive.ringShort" : "dive.ring");
+    drawRing(ring, words, size, Math.max(14.5, (10 * 200) / size), css.getPropertyValue("--ink").trim(), css.getPropertyValue("--mono").trim());
   };
   const fonts = document.fonts;
-  Promise.all([fonts?.ready, fonts?.load('500 14.5px "JetBrains Mono"', content.text("dive.ring"))])
+  const mono = getComputedStyle(root).getPropertyValue("--mono").trim();
+  Promise.all([fonts?.ready, fonts?.load(`500 14.5px ${mono}`, content.text("dive.ring"))])
     .catch(() => undefined)
     .then(() => {
       fontsReady = true;
@@ -189,7 +192,9 @@ export default function init(host: Host) {
     rolling = true;
     cancelled = false;
     root.classList.add("dive-rolling");
+    motion.hold(true);
     say(content.text("dive.shuffling"));
+    let landed = false;
     try {
       motion.tidy();
       updateBadge();
@@ -199,7 +204,7 @@ export default function init(host: Host) {
         host.emit("wall-shuffled", {});
         const order = motion.cells("wall");
         const at = order.indexOf(cell);
-        const group = [order[at - 1], cell, order[at + 1]].filter(Boolean).map(layoutBox);
+        const group = [order[at - 1], cell, order[at + 1]].filter(Boolean).map((c) => layoutBox(c));
         const box = layoutBox(cell);
         const y = frameScroll(box, { top: Math.min(...group.map((b) => b.top)), bottom: Math.max(...group.map((b) => b.bottom)) }, innerHeight, phone.matches);
         landingScroll = Math.max(0, Math.min(scrollY + y, root.scrollHeight - innerHeight));
@@ -212,15 +217,16 @@ export default function init(host: Host) {
         await sleep(LAND_MS);
         if (cancelled) return;
       }
-      endRoll();
-      open();
+      landed = true;
     } finally {
       endRoll();
     }
+    if (landed) open();
   }
   function endRoll() {
     rolling = false;
     root.classList.remove("dive-rolling");
+    motion.hold(false);
     say("");
     for (const c of motion.cells("wall")) c.classList.remove("dive-dim", "dive-lit");
   }
@@ -269,7 +275,7 @@ export default function init(host: Host) {
     host.region("overlay").append(reel);
     const others = content.cases().filter((c) => c.id !== target);
     const seq: CaseItem[] = [];
-    for (let i = 0; i < 16 && others.length; i++) {
+    for (let i = 0; i < ROULETTE_STEPS && others.length; i++) {
       let c = others[Math.floor(Math.random() * others.length)];
       if (others.length > 1) while (c.id === seq.at(-1)?.id) c = others[Math.floor(Math.random() * others.length)];
       seq.push(c);
@@ -393,17 +399,19 @@ export default function init(host: Host) {
       t.bind(h("span", { class: "dive-card-kick mono" }), "dive.kicker"),
       h("span", { class: "dive-card-disc", "aria-hidden": "true" }, h("img", { src: "/whale.svg", alt: "", draggable: "false" })),
       t.bind(h("b", { class: "dive-card-title" }), "dive.title"),
-      t.bind(h("span", { class: "dive-card-sub mono" }), "dive.sub"),
+      h("span", { class: "dive-card-sub mono arrowed" }, t.bind(h("span"), "dive.sub"), icon("arrowRight", 14)),
     );
     t.bind(card, "cursor.dive", "data-cursor");
     card.addEventListener("click", () => void dive(card));
     place.append(card);
-    if (motion.idOf(place) === undefined) motion.add(card, { kind: "block", raise: place });
+    motion.add(card, { kind: "block", raise: place });
   });
 
   host.on("language-changed", () => {
     t.refresh();
     showCore();
     paintRing();
+    // The texts were rebuilt at home: the count goes with them.
+    laterBadge();
   });
 }

@@ -51,7 +51,6 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
     mute.hidden = !(mode === "sound" && started);
     mute.replaceChildren(icon(video.muted ? "muted" : "soundOn", 20));
     mute.setAttribute("aria-label", text(video.muted ? "case.unmute" : "case.mute"));
-    mute.setAttribute("aria-pressed", String(video.muted));
     full.setAttribute("aria-label", text("case.fullscreen"));
     seek.setAttribute("aria-label", text("case.seek"));
     errText.textContent = text("case.error");

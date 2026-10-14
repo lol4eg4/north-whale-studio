@@ -2,7 +2,7 @@
 // The label is the data-cursor of the nearest owner element (owners translate it); while a
 // piece is being dragged it says cursor.dragging. Text fields keep the browser's own cursor.
 import type { Host } from "../../platform/host.ts";
-import { h } from "../../platform/ui/parts.ts";
+import { h, topLayer } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import { cursorColors, labelKeys, wantsCursor, type CursorKey } from "./colors.ts";
 import "./style.css";
@@ -71,6 +71,9 @@ export default function init(host: Host) {
     "pointermove",
     (e) => {
       if (e.pointerType !== "mouse") return;
+      // Over an open modal dialog, the cursor lives inside it (the browser's top layer).
+      const layer = topLayer();
+      if (el.parentElement !== layer) layer.append(el);
       el.style.translate = `${e.clientX}px ${e.clientY}px`;
       inside = true;
       over = e.target as Element;

@@ -1,5 +1,5 @@
-// What the browser remembers between visits: language, sound, pause. Storage can be blocked
-// (private mode, in-app browsers): then the site simply remembers nothing.
+// What the browser remembers between visits: language, sound, pause, the best finale score.
+// Storage can be blocked (private mode, in-app browsers): then the site simply remembers nothing.
 export interface Memory {
   get(key: string): string | null;
   set(key: string, value: string): void;

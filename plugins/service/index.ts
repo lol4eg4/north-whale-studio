@@ -2,13 +2,11 @@
 // Title, one phrase, what is included; «Обсудить проект» goes to contacts, «Смотреть кейсы» to the wall.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { button, h, icon, overlay } from "../../platform/ui/parts.ts";
+import { button, goTo, h, icon, overlay } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import type { ServiceApi } from "./api.ts";
 import "./style.css";
 
-// Same as following a link to that anchor, without reading anyone's markup.
-const goTo = (hash: string) => h("a", { href: hash }).click();
 
 export default function init(host: Host) {
   const { motion } = host;
