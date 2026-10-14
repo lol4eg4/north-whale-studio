@@ -1,3 +1,11 @@
+---
+title: System Architecture
+quadrant: explanation
+created: 2026-10-14
+status: agreed
+read_when: Before adding or moving a block, address, API or screen.
+summary: Layers and blocks of the North Whale Studio site.
+---
 <!-- tab: System Architecture -->
 > **Статус: согласовано 14 октября 2026 года.** Владелец подтвердил слои, блоки и выбор языка по браузеру. Код ещё не написан.
 

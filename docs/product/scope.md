@@ -1,3 +1,11 @@
+---
+title: Scope
+quadrant: explanation
+created: 2026-10-14
+status: agreed
+read_when: Before planning any change to the site.
+summary: What the North Whale Studio site is, for whom, and what is in and out.
+---
 <!-- tab: Scope -->
 # Объём: сайт-визитка North Whale Studio
 

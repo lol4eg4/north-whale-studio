@@ -1,3 +1,11 @@
+---
+title: User stories
+quadrant: explanation
+created: 2026-10-14
+status: agreed
+read_when: Before adding or changing a feature: which story it serves.
+summary: Approved user stories S1-S9 for the North Whale Studio site.
+---
 <!-- tab: User stories -->
 # Истории пользователей: сайт North Whale Studio
 
