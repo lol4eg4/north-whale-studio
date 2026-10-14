@@ -1,0 +1,48 @@
+/* Hero (mock .hero, T§2.2). Pieces tilt with --r only. */
+.hero { position: relative; max-width: 1680px; margin: 0 auto; padding: clamp(24px, 3vw, 44px) var(--g) clamp(20px, 2.4vw, 32px); }
+.hero .kicker { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.hero .kicker span { display: inline-block; }
+.hero .kicker span + span::before { content: "•"; color: var(--buoy); margin-right: 14px; }
+.hero-title { font: 900 clamp(44px, 8.2vw, 138px)/0.93 var(--display); letter-spacing: -0.02em; margin: 0; max-width: 13ch; }
+.hero-title .hw { display: inline-block; }
+.peel-slot { display: inline-block; position: relative; margin-top: 0.2em; }
+.peel-ghost, .hero .peel { display: inline-block; padding: 0.02em 0.2em 0.08em; border-radius: var(--rounded-peel); }
+/* The printed outline the sticker was peeled from. */
+.peel-ghost { rotate: -3deg; color: transparent; -webkit-text-stroke: max(1.5px, 0.02em) var(--ink); box-shadow: inset 0 0 0 max(1.5px, 0.015em) rgba(14, 14, 14, 0.18); }
+.hero .peel {
+  position: absolute; inset: 0; z-index: 2; color: var(--ink); cursor: grab;
+  background: var(--buoy) linear-gradient(225deg, transparent 0 0.2em, var(--tape) 0.2em, var(--paper) 0.28em, color-mix(in srgb, var(--tape), var(--ink) 14%) 0.3em, transparent 0.31em);
+  box-shadow: 0 0 0 0.07em var(--paper), var(--die);
+}
+.hero .hero-note { position: absolute; left: 0; top: 0; z-index: 3; }
+.hero-note .up { display: none; }
+.hero-note.under { display: flex; flex-direction: column-reverse; align-items: flex-end; rotate: -4deg; }
+.hero-note.under .up { display: block; }
+.hero-note.under .left { display: none; }
+.hero.note-under .hero-title { margin-bottom: 96px; }
+.hero-note.narrow { font-size: 17px; rotate: -6deg; }
+.hero-note.narrow .left { width: 58px; height: 39px; margin-top: 2px; }
+.hero-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; margin-top: clamp(20px, 3vw, 40px); }
+.hero .lede { font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); max-width: 40ch; margin: 0; }
+.hero-side { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.hero .watch { font-size: 20px; padding: 10px 22px 10px 10px; min-height: 44px; background: var(--paper); box-shadow: var(--die); border: 2px solid var(--ink); transition: background 0.2s, scale 0.25s; }
+.hero .watch .badge { width: 34px; height: 34px; }
+.hero .believe { font-size: 18px; display: inline-block; }
+@media (hover: hover) {
+  .hero .watch:hover { background: var(--lemon); }
+}
+@media (max-width: 860px) {
+  .hero-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .hero { padding-bottom: 14px; }
+  .hero .kicker { margin-bottom: 14px; }
+  .hero .kicker span:first-child { display: none; }
+  .hero .kicker span:nth-child(2)::before { display: none; }
+  .hero-title { font-size: min(44px, 11.3vw); }
+  .hero-row { margin-top: 16px; gap: 16px; }
+  .hero-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .hero .watch { font-size: 16px; padding: 6px 16px 6px 6px; }
+  .hero .watch .badge { width: 28px; height: 28px; }
+  .hero .believe { font-size: 16px; }
+}
