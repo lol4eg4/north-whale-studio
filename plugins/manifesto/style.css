@@ -1,0 +1,19 @@
+/* Manifesto (mock .mani, T§2.5). Plugin CSS loads before base.css, so rules that meet
+   .piece / .ph-box / mark are scoped under .mani to win. */
+.mani { border-top: 2px solid var(--ink); padding: var(--section) var(--g); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px clamp(32px, 5vw, 90px); max-width: 1680px; margin: 0 auto; }
+.mani-l { position: sticky; top: 134px; align-self: start; z-index: 4; }
+.mani .mani-pill { display: inline-block; background: var(--mint); padding: 5px 9px 4px; border-radius: 99px; --r: -2deg; }
+.mani-h { font: 900 clamp(38px, 5.4vw, 84px)/0.95 var(--display); letter-spacing: -0.02em; margin: 14px 0 0; user-select: none; -webkit-user-select: none; }
+.mani-h .w { display: inline-block; }
+.mani .mani-origin { position: relative; margin-top: 36px; font-size: 15px; max-width: 38ch; }
+.mani-origin .stamp { position: absolute; right: -10px; top: -16px; background: var(--paper); font-size: 13px; }
+.mani-big { font: 500 clamp(22px, 2.5vw, 38px)/1.22 var(--sans); letter-spacing: -0.02em; max-width: 30ch; margin: 0 0 0.9em; }
+.mani-why { font: 900 clamp(26px, 2.8vw, 40px)/1 var(--display); margin: 1.4em 0 0.5em; }
+.mani-body { font-size: clamp(17px, 1.35vw, 20px); max-width: 52ch; }
+.mani .mani-big mark { transition: background-size 1.1s cubic-bezier(0.6, 0, 0.2, 1); }
+html.calm .mani .mani-big mark { transition: none; }
+
+@media (max-width: 860px) {
+  .mani { grid-template-columns: 1fr; }
+  .mani-l { position: static; }
+}
