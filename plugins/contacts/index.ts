@@ -1,5 +1,6 @@
 // Contacts: the big «Напишите нам», the email (a mailto: link, never a piece) with the copy
-// button, and the messengers and socials as stamped placeholders until the studio sends them.
+// button, the messengers and socials: a link where the studio sent an address, a stamped
+// placeholder until then.
 //
 //   copy ok        -> label «Скопировано» 2.4 s + toast + email-copied
 //   copy refused   -> the address is selected + hint toast
@@ -32,14 +33,19 @@ export default function init(host: Host) {
   const copyLabel = h("span");
   const copy = piece(h("button", { type: "button", class: "btn contact-copy" }, icon("check", 16), copyLabel), "sticker");
 
-  // Messengers and socials: no addresses yet, so no links; each chip is a stamped placeholder.
-  const group = (labelKey: string, names: string[]) =>
+  // Messengers and socials: a chip with an address is a link; the rest are stamped placeholders.
+  const link = (label: string, url: string) => {
+    const a = h("a", { class: "btn contact-link", href: url, target: "_blank", rel: "noopener" }, label);
+    motion.add(a, { kind: "sticker" });
+    return t.bind(a, "cursor.write", "data-cursor");
+  };
+  const group = (labelKey: string, items: { label: string; url?: string }[]) =>
     h(
       "div",
       { class: "contact-group" },
       t.bind(h("span", { class: "mono contact-group-name" }), labelKey),
-      ...names.map((name) => piece(h("span", { class: "contact-ph" }, name), "sticker")),
-      stamped(),
+      ...items.map(({ label, url }) => (url ? link(label, url) : piece(h("span", { class: "contact-ph" }, label), "sticker"))),
+      ...(items.some((i) => !i.url) ? [stamped()] : []),
     );
 
   host.region("main").append(
@@ -53,8 +59,8 @@ export default function init(host: Host) {
       h(
         "div",
         { class: "contact-reach" },
-        group("contacts.messengers", data.messengers.map((m) => `${m.name} ${m.handle}`)),
-        group("contacts.socials", data.socials.map((s) => s.name)),
+        group("contacts.messengers", data.messengers.map((m) => ({ label: `${m.name} ${m.handle}`, url: m.url }))),
+        group("contacts.socials", data.socials.map((s) => ({ label: s.name }))),
       ),
     ),
   );

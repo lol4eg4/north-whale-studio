@@ -52,7 +52,7 @@ export interface Client {
 
 export interface Contacts {
   email: string;
-  messengers: { name: string; handle: string }[];
+  messengers: { name: string; handle: string; url?: string }[];
   socials: { name: string }[];
 }
 

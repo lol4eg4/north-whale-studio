@@ -198,7 +198,9 @@ export default function init(host: Host) {
           return cell("sz-s t6", el, "sticker");
         }
         case "telegram": {
-          const el = stickerEl("a", "client sh-pill", r, { href: "#contacts", style: "--c:var(--cobalt);--f:var(--paper)" });
+          const tg = api.contacts().messengers.find((m) => m.name === "Telegram")?.url;
+          const to: Record<string, string> = tg ? { href: tg, target: "_blank", rel: "noopener" } : { href: "#contacts" };
+          const el = stickerEl("a", "client sh-pill", r, { ...to, style: "--c:var(--cobalt);--f:var(--paper)" });
           el.append(t.bind(h("b"), "sticker.telegram"), t.bind(h("span", { class: "ck" }), "sticker.telegramSub"));
           t.bind(el, "cursor.write", "data-cursor");
           return cell("sz-s t6", el, "sticker");

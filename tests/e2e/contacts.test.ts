@@ -63,7 +63,7 @@ test("no clipboard at all: the address is selected too", async () => {
   await context.close();
 });
 
-test("the email is a mailto: link and not a piece; messengers and socials are stamped placeholders", async () => {
+test("the email is a mailto: link and not a piece; Telegram is a link; the rest are stamped placeholders", async () => {
   const { context, page } = await open(browser, server.url);
   const email = await page.evaluate(() => {
     const a = document.querySelector<HTMLAnchorElement>("#contacts a.contact-email")!;
@@ -71,13 +71,20 @@ test("the email is a mailto: link and not a piece; messengers and socials are st
   });
   expect(email).toEqual({ href: `mailto:${EMAIL}`, text: EMAIL, piece: false });
   const reach = await page.evaluate(() => ({
-    links: document.querySelectorAll("#contacts .contact-reach a").length,
+    links: [...document.querySelectorAll<HTMLAnchorElement>("#contacts .contact-reach a")].map((a) => [a.textContent, a.getAttribute("href"), a.target, a.rel]),
     chips: [...document.querySelectorAll("#contacts .contact-ph")].map((c) => c.textContent),
     stamps: document.querySelectorAll("#contacts .contact-reach .stamp").length,
   }));
-  expect(reach.links).toBe(0);
-  expect(reach.chips).toEqual(["Telegram @northwhale", "WhatsApp +7 000 000-00-00", "Behance", "VK"]);
+  expect(reach.links).toEqual([["Telegram @romansmirn0v", "https://t.me/romansmirn0v", "_blank", "noopener"]]);
+  expect(reach.chips).toEqual(["WhatsApp +7 000 000-00-00", "Behance", "VK"]);
   expect(reach.stamps).toBe(2);
+  // The footer and the wall sticker lead to the same chat; the footer has no stamp any more.
+  const elsewhere = await page.evaluate(() => ({
+    foot: document.querySelector(".foot-tg")?.getAttribute("href"),
+    footStamp: document.querySelectorAll(".foot-tg .stamp").length,
+    wall: [...document.querySelectorAll<HTMLAnchorElement>(".wall a.client")].find((a) => a.textContent?.startsWith("Telegram"))?.getAttribute("href"),
+  }));
+  expect(elsewhere).toEqual({ foot: "https://t.me/romansmirn0v", footStamp: 0, wall: "https://t.me/romansmirn0v" });
   // The menu shows the address too.
   expect(await page.locator(".menu-foot .menu-mail a").getAttribute("href")).toBe(`mailto:${EMAIL}`);
   await context.close();

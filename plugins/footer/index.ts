@@ -1,5 +1,5 @@
 // Footer: the giant slogan fitted to the width, one piece per letter (T§4.12), and the row
-// below: copyright, section links, the Telegram placeholder. Every item is a piece.
+// below: copyright, section links, Telegram (a link once the studio has sent it). Every item is a piece.
 import type { Host } from "../../platform/host.ts";
 import { SECTIONS } from "../../platform/frame/frame.ts";
 import type { PieceKind } from "../../platform/motion.ts";
@@ -31,7 +31,11 @@ export default function init(host: Host) {
     return i ? [h("span", { class: "dot foot-dot", "aria-hidden": "true" }), a] : [a];
   });
   const nav = t.bind(h("nav", { class: "foot-nav" }, ...links), "nav.sections", "aria-label");
-  const telegram = piece(h("span", { class: "foot-tg" }, "Telegram", t.bind(stamp(""), "placeholder.stamp")), "word");
+  const tg = content.contacts().messengers.find((m) => m.name === "Telegram")?.url;
+  const telegram = piece(
+    tg ? h("a", { class: "foot-tg", href: tg, target: "_blank", rel: "noopener" }, "Telegram") : h("span", { class: "foot-tg" }, "Telegram", t.bind(stamp(""), "placeholder.stamp")),
+    "word",
+  );
   const row = h("div", { class: "foot-row mono" }, piece(t.bind(h("span"), "foot.copy"), "word"), nav, telegram);
   foot.append(word, row);
 
