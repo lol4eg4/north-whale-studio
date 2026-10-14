@@ -17,6 +17,11 @@ Deferred on purpose. Each item names what it waits for.
 - A share card per case (`/#case-N` shows the site card today).
 - Analytics: none until the studio picks a service.
 
+## Later, from the visual check (2026-10-14)
+
+- Keyboard dragging: pieces move only by mouse and touch. A move mode (focus a piece, arrows, Enter) would match the slingshot's keys. Impact: medium, accessibility.
+- Spacing tokens: DESIGN.md names a 4/8/16/24/32/48 px scale; component CSS still uses some one-off values. Impact: polish.
+
 ## Not planned
 
 - Dark theme; illustrations beyond the whale and the stickers.

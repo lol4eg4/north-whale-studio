@@ -23,9 +23,14 @@ try {
       await page.addStyleTag({ content: ".cursor{display:none!important}" });
       await page.waitForTimeout(800);
       await page.screenshot({ path: join(out, `${lang}-${name}-first.png`) });
-      // Posters load near the screen: scroll the page through once before the full shot.
+      // Posters load and marks draw near the screen: scroll the page through once, a frame or
+      // so per step, before the full shot. (The finale's whale lives on a screen-sized canvas, so
+      // the full shot leaves it out; see the finale on screen instead.)
       const height = await page.evaluate(() => document.documentElement.scrollHeight);
-      for (let y = 0; y < height; y += 500) await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
+      for (let y = 0; y < height; y += 500) {
+        await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
+        await page.waitForTimeout(60);
+      }
       await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
       await page.waitForTimeout(600);
       await page.screenshot({ path: join(out, `${lang}-${name}-full.png`), fullPage: true });
