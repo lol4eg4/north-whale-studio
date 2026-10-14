@@ -1,0 +1,74 @@
+[
+ {
+  "id": 1,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "cobalt"
+ },
+ {
+  "id": 2,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "ink"
+ },
+ {
+  "id": 3,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "mint"
+ },
+ {
+  "id": 4,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "buoy"
+ },
+ {
+  "id": 5,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "signal"
+ },
+ {
+  "id": 6,
+  "name": {
+   "ru": "Имя",
+   "en": "Name"
+  },
+  "role": {
+   "ru": "должность",
+   "en": "role"
+  },
+  "color": "jellyfish"
+ }
+]

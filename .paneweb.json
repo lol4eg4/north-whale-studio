@@ -1,1 +1,1 @@
-{"service":{"cmd":"bun serve.ts","url_path":"/"}}
+{"service":{"cmd":"DEV=1 bun serve.ts","url_path":"/"}}

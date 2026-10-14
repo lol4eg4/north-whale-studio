@@ -1,0 +1,56 @@
+/* Frame: top bar, menu, bottom corners. z-index map: nav 40, dock 60, corner-left 70, menu 80, dialogs 88, toast 90, cursor 1000. */
+.nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 20px; padding: 14px var(--g); background: var(--paper); }
+.logo { font: 900 clamp(20px, 1.9vw, 28px)/1 var(--display); letter-spacing: -0.01em; margin-right: auto; display: flex; align-items: center; gap: 10px; white-space: nowrap; text-transform: uppercase; transform-origin: 0 70%; }
+.links { display: flex; gap: 4px; }
+.links a { padding: 8px 12px; border-radius: 99px; font-weight: 600; transition: background 0.2s, rotate 0.35s var(--ease-spring), scale 0.35s var(--ease-spring); }
+.cases-pill { border: 2px solid var(--ink); padding: 6px 16px 6px 6px; font-size: 15px; min-height: 44px; }
+.hello-pill, .hello-short { background: var(--ink); color: var(--paper); padding: 10px 16px; min-height: 44px; transition: background 0.3s, rotate 0.3s var(--ease-spring); }
+.hello-short { display: none; }
+.nav-lang:empty { display: none; }
+.plus { display: none; flex: none; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--ink); color: var(--paper); padding: 0; transition: rotate 0.35s var(--ease-spring), background 0.2s; }
+.plus.open, .plus[aria-expanded="true"] { rotate: 45deg; background: var(--buoy); color: var(--ink); }
+@media (hover: hover) {
+  .logo:hover { rotate: -3deg; scale: 1.06; }
+  .links a:hover { background: var(--lemon); rotate: -4deg; scale: 1.08; }
+  .hello-pill:hover { background: var(--cobalt); rotate: -3deg; }
+}
+
+/* Menu (<= 1100 px) */
+dialog.menu { position: fixed; inset: 0; z-index: 80; background: var(--lemon); flex-direction: column; gap: 22px; overflow-y: auto; padding: 0 20px calc(96px + env(safe-area-inset-bottom)); }
+dialog.menu[open] { display: flex; }
+dialog.menu::backdrop { background: transparent; }
+.menu-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 -20px; padding: 10px 16px; background: var(--paper); position: sticky; top: 0; }
+.menu-top .plus { display: grid; }
+.menu-links { display: flex; flex-direction: column; align-items: flex-start; }
+.menu-links a { font: 900 min(46px, 12vw)/1.08 var(--display); letter-spacing: -0.02em; padding: 6px 0; transition: translate 0.3s var(--ease-spring), rotate 0.3s var(--ease-spring); }
+.menu-links a:nth-child(2n) { margin-left: 28px; }
+.menu-links a:hover, .menu-links a:active { translate: 8px 0; rotate: -2deg; }
+.menu-lang { display: flex; align-items: center; gap: 12px; }
+.menu-foot { margin-top: auto; border-top: 2px solid var(--ink); padding-top: 14px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.menu-foot .hello-pill { display: inline-flex; }
+html.menu-open .dock, html.menu-open .ctrl { visibility: hidden; }
+
+/* Bottom corners */
+.ctrl { position: fixed; left: clamp(14px, 2vw, 28px); bottom: clamp(14px, 2vw, 28px); z-index: 70; display: flex; align-items: center; padding: 2px; border-radius: 99px; background: var(--paper); border: 2px solid var(--ink); box-shadow: var(--float); }
+.cbtn { width: 48px; height: 44px; border: 0; border-radius: 99px; background: var(--paper); display: grid; place-items: center; padding: 0; color: var(--ink); }
+.ctrl .divider { width: 2px; height: 22px; background: rgba(14, 14, 14, 0.15); }
+.dock { position: fixed; right: clamp(14px, 2vw, 28px); bottom: clamp(14px, 2vw, 28px); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.dock:empty { display: none; }
+
+@media (max-width: 1100px) {
+  .links, .hello-pill { display: none; }
+  .plus { display: grid; }
+}
+@media (max-width: 700px) {
+  .nav { padding: 10px 16px; gap: 10px; }
+  .nav > .nav-lang, .nav > .cases-pill { display: none; }
+  .hello-short { display: inline-flex; font-size: 14px; padding: 0 16px; }
+  .logo { font-size: 17px; }
+  .ctrl { left: 16px; bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .cbtn { width: 44px; }
+  .dock { left: 0; right: 0; bottom: 0; flex-direction: row; justify-content: flex-end; gap: 12px; padding: 0 16px calc(10px + env(safe-area-inset-bottom)); align-items: center; pointer-events: none; }
+  .dock > * { pointer-events: auto; }
+}
+@media (max-width: 400px) {
+  .logo { font-size: 15px; }
+}

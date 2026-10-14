@@ -1,0 +1,20 @@
+{
+  "name": "contacts",
+  "layer": 1,
+  "provides": [],
+  "uses": [
+    "content"
+  ],
+  "events": {
+    "emits": [
+      "email-copied"
+    ],
+    "listens": [
+      "language-changed"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

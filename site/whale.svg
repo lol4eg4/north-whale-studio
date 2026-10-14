@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 180" width="520" height="360">
+  <defs>
+    <g id="whale-shape">
+      <path d="M238 118C238 84 210 62 168 62C132 62 108 74 90 88C78 97 67 93 60 82L54 71L42 78C51 95 66 109 84 117C112 146 150 154 186 150C218 146 238 136 238 118Z"/>
+      <path d="M48 76C40 63 27 57 10 60C16 47 31 42 45 50C47 37 58 26 76 24C72 40 63 60 48 76Z"/>
+      <path d="M182 60L182 36M182 37C176 26 164 24 157 34M182 37C188 26 200 24 207 34" fill="none" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <g fill="#fff" stroke="#fff" stroke-width="16" stroke-linejoin="round"><use href="#whale-shape"/></g>
+  <g stroke="#2F4BFF" stroke-width="11" stroke-linecap="round" fill="none">
+    <path d="M182 60L182 36M182 37C176 26 164 24 157 34M182 37C188 26 200 24 207 34"/>
+  </g>
+  <g stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M182 58L182 36M182 37C176 26 164 24 157 34M182 37C188 26 200 24 207 34"/>
+  </g>
+  <g fill="#2F4BFF"><path d="M238 118C238 84 210 62 168 62C132 62 108 74 90 88C78 97 67 93 60 82L54 71L42 78C51 95 66 109 84 117C112 146 150 154 186 150C218 146 238 136 238 118Z"/><path d="M48 76C40 63 27 57 10 60C16 47 31 42 45 50C47 37 58 26 76 24C72 40 63 60 48 76Z"/></g>
+  <path d="M236 122C232 140 206 151 180 151C150 151 121 143 99 125C131 133 170 135 200 129C214 126 228 123 236 122Z" fill="#fff"/>
+  <g stroke="#2F4BFF" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".5">
+    <path d="M132 135C154 141 182 143 206 138"/><path d="M150 143C168 146 188 147 207 144"/>
+  </g>
+  <path d="M172 112C160 124 146 132 126 136C136 124 150 114 166 106Z" fill="#1F33C9"/>
+  <circle cx="206" cy="100" r="6.5" fill="#0E0E0E"/><circle cx="208.5" cy="97.5" r="2.2" fill="#fff"/>
+  <circle cx="219" cy="114" r="6" fill="#FF8FCF" opacity=".9"/>
+  <path d="M236 119C230 123 222 124 214 121" stroke="#0E0E0E" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <g fill="#fff" stroke="#2F4BFF" stroke-width="3"><circle cx="150" cy="44" r="4"/><circle cx="214" cy="44" r="4"/></g>
+</svg>

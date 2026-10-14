@@ -1,0 +1,17 @@
+{
+  "name": "cursor",
+  "layer": 2,
+  "provides": [],
+  "uses": [],
+  "events": {
+    "emits": [],
+    "listens": [
+      "piece-grabbed",
+      "piece-dropped"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

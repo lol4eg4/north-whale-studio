@@ -1,0 +1,43 @@
+/* Shared parts (DESIGN.md components). Plugins compose screens only from these. */
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); border-radius: 99px; padding: 10px 18px; font: 700 16px/1.2 var(--sans); white-space: nowrap; transition: background 0.2s, color 0.2s, rotate 0.3s var(--ease-spring); }
+.btn-dark { background: var(--ink); color: var(--paper); }
+.btn-action { background: var(--buoy); border-color: var(--buoy); color: var(--ink); font: 900 18px/1.1 var(--display); padding: 14px 22px; box-shadow: 0 0 0 3px #fff; }
+.btn-ghost { background: transparent; border-color: rgba(255, 255, 255, 0.7); color: #fff; }
+@media (hover: hover) {
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn-dark:hover { background: var(--cobalt); }
+  .btn-action:hover { background: var(--lemon); border-color: var(--lemon); rotate: -2deg; }
+  .btn-ghost:hover { background: #fff; color: var(--ink); }
+}
+.pill { display: inline-flex; align-items: center; gap: 10px; border-radius: 99px; font-weight: 700; white-space: nowrap; }
+.badge { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); display: grid; place-items: center; flex: none; }
+.badge::after { content: ""; border: 6px solid transparent; border-top: 8px solid var(--buoy); margin-top: 7px; rotate: -90deg; translate: 2px -3px; }
+.round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); background: var(--paper); padding: 0; flex: none; }
+.link-under { font-weight: 600; border-bottom: 3px solid var(--mint); }
+@media (hover: hover) { .link-under:hover { border-color: var(--jellyfish); } }
+
+/* Paper */
+.sticker { border: 3px solid #fff; box-shadow: var(--die); }
+.note { font: 700 clamp(17px, 1.9vw, 26px)/1.05 var(--marker); color: var(--cobalt); rotate: -7deg; pointer-events: none; }
+.note svg { display: block; }
+mark { color: inherit; background: linear-gradient(var(--hl, var(--lemon)), var(--hl, var(--lemon))) 0 88% / var(--mark, 100%) 45% no-repeat; padding: 0 0.08em; transition: background-size 0.9s cubic-bezier(0.6, 0, 0.2, 1); }
+mark.b { --hl: var(--jellyfish); }
+mark.m { --hl: var(--mint); }
+mark.pre { --mark: 0%; }
+html.calm mark { transition: none; }
+
+/* Placeholders: where the studio's own data goes later. */
+.ph-box { border: 2px dashed rgba(14, 14, 14, 0.35); border-radius: 10px; padding: 12px 14px; color: rgba(14, 14, 14, 0.6); }
+.on-cobalt .ph-box, .on-ink .ph-box { border-color: rgba(255, 255, 255, 0.55); color: rgba(255, 255, 255, 0.82); }
+.stamp { display: inline-block; font: 700 15px var(--marker); color: var(--signal); border: 2px solid var(--signal); border-radius: 6px; padding: 2px 8px; rotate: -8deg; white-space: nowrap; }
+
+/* Dialog base: case, service card, menu share it. */
+dialog.sheet { border: 0; padding: 0; margin: 0; max-width: none; max-height: none; width: 100%; height: 100%; background: transparent; color: inherit; overflow: visible; }
+dialog.sheet::backdrop { background: rgba(14, 14, 14, 0.55); }
+html:has(dialog[open].sheet) { overflow: hidden; }
+
+/* Toast */
+.toast { position: fixed; left: 50%; top: 96px; translate: -50% 0; z-index: 90; background: var(--ink); color: #fff; font: 600 16px/1.3 var(--sans); padding: 10px 16px; border-radius: 99px; box-shadow: 0 0 0 3px #fff; pointer-events: none; max-width: calc(100vw - 32px); text-align: center; }
+.toast[hidden] { display: none; }

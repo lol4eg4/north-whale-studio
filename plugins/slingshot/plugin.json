@@ -1,0 +1,22 @@
+{
+  "name": "slingshot",
+  "layer": 2,
+  "provides": [],
+  "uses": [
+    "content",
+    "sound"
+  ],
+  "events": {
+    "emits": [
+      "whale-launched",
+      "whale-hit"
+    ],
+    "listens": [
+      "language-changed"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

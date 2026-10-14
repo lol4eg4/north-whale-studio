@@ -1,0 +1,31 @@
+{
+  "name": "sound",
+  "layer": 2,
+  "provides": [
+    "sound"
+  ],
+  "uses": [
+    "content"
+  ],
+  "events": {
+    "emits": [],
+    "listens": [
+      "language-changed",
+      "case-opened",
+      "case-closed",
+      "service-opened",
+      "tile-hovered",
+      "email-copied",
+      "piece-grabbed",
+      "piece-dropped",
+      "wall-shuffled",
+      "wall-tidied",
+      "whale-launched",
+      "whale-hit"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

@@ -1,0 +1,90 @@
+[
+ {
+  "caseId": 2,
+  "name": {
+   "ru": "AG1",
+   "en": "AG1"
+  },
+  "shape": "pill",
+  "bg": "jellyfish",
+  "fg": "ink",
+  "phone": false
+ },
+ {
+  "caseId": 1,
+  "name": {
+   "ru": "Waldorf Astoria",
+   "en": "Waldorf Astoria"
+  },
+  "shape": "circle",
+  "bg": "ink",
+  "fg": "paper",
+  "phone": true
+ },
+ {
+  "caseId": 4,
+  "name": {
+   "ru": "Mabrook",
+   "en": "Mabrook"
+  },
+  "shape": "pill",
+  "bg": "lemon",
+  "fg": "ink",
+  "phone": false
+ },
+ {
+  "caseId": 3,
+  "name": {
+   "ru": "Dear Passengers",
+   "en": "Dear Passengers"
+  },
+  "shape": "circle",
+  "bg": "cobalt",
+  "fg": "paper",
+  "phone": false
+ },
+ {
+  "caseId": 5,
+  "name": {
+   "ru": "UNIUN",
+   "en": "UNIUN"
+  },
+  "shape": "pill",
+  "bg": "mint",
+  "fg": "ink",
+  "phone": false
+ },
+ {
+  "caseId": 7,
+  "name": {
+   "ru": "Антикрус",
+   "en": "Antikrus"
+  },
+  "shape": "circle",
+  "bg": "signal",
+  "fg": "paper",
+  "phone": true
+ },
+ {
+  "caseId": 6,
+  "name": {
+   "ru": "Сергей Ибадов",
+   "en": "Sergey Ibadov"
+  },
+  "shape": "pill",
+  "bg": "jellyfish",
+  "fg": "ink",
+  "phone": false
+ },
+ {
+  "caseId": 8,
+  "name": {
+   "ru": "DeckForge",
+   "en": "DeckForge"
+  },
+  "shape": "pill",
+  "bg": "ink",
+  "fg": "lemon",
+  "phone": true
+ }
+]

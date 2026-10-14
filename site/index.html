@@ -1,17 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>North Whale Studio</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>North Whale Studio — сайты и упаковка бизнеса</title>
+    <meta name="description" content="Делаем сайты, которые хочется трогать. Сайты, упаковка бизнеса, реклама, 3D и трейлеры." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="North Whale Studio" />
+    <meta property="og:description" content="Делаем сайты, которые хочется трогать." />
+    <meta property="og:image" content="%OG_IMAGE%" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/rubik-cyrillic-900-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/rubik-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/onest-cyrillic-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/onest-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+@font-face{font-family:'Rubik';font-style:normal;font-display:swap;font-weight:900;src:url(/fonts/rubik-cyrillic-900-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Rubik';font-style:normal;font-display:swap;font-weight:900;src:url(/fonts/rubik-latin-900-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/onest-cyrillic-500-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/onest-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/onest-cyrillic-600-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/onest-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/onest-cyrillic-700-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/onest-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:800;src:url(/fonts/onest-cyrillic-800-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Onest';font-style:normal;font-display:swap;font-weight:800;src:url(/fonts/onest-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/jetbrains-mono-cyrillic-500-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Shantell Sans';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/shantell-sans-cyrillic-700-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Shantell Sans';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/shantell-sans-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    </style>
+    <link rel="stylesheet" href="/app.css?v=%V%" />
+    <script type="module" src="/app.js?v=%V%"></script>
     <!-- The board's bug report widget, on tailnet test sites only. -->
     <script>if(location.hostname.endsWith(".ts.net"))document.head.append(Object.assign(document.createElement("script"),{src:"https://pane-server.tail9feca9.ts.net:8446/widget.js",defer:true}))</script>
   </head>
   <body>
-    <main>
-      <h1>North Whale Studio</h1>
-      <p>Coming soon.</p>
-    </main>
+    <noscript>North Whale Studio · hello@northwhale.studio</noscript>
   </body>
 </html>

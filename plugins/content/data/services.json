@@ -1,0 +1,148 @@
+[
+ {
+  "id": 1,
+  "main": true,
+  "title": {
+   "ru": "Сайты под ключ",
+   "en": "Turnkey websites"
+  },
+  "phrase": {
+   "ru": "От смысла и дизайна до анимации и запуска.",
+   "en": "From meaning and design to animation and launch."
+  },
+  "includes": [
+   {
+    "ru": "Смысл и структура: о чём сайт и для кого.",
+    "en": "Meaning and structure: what the site says and to whom."
+   },
+   {
+    "ru": "Дизайн и анимация в вашем стиле.",
+    "en": "Design and animation in your style."
+   },
+   {
+    "ru": "Вёрстка под телефон и компьютер.",
+    "en": "Built for phones and desktops."
+   },
+   {
+    "ru": "Запуск и поддержка после запуска.",
+    "en": "Launch, and support after it."
+   }
+  ]
+ },
+ {
+  "id": 2,
+  "main": false,
+  "title": {
+   "ru": "Упаковка бизнеса",
+   "en": "Brand packaging"
+  },
+  "phrase": {
+   "ru": "Имя, знак, стиль и тексты, по которым вас узнают.",
+   "en": "The name, mark, style and words people know you by."
+  },
+  "includes": [
+   {
+    "ru": "Смысл и позиционирование.",
+    "en": "Meaning and positioning."
+   },
+   {
+    "ru": "Логотип и фирменный стиль.",
+    "en": "Logo and visual identity."
+   },
+   {
+    "ru": "Тексты: от слогана до презентации.",
+    "en": "Copy: from the slogan to the pitch deck."
+   },
+   {
+    "ru": "Носители: от визитки до соцсетей.",
+    "en": "Touchpoints: from business cards to social media."
+   }
+  ]
+ },
+ {
+  "id": 3,
+  "main": false,
+  "title": {
+   "ru": "Реклама",
+   "en": "Advertising"
+  },
+  "phrase": {
+   "ru": "Ролики, которые досматривают до конца.",
+   "en": "Ads people watch to the end."
+  },
+  "includes": [
+   {
+    "ru": "Идея и сценарий.",
+    "en": "Idea and script."
+   },
+   {
+    "ru": "Съёмка или анимация.",
+    "en": "Shoot or animation."
+   },
+   {
+    "ru": "Монтаж, звук и цвет.",
+    "en": "Edit, sound and colour."
+   },
+   {
+    "ru": "Версии под каждую площадку.",
+    "en": "Cuts for every platform."
+   }
+  ]
+ },
+ {
+  "id": 4,
+  "main": false,
+  "title": {
+   "ru": "3D-анимация",
+   "en": "3D animation"
+  },
+  "phrase": {
+   "ru": "Продукт и мир вокруг него в объёме.",
+   "en": "Your product and its world in 3D."
+  },
+  "includes": [
+   {
+    "ru": "Модели и сцены.",
+    "en": "Models and scenes."
+   },
+   {
+    "ru": "Анимация и свет.",
+    "en": "Animation and lighting."
+   },
+   {
+    "ru": "Ролики и картинки для сайта и рекламы.",
+    "en": "Videos and stills for the site and ads."
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "main": false,
+  "title": {
+   "ru": "Игровые трейлеры",
+   "en": "Game trailers"
+  },
+  "phrase": {
+   "ru": "Трейлер, после которого игру хочется скачать.",
+   "en": "A trailer that makes people want the game."
+  },
+  "includes": [
+   {
+    "ru": "Сценарий и раскадровка.",
+    "en": "Script and storyboard."
+   },
+   {
+    "ru": "Захват геймплея и 3D.",
+    "en": "Gameplay capture and 3D."
+   },
+   {
+    "ru": "Монтаж и звук.",
+    "en": "Edit and sound."
+   },
+   {
+    "ru": "Версии для сторов и соцсетей.",
+    "en": "Cuts for stores and social media."
+   }
+  ]
+ }
+]

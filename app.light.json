@@ -1,0 +1,60 @@
+{
+  "plugins": [
+    {
+      "name": "content",
+      "on": true
+    },
+    {
+      "name": "hero",
+      "on": true
+    },
+    {
+      "name": "wall",
+      "on": true
+    },
+    {
+      "name": "case",
+      "on": true
+    },
+    {
+      "name": "service",
+      "on": true
+    },
+    {
+      "name": "manifesto",
+      "on": true
+    },
+    {
+      "name": "contacts",
+      "on": true
+    },
+    {
+      "name": "footer",
+      "on": true
+    },
+    {
+      "name": "drag",
+      "on": false
+    },
+    {
+      "name": "dive",
+      "on": false
+    },
+    {
+      "name": "sound",
+      "on": false
+    },
+    {
+      "name": "cursor",
+      "on": false
+    },
+    {
+      "name": "slingshot",
+      "on": false
+    },
+    {
+      "name": "visits",
+      "on": false
+    }
+  ]
+}

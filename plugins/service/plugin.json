@@ -1,0 +1,22 @@
+{
+  "name": "service",
+  "layer": 1,
+  "provides": [
+    "service"
+  ],
+  "uses": [
+    "content"
+  ],
+  "events": {
+    "emits": [
+      "service-opened"
+    ],
+    "listens": [
+      "language-changed"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

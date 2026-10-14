@@ -1,0 +1,25 @@
+{
+  "name": "drag",
+  "layer": 2,
+  "provides": [],
+  "uses": [
+    "content"
+  ],
+  "events": {
+    "emits": [
+      "piece-grabbed",
+      "piece-dropped"
+    ],
+    "listens": [
+      "language-changed",
+      "case-opened",
+      "case-closed"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": [
+      "wall-hint"
+    ]
+  }
+}
