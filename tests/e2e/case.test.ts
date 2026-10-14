@@ -96,6 +96,30 @@ describe("open and close", () => {
     expect(errors).toEqual([]);
     await context.close();
   });
+
+  test("a press inside the panel released on the outer margin keeps the case open; a plain click there closes it", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
+    await openTile(page, 2);
+    // The panel reveal clips and moves the content; wait until it has settled.
+    await page.waitForFunction(() => document.querySelector("dialog.case")!.getAnimations({ subtree: true }).length === 0, null, { timeout: 8000 });
+    const margin = { x: 10, y: 10 };
+    // The margin is the dialog's own padding around the panel.
+    expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y) === document.querySelector("dialog.case"), margin)).toBe(true);
+    const box = (await page.locator("dialog.case .case-title").boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(margin.x, margin.y, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await isOpen(page)).toBe(true);
+    expect(await hash(page)).toBe("#case-2");
+
+    await page.mouse.click(margin.x, margin.y);
+    await waitClosed(page);
+    expect(await hash(page)).toBe("");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 });
 
 describe("links and history", () => {
@@ -131,6 +155,26 @@ describe("links and history", () => {
     await page.keyboard.press("Escape");
     await waitClosed(page);
     expect(page.url()).toBe(`${srv.url}/?lang=en`);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("Esc back onto a #case-3 entry shows case 3 and keeps it open", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
+    // Entries: [/, #case-3]. pushState does not fire hashchange, so nothing opens by itself.
+    await page.evaluate(() => history.pushState(null, "", "#case-3"));
+    expect(await isOpen(page)).toBe(false);
+    await openTile(page, 2);
+    expect(await title(page)).toBe("AG1");
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Dear Passengers", null, { timeout: 5000 });
+    expect(await isOpen(page)).toBe(true);
+    expect(await hash(page)).toBe("#case-3");
+    // The wait for the step back used to close the case 1.5 s later.
+    await page.waitForTimeout(2500);
+    expect(await isOpen(page)).toBe(true);
+    expect(await title(page)).toBe("Dear Passengers");
+    expect(await hash(page)).toBe("#case-3");
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -215,6 +259,29 @@ describe("copy link", () => {
     await page.click("dialog.case .link-copy");
     await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Ссылка на кейс скопирована", { timeout: 2000 });
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`${srv.url}/?lang=ru#case-7`);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("the toast is inside the open case and really visible", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`, { permissions: ["clipboard-read", "clipboard-write"] });
+    await openTile(page, 7);
+    await page.click("dialog.case .link-copy");
+    await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Ссылка на кейс скопирована", { timeout: 2000 });
+    const seen = await page.evaluate(() => {
+      const toast = document.querySelector<HTMLElement>(".toast")!;
+      const dialog = document.querySelector<HTMLDialogElement>("dialog.case")!;
+      const r = toast.getBoundingClientRect();
+      // The toast never takes the pointer (pointer-events: none), so elementFromPoint would skip it;
+      // let it take the pointer here to find out what is painted at its centre.
+      toast.style.pointerEvents = "auto";
+      const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { inDialog: toast.parentElement === dialog && dialog.open, size: [r.width, r.height], atToast: !!at && (at === toast || toast.contains(at)), at: at?.className };
+    });
+    expect(seen.inDialog).toBe(true);
+    expect(seen.size[0]).toBeGreaterThan(0);
+    expect(seen.size[1]).toBeGreaterThan(0);
+    expect(seen.atToast).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
   });

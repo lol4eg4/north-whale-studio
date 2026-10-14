@@ -17,6 +17,7 @@ interface Hand {
   el: HTMLElement;
   pointerId: number;
   fixed: boolean;
+  floor: number; // highest point on screen for a fixed piece: the bar's own pieces may go up to 0
   base: { x: number; y: number };
   x0: number;
   y0: number;
@@ -41,10 +42,14 @@ export default function init(host: Host) {
   let frame = 0;
   let lastFrame = 0;
 
-  // A piece inside a fixed layer (the dock) is not carried by the page scroll.
-  const isFixed = (el: HTMLElement) => {
-    for (let n: HTMLElement | null = el; n && n !== document.body; n = n.parentElement) if (getComputedStyle(n).position === "fixed") return true;
-    return false;
+  // A piece inside a fixed layer (the dock) or the sticky top bar (the studio name) is not
+  // carried by the page scroll.
+  const layerOf = (el: HTMLElement) => {
+    for (let n: HTMLElement | null = el; n && n !== document.body; n = n.parentElement) {
+      const p = getComputedStyle(n).position;
+      if (p === "fixed" || p === "sticky") return p;
+    }
+    return null;
   };
 
   const place = () => {
@@ -56,7 +61,7 @@ export default function init(host: Host) {
     // edge would be out of reach and would make the page scroll sideways.
     const r = hand.el.getBoundingClientRect();
     const w = root.clientWidth;
-    const top = hand.fixed ? 50 : -scrollY;
+    const top = hand.fixed ? hand.floor : -scrollY;
     const bottom = hand.fixed ? innerHeight : hand.pageH - scrollY;
     if (r.left < 0) x -= r.left;
     else if (r.right > w) x -= r.right - w;
@@ -150,7 +155,8 @@ export default function init(host: Host) {
     if (id === undefined) return;
     const el = motion.el(id)!;
     const kind: PointerKind = e.pointerType === "touch" ? "touch" : e.pointerType === "pen" ? "pen" : "mouse";
-    hand = { id, el, pointerId: e.pointerId, fixed: isFixed(el), base: motion.offset(id), x0: e.clientX, y0: e.clientY, sy0: scrollY, pageH: root.scrollHeight, x: e.clientX, y: e.clientY, grabbed: false };
+    const layer = layerOf(el);
+    hand = { id, el, pointerId: e.pointerId, fixed: !!layer, floor: layer === "sticky" ? 0 : 50, base: motion.offset(id), x0: e.clientX, y0: e.clientY, sy0: scrollY, pageH: root.scrollHeight, x: e.clientX, y: e.clientY, grabbed: false };
     gesture.down(kind, e.clientX, e.clientY, e.timeStamp);
     if (kind === "touch") holdTimer = window.setTimeout(() => act(gesture.timer(performance.now())), HOLD_MS);
   });

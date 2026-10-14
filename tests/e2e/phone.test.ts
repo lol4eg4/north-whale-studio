@@ -1,5 +1,6 @@
 // iPhone, emulated in Chromium (WebKit cannot run on this host; the owner checks a real phone):
-// taps open cases, loops stay muted and inline, controls are thumb-sized, no mouse cursor.
+// taps open cases, the dive button too, loops stay muted and inline, controls are thumb-sized,
+// no mouse cursor.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { devices, type Browser } from "playwright-core";
 import { launch, open, startServer } from "./helpers.ts";
@@ -58,5 +59,29 @@ test("iPhone: header, corner and dock controls are at least 44 px", async () => 
       .map(({ el, r }) => `${el} ${Math.round(r.width)}x${Math.round(r.height)}`),
   );
   expect(small).toEqual([]);
+  await context.close();
+});
+
+test("iPhone: tapping the dive button opens a random case within 3.5 s and leaves no roulette behind", async () => {
+  const { context, page, errors } = await open(browser, server.url, iphone);
+  const started = Date.now();
+  await page.locator(".dive-btn").tap();
+  await page.waitForFunction(() => !!document.querySelector("dialog.case[open]"), undefined, { timeout: 3500, polling: 50 });
+  expect(Date.now() - started).toBeLessThan(3500);
+  // The phone's slot reel fades out for a moment after the case opens; then nothing of the roll is left.
+  const leftovers = () =>
+    page.evaluate(() => ({
+      rolling: document.documentElement.classList.contains("dive-rolling"),
+      cells: document.querySelectorAll(".dive-dim, .dive-lit").length,
+      reel: document.querySelectorAll(".dive-slot, .dive-slot-card").length,
+      bubble: (() => {
+        const b = document.querySelector<HTMLElement>(".dive-bubble")!;
+        return b.hidden && b.textContent === "";
+      })(),
+    }));
+  await page.waitForFunction(() => !document.querySelector(".dive-slot, .dive-slot-card"), undefined, { timeout: 2000 });
+  await page.waitForTimeout(300);
+  expect(await leftovers()).toEqual({ rolling: false, cells: 0, reel: 0, bubble: true });
+  expect(errors).toEqual([]);
   await context.close();
 });

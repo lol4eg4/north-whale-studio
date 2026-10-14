@@ -66,7 +66,7 @@ interface Entry {
   video: HTMLVideoElement;
   src: { wide: string; phone: string };
   drawing(on: boolean): void;
-  stall: number; // timer: a source with no playable frame in 20 s counts as failed
+  stall: number; // timer: a source that brings no data for 20 s gives its slot back
 }
 
 const STALL_MS = 20_000;
@@ -107,8 +107,7 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     e.state.attached = e.state.loading = true;
     e.video.preload = "auto";
     e.video.src = opts.phone.matches ? e.src.phone : e.src.wide;
-    clearTimeout(e.stall);
-    e.stall = window.setTimeout(() => e.state.loading && fail(e), STALL_MS);
+    watch(e);
   };
   const play = (e: Entry) => {
     e.state.playing = true;
@@ -122,6 +121,16 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
         if (e.state.playing) fail(e);
       },
     );
+  };
+  // No data for 20 s: the slot goes back and the tile tries again later (a slow link keeps going
+  // as long as data comes).
+  const watch = (e: Entry) => {
+    clearTimeout(e.stall);
+    e.stall = window.setTimeout(() => {
+      if (!e.state.loading) return;
+      detach(e);
+      update();
+    }, STALL_MS);
   };
   const pause = (e: Entry) => {
     e.state.playing = false;
@@ -185,6 +194,7 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
         e.state.ready = true;
         update();
       });
+      video.addEventListener("progress", () => e.state.loading && watch(e));
       video.addEventListener("error", () => e.state.attached && fail(e));
       entries.push(e);
       byEl.set(el, e);

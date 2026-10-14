@@ -81,6 +81,15 @@ export default function init(host: Host) {
     },
     { passive: true },
   );
+  // A dialog that closes would take the cursor out of sight with it (no pointermove comes).
+  document.addEventListener(
+    "close",
+    () => {
+      const layer = topLayer();
+      if (el.parentElement !== layer) layer.append(el);
+    },
+    true,
+  );
   window.addEventListener("pointerdown", (e) => e.pointerType === "mouse" && el.classList.add("down"), { passive: true });
   window.addEventListener("pointerup", () => el.classList.remove("down"), { passive: true });
   document.addEventListener("mouseout", (e) => !e.relatedTarget && hide());

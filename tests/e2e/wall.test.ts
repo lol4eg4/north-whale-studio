@@ -1,5 +1,6 @@
 // Wall: dense packing without holes, no sideways scroll, the first tile in view,
-// lazy loops (nothing before 2 s, only near the screen), posters, no console errors.
+// lazy loops (nothing before 2 s, only near the screen, at most 3 loading), posters that stay
+// when a loop fails, no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Browser } from "playwright-core";
 import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
@@ -89,17 +90,37 @@ describe("wall layout", () => {
 });
 
 describe("wall media", () => {
-  test("posters first; loops only after 2 s and only near the screen; max 3 loading at once", async () => {
+  test("posters before loops; loops only after 2 s and only near the screen; max 3 loading at once", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    // Loading = has a source and no canplay yet (the page's own definition); the peak is kept per page.
+    await context.addInitScript(() => {
+      const loading = new Set<EventTarget>();
+      const w = window as unknown as { __peakLoading: number };
+      w.__peakLoading = 0;
+      addEventListener("canplay", (e) => void loading.delete(e.target!), true);
+      new MutationObserver((list) => {
+        for (const r of list) {
+          if (!(r.target instanceof HTMLVideoElement)) continue;
+          r.target.hasAttribute("src") ? loading.add(r.target) : loading.delete(r.target);
+        }
+        w.__peakLoading = Math.max(w.__peakLoading, loading.size);
+      }).observe(document, { subtree: true, attributes: true, attributeFilter: ["src"] });
+    });
     const page = await context.newPage();
     const errors: string[] = [];
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
     page.on("pageerror", (e) => errors.push(String(e)));
     const loops: { id: number; at: number }[] = [];
+    const seq: string[] = []; // "poster:<id>" and "loop:<id>" in request order
     let loadAt = 0;
     page.on("request", (r) => {
       const m = /\/media\/c(\d)-(tile|phone)\.mp4/.exec(r.url());
-      if (m) loops.push({ id: Number(m[1]), at: Date.now() });
+      if (m) {
+        loops.push({ id: Number(m[1]), at: Date.now() });
+        seq.push(`loop:${m[1]}`);
+      }
+      const p = /\/media\/c(\d)(-phone)?\.webp/.exec(r.url());
+      if (p) seq.push(`poster:${p[1]}`);
     });
     page.on("load", () => (loadAt = Date.now()));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
@@ -110,6 +131,20 @@ describe("wall media", () => {
 
     expect(loops.length).toBeGreaterThan(0);
     for (const l of loops) expect(l.at - loadAt, `loop ${l.id} asked ${l.at - loadAt} ms after load`).toBeGreaterThanOrEqual(1900);
+    // Posters first: the first request for a picture comes before the first loop, and every tile
+    // that asked for a loop had asked for its poster before.
+    const firstPoster = seq.findIndex((s) => s.startsWith("poster:"));
+    expect(firstPoster, `request order ${seq.join(" ")}`).toBeGreaterThanOrEqual(0);
+    expect(firstPoster, `request order ${seq.join(" ")}`).toBeLessThan(seq.findIndex((s) => s.startsWith("loop:")));
+    for (const l of loops) {
+      const poster = seq.indexOf(`poster:${l.id}`);
+      expect(poster, `poster of tile ${l.id} asked before its loop in ${seq.join(" ")}`).toBeGreaterThanOrEqual(0);
+      expect(poster, `poster of tile ${l.id} asked before its loop in ${seq.join(" ")}`).toBeLessThan(seq.indexOf(`loop:${l.id}`));
+    }
+    // At most 3 loops loading at once, though more tiles are near.
+    const peak = await page.evaluate(() => (window as unknown as { __peakLoading: number }).__peakLoading);
+    expect(peak, "most loops loading at once").toBeGreaterThanOrEqual(1);
+    expect(peak, "most loops loading at once").toBeLessThanOrEqual(3);
 
     const tiles = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => {
@@ -143,6 +178,70 @@ describe("wall media", () => {
     }
     await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".wall .tile-poster")].every((i) => i.complete && i.naturalWidth > 0));
     expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("every loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    // The page's videos that fired an error, to know when the failures have happened.
+    await context.addInitScript(() => {
+      const failed = new Set<EventTarget>();
+      (window as unknown as { __failedLoops: Set<EventTarget> }).__failedLoops = failed;
+      addEventListener("error", (e) => e.target instanceof HTMLVideoElement && failed.add(e.target), true);
+    });
+    const page = await context.newPage();
+    const pageErrors: string[] = [];
+    page.on("pageerror", (e) => pageErrors.push(String(e)));
+    const asked: string[] = [];
+    await page.route("**/media/*-tile.mp4", (route) => {
+      asked.push(route.request().url());
+      return route.abort();
+    });
+    await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
+
+    // Tiles well inside the loading reach (one screen around the viewport) must all try and fail.
+    const sure = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wall .tile")].filter((t) => {
+        const r = t.getBoundingClientRect();
+        return r.top < 2 * innerHeight - 100 && r.bottom > -innerHeight + 100;
+      }).length,
+    );
+    expect(sure).toBeGreaterThanOrEqual(3);
+    await page.waitForFunction((n) => (window as unknown as { __failedLoops: Set<EventTarget> }).__failedLoops.size >= n, sure, { timeout: 15000 });
+    // Sources attach about 2 s after load, so the first ask is not earlier.
+    expect(asked.length).toBeGreaterThanOrEqual(sure);
+
+    const state = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => {
+          const img = t.querySelector<HTMLImageElement>(".tile-poster")!;
+          const video = t.querySelector<HTMLVideoElement>("video")!;
+          return {
+            label: t.getAttribute("aria-label")!.slice(0, 8),
+            hasPoster: img.hasAttribute("src"),
+            posterDrawn: img.complete && img.naturalWidth > 0 && getComputedStyle(img).visibility === "visible" && !t.classList.contains("no-poster"),
+            videoShown: t.classList.contains("shown") || getComputedStyle(video).opacity !== "0",
+            videoSrc: video.getAttribute("src"),
+          };
+        }),
+      );
+    const check = (tiles: Awaited<ReturnType<typeof state>>, when: string) => {
+      expect(tiles.filter((t) => t.hasPoster).length, `tiles with a poster ${when}`).toBeGreaterThanOrEqual(sure);
+      for (const t of tiles) {
+        expect(t.videoSrc, `source of ${t.label} ${when}`).toBeNull();
+        expect(t.videoShown, `video of ${t.label} shown ${when}`).toBe(false);
+        if (t.hasPoster) expect(t.posterDrawn, `poster of ${t.label} visible ${when}`).toBe(true);
+      }
+    };
+    check(await state(), "after the failure");
+
+    // Nothing is asked again: the same loop list, each loop asked once.
+    const before = [...asked];
+    await page.waitForTimeout(5000);
+    expect(asked, "loops asked again").toEqual(before);
+    expect(new Set(asked).size, `a loop was asked twice: ${asked.join(" ")}`).toBe(asked.length);
+    check(await state(), "5 s later");
+    expect(pageErrors).toEqual([]);
     await context.close();
   });
 

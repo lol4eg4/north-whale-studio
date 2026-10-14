@@ -43,15 +43,17 @@ export async function open(browser: Browser, url: string, options: BrowserContex
   });
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("requestfailed", (r) => {
-    // Media aborted on purpose by a test or by the browser pausing a video is not a failure.
-    if (!r.url().includes("/media/") && !r.url().includes("widget.js")) errors.push(`request failed: ${r.url()}`);
+    // Only a video the page itself detached (net::ERR_ABORTED on /media/) is not a failure.
+    const detached = r.url().includes("/media/") && r.failure()?.errorText === "net::ERR_ABORTED";
+    if (!detached && !r.url().includes("widget.js")) errors.push(`request failed: ${r.url()}`);
   });
   await page.goto(url, { waitUntil: "load" });
   await page.evaluate(() => document.fonts.ready);
   return { context, page, errors };
 }
 
-// Empty grid slots inside the wall, from the cells' layout boxes (pieces' translate does not count).
+// Empty grid slots inside the wall, up to the end of the last row, from the cells' layout boxes
+// (pieces' translate does not count).
 export function wallHoles(page: Page): Promise<{ cols: number; holes: number }> {
   return page.evaluate(() => {
     const wall = document.querySelector<HTMLElement>(".wall")!;
@@ -72,8 +74,8 @@ export function wallHoles(page: Page): Promise<{ cols: number; holes: number }> 
       for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) taken.add((r0 + j) * cols + c0 + i);
     }
     let holes = 0;
-    const last = Math.max(...taken);
-    for (let k = 0; k < last; k++) if (!taken.has(k)) holes++;
+    const end = (Math.floor(Math.max(...taken) / cols) + 1) * cols;
+    for (let k = 0; k < end; k++) if (!taken.has(k)) holes++;
     return { cols, holes };
   });
 }

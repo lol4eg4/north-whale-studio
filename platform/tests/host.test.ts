@@ -64,4 +64,54 @@ describe("host", () => {
     console.error = errors;
     expect(started).toEqual(["b"]);
   });
+
+  test("a slot fill that throws does not stop the other slots or the ready callbacks", () => {
+    const { boot } = make();
+    const order: string[] = [];
+    const errors = console.error;
+    console.error = () => {};
+    boot([
+      {
+        name: "wall",
+        layer: 1,
+        init: (h) => {
+          h.slot("wall-dive", {} as HTMLElement, () => order.push("dive fallback"));
+          h.slot("wall-hint", {} as HTMLElement, () => order.push("hint fallback"));
+          h.ready(() => order.push("ready"));
+        },
+      },
+      {
+        name: "dive",
+        layer: 2,
+        init: (h) =>
+          h.fill("wall-dive", () => {
+            throw new Error("broken fill");
+          }),
+      },
+    ]);
+    console.error = errors;
+    expect(order).toEqual(["hint fallback", "ready"]);
+  });
+
+  test("a ready callback that throws does not stop the next one", () => {
+    const { boot } = make();
+    const order: string[] = [];
+    const errors = console.error;
+    console.error = () => {};
+    boot([
+      {
+        name: "a",
+        layer: 1,
+        init: (h) => {
+          h.ready(() => order.push("first"));
+          h.ready(() => {
+            throw new Error("broken ready");
+          });
+          h.ready(() => order.push("third"));
+        },
+      },
+    ]);
+    console.error = errors;
+    expect(order).toEqual(["first", "third"]);
+  });
 });

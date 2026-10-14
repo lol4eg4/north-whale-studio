@@ -1,5 +1,25 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { join } from "node:path";
 import { startServer } from "./e2e/helpers.ts";
+
+// One GET with the path exactly as written; returns the whole answer as text.
+async function raw(port: number, path: string): Promise<string> {
+  let answer = "";
+  const done = Promise.withResolvers<void>();
+  const socket = await Bun.connect({
+    hostname: "127.0.0.1",
+    port,
+    socket: {
+      open: (s) => void s.write(`GET ${path} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n`),
+      data: (_s, chunk) => void (answer += chunk.toString()),
+      close: () => done.resolve(),
+      error: (_s, e) => done.reject(e),
+    },
+  });
+  await done.promise;
+  socket.end();
+  return answer;
+}
 
 let server: Awaited<ReturnType<typeof startServer>>;
 let withOrigin: Awaited<ReturnType<typeof startServer>>;
@@ -70,6 +90,32 @@ describe("serve.ts", () => {
       const res = await fetch(`${server.url}${path}`);
       expect(res.status, path).toBe(404);
     }
+  });
+
+  test("encoded slashes cannot climb out of site/", async () => {
+    // fetch keeps %2f as written, so the server decodes it itself.
+    for (const path of ["/%2e%2e%2fserve.ts", "/..%2fpackage.json", "/media/..%2f..%2fserve.ts", "/%2e%2e/serve.ts"]) {
+      const res = await fetch(`${server.url}${path}`);
+      expect(res.status, path).toBe(404);
+      expect(await res.text(), path).not.toMatch(/Bun\.serve|"name": "north-whale-studio"/);
+    }
+  });
+
+  test("plain .. segments sent raw (fetch would normalize them) are 404", async () => {
+    const port = Number(new URL(server.url).port);
+    for (const path of ["/../serve.ts", "/%2e%2e/serve.ts", "/media/../../serve.ts", "/%2e%2e/%2e%2e/package.json"]) {
+      const answer = await raw(port, path);
+      expect(answer, path).toStartWith("HTTP/1.1 404");
+      expect(answer, path).not.toMatch(/Bun\.serve|"name": "north-whale-studio"/);
+    }
+  });
+
+  test("a video answers a byte range with 206, Content-Range and exactly the bytes asked", async () => {
+    const res = await fetch(`${server.url}/media/c1-tile.mp4`, { headers: { Range: "bytes=0-99" } });
+    expect(res.status).toBe(206);
+    const size = Bun.file(join(import.meta.dir, "..", "site", "media", "c1-tile.mp4")).size;
+    expect(res.headers.get("content-range")).toBe(`bytes 0-99/${size}`);
+    expect((await res.arrayBuffer()).byteLength).toBe(100);
   });
 
   test("only the plain address gets the page: a path that normalizes to / is 404", async () => {
