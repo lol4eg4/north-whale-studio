@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bun test platform plugins tools tests/server.test.ts tests/build.test.ts tests/tokens.test.ts",
+    "test": "bun test platform plugins tools tests/server.test.ts tests/build.test.ts tests/tokens.test.ts tests/plugins.test.ts",
     "e2e": "bun test tests/e2e --timeout 60000",
     "media": "bun tools/media.ts",
     "check": "bunx tsc --noEmit -p ."
