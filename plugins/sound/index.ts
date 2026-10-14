@@ -1,8 +1,9 @@
 // Sound (T§6): off by default, one button in the bottom-left control, synthesized sounds for
-// page events, and the whale song for plan B.
+// page events, and a looping music bed behind them (music.ts). Plan B is the same switch as the button.
 //
 //   click (gesture) -> AudioContext created -> on; the choice is remembered ("sound")
 //   later visit, remembered on -> the first gesture creates / resumes the context
+//   on -> the music plays; off, a hidden tab, or a case video with its own sound -> it fades out
 import type { PageEvents } from "../../platform/events.ts";
 import type { Host } from "../../platform/host.ts";
 import { h, icon } from "../../platform/ui/parts.ts";
@@ -10,6 +11,7 @@ import type { ContentApi } from "../content/api.ts";
 import type { SoundApi, SoundName } from "./api.ts";
 import { cueFor, gate, isOn, toStored } from "./cues.ts";
 import { createEngine, type Engine } from "./engine.ts";
+import { createMusic, type Music } from "./music.ts";
 import "./style.css";
 
 const EVENTS: (keyof PageEvents)[] = [
@@ -25,14 +27,13 @@ const EVENTS: (keyof PageEvents)[] = [
   "whale-launched",
   "whale-hit",
 ];
-const SONG = "/media/whale-song.m4a";
 
 export default function init(host: Host) {
   const w = globalThis as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };
   const Ctor = w.AudioContext ?? w.webkitAudioContext;
   let on = !!Ctor && isOn(host.memory.get("sound"));
   let engine: Engine | null = null;
-  let audio: HTMLAudioElement | null = null;
+  let music: Music | null = null;
   let warned = false;
   const open = gate();
 
@@ -41,16 +42,9 @@ export default function init(host: Host) {
       if (!on || !engine || !open(name, performance.now())) return;
       engine.play(name, pitch);
     },
+    // Plan B: the same switch as the sound button.
     song() {
-      if (audio && !audio.paused) return stopSong();
-      if (!on && Ctor) setOn(true);
-      if (!audio) {
-        audio = new Audio(SONG);
-        audio.preload = "auto";
-        audio.addEventListener("error", () => warn(audio?.error?.message || `cannot load ${SONG}`));
-      }
-      audio.currentTime = 0;
-      audio.play().catch((e: Error) => warn(e.message));
+      if (Ctor) setOn(!on);
     },
   };
   host.provide("sound", api);
@@ -58,13 +52,22 @@ export default function init(host: Host) {
   function warn(why: string) {
     if (warned) return;
     warned = true;
-    console.warn(`The whale song did not play: ${why}`);
+    console.warn(`The background music did not play: ${why}`);
   }
-  function stopSong() {
-    if (!audio) return;
-    audio.pause();
-    audio.currentTime = 0;
+  // A case video with its own sound plays alone: the music steps aside until it stops or is muted.
+  const talking = () => [...document.querySelectorAll("video")].some((v) => !v.paused && !v.ended && !v.muted && v.volume > 0);
+  // The music plays while sound is on, the tab is shown and no video talks; anything else fades it out.
+  function syncMusic() {
+    if (!music) return;
+    if (on && !document.hidden && !talking()) music.start();
+    else music.stop();
   }
+  // The music is stopped: with sound off or the tab hidden the context can sleep.
+  function idle() {
+    if (engine && (!on || document.hidden)) engine.ctx.suspend().catch(() => {});
+  }
+  for (const type of ["play", "pause", "ended", "volumechange", "emptied"])
+    document.addEventListener(type, (e) => e.target instanceof HTMLVideoElement && syncMusic(), true);
 
   for (const type of EVENTS)
     host.on(type, (detail) => {
@@ -97,30 +100,32 @@ export default function init(host: Host) {
   function setOn(next: boolean) {
     on = next;
     host.memory.set("sound", toStored(on));
-    if (on) wake(true);
-    else {
-      stopSong();
-      engine?.ctx.suspend().catch(() => {});
-    }
+    if (on) {
+      music?.reset();
+      wake(true);
+    } else syncMusic();
     show();
   }
 
   // Runs inside a gesture: the browser lets audio start only then.
   function wake(fresh: boolean) {
-    if (!engine) engine = createEngine(Ctor!);
+    if (!engine) {
+      engine = createEngine(Ctor!);
+      music = createMusic(engine.ctx, engine.out, warn, idle);
+    }
     const ctx = engine.ctx;
     const go = () => fresh && engine!.play("on");
     if (ctx.state === "running") go();
     else ctx.resume().then(go, () => {});
+    syncMusic();
   }
-  const onGesture = () => on && (!engine || engine.ctx.state !== "running") && !document.hidden && wake(false);
+  const onGesture = () => on && !document.hidden && (!engine || engine.ctx.state !== "running" || music?.state === "idle") && wake(false);
   for (const type of ["pointerdown", "pointerup", "keydown", "touchend"]) window.addEventListener(type, onGesture, { capture: true, passive: true });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopSong();
     if (!engine) return;
-    if (document.hidden) engine.ctx.suspend().catch(() => {});
-    else if (on) engine.ctx.resume().catch(() => {});
+    if (!document.hidden && on) engine.ctx.resume().catch(() => {});
+    syncMusic();
   });
-  window.addEventListener("pagehide", stopSong);
+  window.addEventListener("pagehide", () => music?.halt());
 }

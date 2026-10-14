@@ -1,6 +1,6 @@
 // Slow 4G (AC 17): 1.6 Mbps down, 750 kbps up, 150 ms round trip, CPU 4x slower. The hero
 // headline (in its own font) and the first case poster paint within 3 s; the first screen
-// moves at most 450 KB. Videos and the whale song do not count: they start later on purpose.
+// moves at most 450 KB. Videos and the music do not count: they start later on purpose.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser, BrowserContextOptions } from "playwright-core";
 import { launch, phone, startServer } from "./helpers.ts";

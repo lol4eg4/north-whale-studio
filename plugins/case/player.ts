@@ -2,7 +2,7 @@
 //   silent video: autoplays muted and looped (not in calm or paused), play/pause, seek, time, full screen
 //   video with sound: poster + «Смотреть со звуком»; that click starts it with sound, then the same
 //     controls plus a mute toggle
-//   still picture (UNIUN): no player
+//   still picture (UNION): no player
 //   error: poster + «Повторить», which reloads the source
 import type { Motion } from "../../platform/motion.ts";
 import { h, icon } from "../../platform/ui/parts.ts";
