@@ -18,7 +18,11 @@ html.calm :is(.btn, .pill, .cbtn, .go, .case-round, .tidy-btn, .sc-x):is(:hover,
 .badge { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); display: grid; place-items: center; flex: none; }
 .badge::after { content: ""; border: 6px solid transparent; border-top: 8px solid var(--buoy); margin-top: 7px; rotate: -90deg; translate: 2px -3px; }
 .link-under { font-weight: 600; border-bottom: 3px solid var(--mint); }
-@media (pointer: coarse) { .link-under { display: inline-flex; align-items: center; min-height: 44px; } }
+/* On touch screens the tap area grows to 44 px around the text; the underline stays under it. */
+@media (pointer: coarse) {
+  .link-under { position: relative; }
+  .link-under::after { content: ""; position: absolute; inset: -10px -6px; }
+}
 @media (hover: hover) { .link-under:hover { border-color: var(--jellyfish); } }
 /* Text with a drawn arrow after it (DESIGN.md: icons are drawn, never font symbols). */
 .arrowed { display: inline-flex; align-items: center; gap: 0.3em; }
