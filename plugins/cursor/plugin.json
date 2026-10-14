@@ -2,10 +2,13 @@
   "name": "cursor",
   "layer": 2,
   "provides": [],
-  "uses": [],
+  "uses": [
+    "content"
+  ],
   "events": {
     "emits": [],
     "listens": [
+      "language-changed",
       "piece-grabbed",
       "piece-dropped"
     ]

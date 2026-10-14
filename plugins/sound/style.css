@@ -1,0 +1,5 @@
+/* Sound button: first in the bottom-left control, before pause (T§2.10). On = ink pill. */
+.sound-btn { transition: background 0.2s, color 0.2s, translate 0.35s var(--ease-spring); }
+.sound-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+@media (hover: hover) { .sound-btn:hover { translate: 0 -1px; } }
+html.calm .sound-btn { transition: none; }
