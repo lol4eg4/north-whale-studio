@@ -33,8 +33,9 @@ export async function launch(): Promise<Browser> {
 // Phone-like context: touch, coarse pointer, small screen.
 export const phone: BrowserContextOptions = { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 };
 
+// Russian browser by default, so "/" shows the Russian page; pass { locale: "en-US" } for English.
 export async function open(browser: Browser, url: string, options: BrowserContextOptions = {}) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...options });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "ru-RU", ...options });
   const page = await context.newPage();
   const errors: string[] = [];
   page.on("console", (m) => {

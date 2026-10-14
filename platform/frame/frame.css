@@ -54,3 +54,9 @@ html.menu-open .dock, html.menu-open .ctrl { visibility: hidden; }
 @media (max-width: 400px) {
   .logo { font-size: 15px; }
 }
+/* 320 px: the name, «Написать» and «+» do not fit in one row; the menu keeps «Написать нам». */
+@media (max-width: 359px) {
+  .hello-short { display: none; }
+}
+
+.finale:empty { display: none; }
