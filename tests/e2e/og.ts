@@ -7,8 +7,8 @@ const server = await startServer();
 const browser = await launch();
 try {
   const { page, errors } = await open(browser, server.url, { viewport: { width: 1200, height: 630 }, reducedMotion: "reduce" });
-  // Headless Chromium parks the mouse at 0,0, where the custom cursor would show.
-  await page.addStyleTag({ content: ".cursor{display:none!important}" });
+  // A still picture: no floating controls, and no custom cursor (headless Chromium parks the mouse at 0,0).
+  await page.addStyleTag({ content: ".cursor,.ctrl,.dock{display:none!important}" });
   await page.waitForTimeout(800);
   await page.screenshot({ path: join(import.meta.dir, "..", "..", "site", "og.jpg"), type: "jpeg", quality: 82 });
   if (errors.length) throw new Error(errors.join("\n"));
