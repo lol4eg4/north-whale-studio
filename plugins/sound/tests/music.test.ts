@@ -89,6 +89,8 @@ describe("music source", () => {
   const real = { fetch: globalThis.fetch, setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
   let fetches: string[];
   let status: number;
+  let offline: boolean;
+  let corrupt: boolean;
   let sources: FakeSource[];
   let timers: { fn: () => void; ms: number }[];
   let warnings: string[];
@@ -99,12 +101,15 @@ describe("music source", () => {
   beforeEach(() => {
     fetches = [];
     status = 200;
+    offline = false;
+    corrupt = false;
     sources = [];
     timers = [];
     warnings = [];
     idles = 0;
     globalThis.fetch = (async (url: string) => {
       fetches.push(url);
+      if (offline) throw new TypeError("Failed to fetch");
       return { ok: status === 200, status, arrayBuffer: async () => new ArrayBuffer(8) };
     }) as unknown as typeof fetch;
     globalThis.setTimeout = ((fn: () => void, ms: number) => timers.push({ fn, ms })) as unknown as typeof setTimeout;
@@ -126,7 +131,10 @@ describe("music source", () => {
       createBiquadFilter: () => lp,
       createGain: () => gain,
       createBufferSource: () => sources[sources.push(new FakeSource()) - 1],
-      decodeAudioData: async () => TRACK,
+      decodeAudioData: async () => {
+        if (corrupt) throw new DOMException("Unable to decode audio data", "EncodingError");
+        return TRACK;
+      },
     };
     const music = createMusic(ctx as unknown as AudioContext, {} as AudioNode, (why) => warnings.push(why), () => idles++);
     return { music, lp, gain };
@@ -226,12 +234,50 @@ describe("music source", () => {
     expect(music.state).toBe("playing");
   });
 
-  test("halt stops the source at once", async () => {
-    const { music } = make();
+  test("halt stops the source at once and puts the nodes back for a clean next needle drop", async () => {
+    const { music, lp, gain } = make();
     music.start();
     await flush();
     music.halt();
     expect(sources[0].stopped).toBe(1);
     expect(music.state).toBe("idle");
+    expect(lp.frequency.value).toBe(110);
+    expect(gain.gain.value).toBe(0);
+    lp.frequency.calls.length = 0;
+    gain.gain.calls.length = 0;
+    music.start();
+    await flush();
+    expect(lp.frequency.calls[1]).toEqual(["set", 110, 2]);
+    expect(gain.gain.calls[1]).toEqual(["set", 0, 2]);
   });
+
+  test("start, stop, start again while the file loads: one source", async () => {
+    const { music } = make();
+    music.start();
+    music.stop();
+    music.start();
+    await flush();
+    expect(sources.length).toBe(1);
+    expect(music.state).toBe("playing");
+    expect(fetches.length).toBe(1);
+  });
+
+  for (const [what, set] of [
+    ["no network", () => (offline = true)],
+    ["a file that does not decode", () => (corrupt = true)],
+  ] as const)
+    test(`${what}: one warning, no source, no new request until reset`, async () => {
+      set();
+      const { music } = make();
+      music.start();
+      music.stop();
+      music.start(); // two handlers wait on the one request
+      await flush();
+      expect(warnings.length).toBe(1);
+      expect(sources).toEqual([]);
+      expect(music.state).toBe("idle");
+      music.start();
+      await flush();
+      expect(fetches.length).toBe(1);
+    });
 });

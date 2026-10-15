@@ -13,6 +13,12 @@ describe("texts", () => {
     for (const [k, v] of [...Object.entries(ru), ...Object.entries(en)]) expect(v.trim(), k).not.toBe("");
   });
 
+  test("a messenger or social with an address links over https", () => {
+    const { messengers } = store("ru").contacts();
+    for (const m of messengers) if (m.url) expect(m.url, m.name).toStartWith("https://");
+    expect(messengers.find((m) => m.name === "Telegram")?.url).toBe("https://t.me/romansmirn0v");
+  });
+
   test("format fills parameters; an unknown key is reported", () => {
     expect(store("ru").format("case.counter", { n: 3, total: 8 })).toBe("Кейс 3 из 8");
     expect(store("en").format("tidy.done", { n: 5 })).toBe("Back in place: 5");

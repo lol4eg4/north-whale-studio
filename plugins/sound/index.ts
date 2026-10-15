@@ -43,7 +43,7 @@ export default function init(host: Host) {
       engine.play(name, pitch);
     },
     // Plan B: the same switch as the sound button.
-    song() {
+    toggle() {
       if (Ctor) setOn(!on);
     },
   };
@@ -103,20 +103,27 @@ export default function init(host: Host) {
     if (on) {
       music?.reset();
       wake(true);
-    } else syncMusic();
+    } else {
+      playLike("auto");
+      syncMusic();
+    }
     show();
+  }
+  // iPhone: Web Audio keeps quiet with the ring switch on unless the page asks to play like media.
+  function playLike(type: "playback" | "auto") {
+    const session = (navigator as { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = type;
   }
 
   // Runs inside a gesture: the browser lets audio start only then.
   function wake(fresh: boolean) {
+    playLike("playback");
     if (!engine) {
       engine = createEngine(Ctor!);
       music = createMusic(engine.ctx, engine.out, warn, idle);
     }
-    const ctx = engine.ctx;
-    const go = () => fresh && engine!.play("on");
-    if (ctx.state === "running") go();
-    else ctx.resume().then(go, () => {});
+    // Always resume: a suspend from the last fade may still be on its way while the state says running.
+    engine.ctx.resume().then(() => fresh && engine!.play("on"), () => {});
     syncMusic();
   }
   const onGesture = () => on && !document.hidden && (!engine || engine.ctx.state !== "running" || music?.state === "idle") && wake(false);

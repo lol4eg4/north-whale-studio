@@ -72,7 +72,7 @@ html.calm .dive-card-disc { transition: none; }
 /* Phone: bottom bar, dive in the centre, tidy round on the right. */
 @media (max-width: 700px) {
   .dock .dive-btn { position: absolute; width: 84px; height: 84px; left: 50%; margin-left: -36px; bottom: calc(8px + env(safe-area-inset-bottom)); }
-  .dive-core { width: 56px; height: 56px; font-size: 11px; }
+  .dive-core { width: 56px; height: 56px; }
   .dive-core span { display: none; }
   .dive-core svg { display: block; }
   .dock .tidy-btn { width: 52px; height: 52px; padding: 0; justify-content: center; border-radius: 50%; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(14, 14, 14, 0.18); }

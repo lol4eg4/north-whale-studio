@@ -92,6 +92,12 @@ describe("serve.ts", () => {
     }
   });
 
+  test("a missing media file is a 404 that is not cached", async () => {
+    const res = await fetch(`${server.url}/media/missing.m4a`);
+    expect(res.status).toBe(404);
+    expect(res.headers.get("cache-control")).toBeNull();
+  });
+
   test("encoded slashes cannot climb out of site/", async () => {
     // fetch keeps %2f as written, so the server decodes it itself.
     for (const path of ["/%2e%2e%2fserve.ts", "/..%2fpackage.json", "/media/..%2f..%2fserve.ts", "/%2e%2e/serve.ts"]) {

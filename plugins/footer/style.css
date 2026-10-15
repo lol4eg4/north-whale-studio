@@ -17,20 +17,20 @@ html.calm .foot .fl { transition: none; }
 .foot .foot-row > .foot-tg { display: inline-flex; align-items: center; gap: 12px; }
 .foot-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .foot .foot-row .foot-dot { width: 5px; height: 5px; background: var(--text-muted); }
-.foot .foot-nav a { position: relative; padding: 2px 0; }
-.foot-nav a::before { content: ""; position: absolute; inset: 15% -4px 5%; background: var(--lemon); z-index: -1; border-radius: 3px; scale: 1 0; transform-origin: 50% 100%; transition: scale 0.28s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.foot .foot-nav a, .foot a.foot-tg { position: relative; padding: 2px 0; }
+.foot-nav a::before, a.foot-tg::before { content: ""; position: absolute; inset: 15% -4px 5%; background: var(--lemon); z-index: -1; border-radius: 3px; scale: 1 0; transform-origin: 50% 100%; transition: scale 0.28s cubic-bezier(0.3, 1.5, 0.5, 1); }
 @media (hover: hover) {
-  .foot-nav a:hover::before { scale: 1 1; }
-  .foot .foot-nav a:not(.lifted):hover { --r: -2deg; }
+  .foot-nav a:hover::before, a.foot-tg:hover::before { scale: 1 1; }
+  .foot .foot-nav a:not(.lifted):hover, .foot a.foot-tg:not(.lifted):hover { --r: -2deg; }
 }
-.foot-nav a:focus-visible::before { scale: 1 1; }
+.foot-nav a:focus-visible::before, a.foot-tg:focus-visible::before { scale: 1 1; }
 .foot-tg .stamp { font-size: 12px; text-transform: none; letter-spacing: 0; }
 
 @media (pointer: coarse) {
-  .foot .foot-nav a { display: inline-flex; align-items: center; min-height: 44px; }
-  .foot-nav a::before { inset: 30% -4px 22%; }
+  .foot .foot-nav a, .foot .foot-row > a.foot-tg { display: inline-flex; align-items: center; min-height: 44px; }
+  .foot-nav a::before, a.foot-tg::before { inset: 30% -4px 22%; }
 }
 @media (max-width: 700px) {
   .foot-row { padding-right: 0; flex-direction: column; align-items: flex-start; }
 }
-html.calm .foot-nav a::before { transition: none; }
+html.calm :is(.foot-nav a, a.foot-tg)::before { transition: none; }

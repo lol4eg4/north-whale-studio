@@ -122,7 +122,9 @@ async function route(req: Request): Promise<Response> {
   let file = Bun.file(join(root, path));
   if (!file.name!.startsWith(`${root}/`) || !(await file.exists())) file = Bun.file(join(root, "404.html"));
   if (!(await file.exists())) return notFound();
-  const res = new Response(file, { status: file.name!.endsWith("/404.html") ? 404 : 200 });
-  if (path.startsWith("/media/") || path.startsWith("/fonts/")) res.headers.set("Cache-Control", "public, max-age=86400");
+  const missing = file.name!.endsWith("/404.html");
+  const res = new Response(file, { status: missing ? 404 : 200 });
+  // Only a file that is there is kept for a day: a 404 cached as long would hide a file added later.
+  if (!missing && (path.startsWith("/media/") || path.startsWith("/fonts/"))) res.headers.set("Cache-Control", "public, max-age=86400");
   return res;
 }

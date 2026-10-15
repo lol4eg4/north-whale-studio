@@ -155,6 +155,53 @@ test("calm: dive opens a case at once, without the roulette", async () => {
   await context.close();
 });
 
+// The dive button's label sits inside its ink disc: the first line is at most 84% of the disc wide,
+// the type is never under 10 px; the button and the wall card say «крути» / "spin" at the cursor.
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 900, height: 800 },
+]) {
+  for (const [lang, first, spin] of [
+    ["ru", "Рандомный", "крути"],
+    ["en", "Random", "spin"],
+  ] as const) {
+    test(`dive label fits its disc and the cursor says «${spin}»: ${viewport.width}x${viewport.height}, ${lang}`, async () => {
+      const { context, page, errors } = await open(browser, `${server.url}/?lang=${lang}`, { viewport });
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))); // the label is fitted once the fonts are in
+      const core = await page.evaluate(() => {
+        const disc = document.querySelector<HTMLElement>(".dive-core")!;
+        const line = disc.querySelector<HTMLElement>("span")!;
+        return { text: line.textContent, line: line.offsetWidth, disc: disc.clientWidth, font: parseFloat(getComputedStyle(disc).fontSize) };
+      });
+      expect(core.text).toBe(first);
+      expect(core.line).toBeLessThanOrEqual(core.disc * 0.84 + 1);
+      expect(core.font).toBeGreaterThanOrEqual(10);
+      expect(await page.locator(".dive-btn").getAttribute("data-cursor")).toBe(spin);
+      expect(await page.locator(".dive-card").getAttribute("data-cursor")).toBe(spin);
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
+}
+
+test("phone: the dive disc shows the die, not the label", async () => {
+  const { context, page, errors } = await open(browser, server.url, phone);
+  const core = await page.evaluate(() => {
+    const disc = document.querySelector<HTMLElement>(".dive-core")!;
+    const die = disc.querySelector("svg")!.getBoundingClientRect();
+    return {
+      svg: getComputedStyle(disc.querySelector("svg")!).display,
+      dieWidth: die.width,
+      spans: [...disc.querySelectorAll("span")].map((el) => getComputedStyle(el).display),
+    };
+  });
+  expect(core.svg).not.toBe("none");
+  expect(core.dieWidth).toBeGreaterThan(0);
+  expect(core.spans).toEqual(["none", "none"]);
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
 test("the pause button stops the ring", async () => {
   const { context, page } = await open(browser, server.url);
   const ring = () => page.evaluate(() => getComputedStyle(document.querySelector(".dive-ring")!).animationPlayState);

@@ -3,5 +3,5 @@ export type SoundName = "peel" | "drop" | "click" | "pop" | "shuffle" | "land" |
 
 export interface SoundApi {
   play(name: SoundName, pitch?: number): void;
-  song(): void; // Plan B: switches site sound on (the music starts) or off, like the sound button
+  toggle(): void; // Plan B: site sound on (the music starts) or off, like the sound button
 }

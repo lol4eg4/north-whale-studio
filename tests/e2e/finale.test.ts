@@ -127,6 +127,20 @@ async function toFinaleDropping(page: Page, ms: number) {
   await page.clock.runFor(ms);
 }
 
+// Poll the drawn whale every 100 ms until two reads in a row agree within 1 px (it lies still), at most
+// 2.5 s. In flight the whale is on the sky canvas, not the finale canvas: no read is not still.
+async function stillWhale(page: Page) {
+  const read = () => drawnWhale(page).catch(() => null);
+  let prev = await read();
+  for (let waited = 0; waited < 2500; waited += 100) {
+    await page.waitForTimeout(100);
+    const now = await read();
+    if (prev && now && Math.hypot(now.centre.x - prev.centre.x, now.centre.y - prev.centre.y) <= 1) return now;
+    prev = now;
+  }
+  throw new Error("The whale did not lie still within 2.5 s");
+}
+
 async function mousePull(page: Page, at: Vec, pull: Vec) {
   await page.mouse.move(at.x, at.y);
   await page.mouse.down();
@@ -239,8 +253,7 @@ describe("finale", () => {
     const { centre } = await drawnWhale(page);
     await mousePull(page, centre, { x: 0, y: -40 }); // pulled up: a weak shot into the ground
     expect(await countText(page)).toBe("Китов запущено: 1");
-    await page.waitForTimeout(1000); // it bounces, then lies still (it pops home only after 2.5 s)
-    const lying = await drawnWhale(page);
+    const lying = await stillWhale(page); // it bounces, then lies still (it pops home only after 2.5 s)
     expect(Math.hypot(lying.centre.x - centre.x, lying.centre.y - centre.y)).toBeGreaterThan(20);
     await mousePull(page, lying.centre, { x: -60, y: 90 });
     expect(await countText(page)).toBe("Китов запущено: 2");
@@ -256,6 +269,21 @@ describe("finale", () => {
     await mousePull(page, centre, { x: -6, y: 9 });
     await page.waitForTimeout(300);
     expect(await countText(page)).toBe("Китов запущено: 0");
+    await mousePull(page, centre, { x: -60, y: 90 });
+    expect(await countText(page)).toBe("Китов запущено: 1");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a press outside the grab box does not catch the whale: a 100 px pull there launches nothing", async () => {
+    const { context, page, errors } = await open(browser, server.url);
+    await toFinale(page);
+    const r = (await page.locator(".ss-grab").boundingBox())!;
+    expect(r.x).toBeGreaterThan(60); // the press lands on the page, left of the box
+    await mousePull(page, { x: r.x - 60, y: r.y + r.height / 2 }, { x: -60, y: 80 });
+    await page.waitForTimeout(300);
+    expect(await countText(page)).toBe("Китов запущено: 0");
+    const { centre } = await drawnWhale(page);
     await mousePull(page, centre, { x: -60, y: 90 });
     expect(await countText(page)).toBe("Китов запущено: 1");
     expect(errors).toEqual([]);

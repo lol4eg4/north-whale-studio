@@ -7,6 +7,7 @@
 //   wait -> drop -> rest <-> drag -> fly ----> gone -> wait      (left the screen)
 //                                    |  \---> roll -> gone      (rests on the ground 2.5 s)
 //                                    \-> rocket -> top -> wait  (page follows it up; not in calm)
+//   a press on the whale in drop, roll or gone catches it: -> rest -> drag at once
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { h, icon, toast } from "../../platform/ui/parts.ts";
@@ -40,6 +41,9 @@ import "./style.css";
 
 type Mode = "wait" | "drop" | "rest" | "drag" | "fly" | "rocket" | "top" | "roll" | "gone";
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+const SLING_TIP = 0.61; // the sling's tips stand this many S above the pocket
+const CATCH: Mode[] = ["rest", "drop", "roll", "gone"]; // a press on the whale starts a pull
+const coarse = matchMedia("(pointer: coarse)");
 // An angle folded into -pi..pi.
 const wrapAngle = (a: number) => ((((a + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - Math.PI;
 
@@ -73,7 +77,7 @@ export default function init(host: Host) {
   section.setAttribute("aria-labelledby", "finale-title");
   section.append(canvas, copy, snap, hint, grab, count, live);
   for (const el of [kicker, stk, snap]) motion.add(el, { kind: "sticker" });
-  snap.addEventListener("click", () => sound().song());
+  snap.addEventListener("click", () => sound().toggle());
 
   const sky = h("canvas", { class: "ss-sky", "aria-hidden": "true", hidden: true });
   host.region("overlay").append(sky);
@@ -181,9 +185,10 @@ export default function init(host: Host) {
     }
     grab.style.width = `${grabW()}px`;
     // The focus ring keeps to the whale's body, at the foot of the grab (which grows upward while the whale drops in).
+    const ringH = geo.whaleH * 1.25;
     grab.style.setProperty("--ring-w", `${geo.whaleW * 0.9}px`);
-    grab.style.setProperty("--ring-h", `${geo.whaleH * 1.25}px`);
-    grab.style.setProperty("--ring-b", `${(grabH() - geo.whaleH * 1.25) / 2}px`);
+    grab.style.setProperty("--ring-h", `${ringH}px`);
+    grab.style.setProperty("--ring-b", `${(grabH() - ringH) / 2}px`);
     placeAside(copyBottom);
     draw();
     wake();
@@ -238,7 +243,7 @@ export default function init(host: Host) {
   // The whale drops in as soon as the tips of the sling come on screen.
   const slingVisible = () => {
     const r = section.getBoundingClientRect();
-    return r.bottom > 0 && r.top + geo.R.y - geo.S * 0.61 < innerHeight;
+    return r.bottom > 0 && r.top + geo.R.y - geo.S * SLING_TIP < innerHeight;
   };
   const settled = () =>
     Math.abs(pocket.x - geo.R.x) + Math.abs(pocket.y - geo.R.y) + Math.abs(pocket.vx) + Math.abs(pocket.vy) < 0.05 &&
@@ -351,7 +356,7 @@ export default function init(host: Host) {
   // the pocket at once and the pull starts.
   let upMoves = 0;
   grab.addEventListener("pointerdown", (e) => {
-    if (!["rest", "drop", "roll", "gone"].includes(mode) || e.button !== 0) return;
+    if (!CATCH.includes(mode) || e.button !== 0) return;
     e.preventDefault();
     grab.setPointerCapture(e.pointerId);
     if (mode === "roll" || mode === "gone") drop();
@@ -775,8 +780,8 @@ export default function init(host: Host) {
       const dy = (y - base.y) * (1 - fr.sq);
       return { x: base.x + dx * cos - dy * sin, y: base.y + dx * sin + dy * cos };
     };
-    const tipL = fx(R.x - 0.4 * S, R.y - 0.61 * S);
-    const tipR = fx(R.x + 0.4 * S, R.y - 0.61 * S);
+    const tipL = fx(R.x - 0.4 * S, R.y - SLING_TIP * S);
+    const tipR = fx(R.x + 0.4 * S, R.y - SLING_TIP * S);
     const joint = fx(R.x, R.y + 0.38 * S);
     c.strokeStyle = col.frame;
     c.lineWidth = S * 0.13;
@@ -857,14 +862,20 @@ export default function init(host: Host) {
   }
 
   function placeGrab() {
-    const at = mode === "rest" || mode === "drag" || mode === "roll" ? whale : geo.R;
+    // A touch screen scrolls with the same finger: there the grab follows the falling whale itself;
+    // a mouse gets a column from the whale down to the pocket.
+    const touch = coarse.matches;
+    const at = mode === "rest" || mode === "drag" || mode === "roll" || (mode === "drop" && touch) ? whale : geo.R;
     const w = grabW();
     const gh = grabH();
-    // While the whale drops in, the grab also reaches up over it and the last 0.2 s of its fall
-    // (the eye and the finger lag behind it).
-    const up = mode === "drop" ? clamp(geo.R.y - whale.y + whale.vy * 0.2, 0, geo.H) : 0;
+    // While the whale drops in, the grab also reaches up over the last 0.2 s of its fall (the eye
+    // and the finger lag behind it).
+    const lag = clamp(whale.vy * 0.2, 0, geo.H);
+    const up = mode !== "drop" ? 0 : touch ? lag : clamp(geo.R.y - whale.y + lag, 0, geo.H);
     grab.style.height = `${gh + up}px`;
     grab.style.translate = `${at.x - w / 2}px ${at.y - up - geo.S * 0.14 - gh / 2}px`;
+    // While a press could not catch the whale, the grab lets touches through to scroll the page.
+    grab.style.pointerEvents = mode === "drag" || CATCH.includes(mode) ? "" : "none";
   }
 
   // Watchers

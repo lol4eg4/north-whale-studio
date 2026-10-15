@@ -10,7 +10,8 @@ export const MUSIC_SRC = "/media/music.m4a";
 export const LEVEL = 0.44;
 const DULL = 110; // Hz, the lowpass shut
 const OPEN = 20000; // Hz, the lowpass open
-const FADE_MS = 1550; // the gain is at 0 after 1.5 s
+const FADE = 1.5; // s, the gain's way down to 0
+const FADE_MS = FADE * 1000 + 50; // the file is let go just after
 
 // The fades, apart from the nodes so a test can read them. Both start from where the params are now,
 // so a start during a stop (and the other way round) has no jump.
@@ -34,7 +35,7 @@ export function fadeOut(lp: AudioParam, gain: AudioParam, t: number) {
   lp.exponentialRampToValueAtTime(DULL, t + 1.3);
   gain.cancelScheduledValues(t);
   gain.setValueAtTime(g, t);
-  gain.linearRampToValueAtTime(0, t + 1.5);
+  gain.linearRampToValueAtTime(0, t + FADE);
 }
 
 // warn: one line for a file that cannot play. idle: the music is fully stopped (or was not playing).
@@ -76,11 +77,12 @@ export function createMusic(ctx: AudioContext, out: AudioNode, warn: (why: strin
     needleDrop(lp.frequency, level.gain, ctx.currentTime);
     source.start();
   }
-  function problem(e: Error) {
+  function problem(e: unknown) {
+    if (failed) return; // every start that waited on the one request hears the same failure
     failed = true; // a file that cannot be read is not asked for again until the visitor turns sound on again
     track = null;
-    warn(e.message);
     if (state !== "idle") release();
+    warn(e instanceof Error ? e.message : String(e));
   }
 
   return {

@@ -1,6 +1,5 @@
 // Regression: ISSUE-001 — `bun run test` left out tests/plugins.test.ts.
-// Found by /qa on 2026-10-14
-// Report: .gstack/qa-reports/qa-report-127-0-0-1-2026-10-14.md
+// Found in testing on 2026-10-14: the plugin manifest test never ran in `bun run test`.
 import { expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import pkg from "../package.json";

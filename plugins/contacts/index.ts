@@ -35,7 +35,7 @@ export default function init(host: Host) {
 
   // Messengers and socials: a chip with an address is a link; the rest are stamped placeholders.
   const link = (label: string, url: string) => {
-    const a = h("a", { class: "btn contact-link", href: url, target: "_blank", rel: "noopener" }, label);
+    const a = h("a", { class: "btn", href: url, target: "_blank", rel: "noopener" }, label);
     motion.add(a, { kind: "sticker" });
     return t.bind(a, "cursor.write", "data-cursor");
   };

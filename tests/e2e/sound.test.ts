@@ -155,13 +155,15 @@ describe("sound", () => {
 
     await page.locator(".ctrl .sound-btn").click();
     await playing(page);
-    expect(await music(page)).toEqual({ duration: 30.72, stopped: false, sources: 1, context: "running" });
+    const m = (await music(page))!;
+    expect(m.duration).toBeGreaterThan(30); // the file may be swapped for another track
+    expect(m).toEqual({ duration: m.duration, stopped: false, sources: 1, context: "running" });
     expect(requests.filter((p) => p === MUSIC)).toEqual([MUSIC]);
     expect(errors).toEqual([]);
     await context.close();
   });
 
-  test("sound off fades the music out, then pauses it and lets the file go; on again plays it", async () => {
+  test("sound off fades the music out, stops its source and suspends the context; on again resumes and plays it", async () => {
     const { context, page, errors } = await openWatching(server.url);
     const btn = page.locator(".ctrl .sound-btn");
     await btn.click();
@@ -170,9 +172,12 @@ describe("sound", () => {
     expect(await btn.getAttribute("aria-pressed")).toBe("false");
     expect((await music(page))!.stopped).toBe(false); // still fading
     await stopped(page);
+    await page.waitForFunction(() => (window as unknown as { __contexts: AudioContext[] }).__contexts[0]?.state === "suspended");
+    expect(await contexts(page)).toEqual(["suspended"]);
     await btn.click();
     expect(await btn.getAttribute("aria-pressed")).toBe("true");
     await playing(page);
+    expect(await contexts(page)).toEqual(["running"]);
     expect((await music(page))!.sources).toBe(2);
     expect(errors).toEqual([]);
     await context.close();
@@ -214,6 +219,48 @@ describe("sound", () => {
     await context.close();
   });
 
+  test("iPhone audio session: sound on asks to play like media, sound off gives it back", async () => {
+    const { context, page, errors } = await open(browser, server.url);
+    await context.addInitScript(() => {
+      (navigator as unknown as { audioSession: { type: string } }).audioSession = { type: "auto" };
+    });
+    await page.reload({ waitUntil: "load" });
+    const type = () => page.evaluate(() => (navigator as unknown as { audioSession: { type: string } }).audioSession.type);
+    const btn = page.locator(".ctrl .sound-btn");
+    expect(await type()).toBe("auto");
+    await btn.click();
+    expect(await type()).toBe("playback");
+    await btn.click();
+    expect(await type()).toBe("auto");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("pagehide stops the music at once, without the fade", async () => {
+    const { context, page, errors } = await openWatching(server.url);
+    await page.locator(".ctrl .sound-btn").click();
+    await playing(page);
+    expect((await music(page))!.stopped).toBe(false);
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false })));
+    await page.waitForFunction(() => (window as unknown as { __music: { stopped: boolean }[] }).__music.at(-1)?.stopped === true, null, { timeout: 300 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("plan B turns off the sound the sound button turned on, and the music stops", async () => {
+    const { context, page, errors } = await openWatching(server.url);
+    const btn = page.locator(".ctrl .sound-btn");
+    await btn.click();
+    await playing(page);
+    expect(await btn.getAttribute("aria-pressed")).toBe("true");
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+    await page.getByRole("button", { name: "План Б: пусть кит споёт" }).click();
+    expect(await btn.getAttribute("aria-pressed")).toBe("false");
+    await stopped(page);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
   test("plan B turns the sound on and plays the music; a second press turns it off", async () => {
     const { context, page, errors } = await openWatching(server.url);
     await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
@@ -246,6 +293,15 @@ describe("sound", () => {
     }, null, { timeout: 10000 });
     await stopped(page);
     expect(await page.locator(".ctrl .sound-btn").getAttribute("aria-pressed")).toBe("true");
+    // Muting the video gives the music back; unmuting takes it away again.
+    const mute = page.locator("dialog.case .mute");
+    const videoMuted = () => page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.muted);
+    await mute.click();
+    expect(await videoMuted()).toBe(true);
+    await playing(page);
+    await mute.click();
+    expect(await videoMuted()).toBe(false);
+    await stopped(page);
     await page.keyboard.press("Escape");
     await playing(page);
     expect(errors).toEqual([]);

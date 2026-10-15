@@ -14,6 +14,7 @@
 .wall > .sz-s { grid-column: span 1; grid-row: span 1; }
 .wall > .sz-s2 { grid-column: span 2; grid-row: span 1; }
 .wall > .sw { grid-column: span 2; }
+.wall > .sw .svc { padding: 4% 4.5%; } /* percent of the width: half of .svc's, so the same in px */
 .wall > .sz-fam { grid-column: span 3; grid-row: span 2; }
 .wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
 .wall > .t6 { display: none; }
@@ -29,7 +30,7 @@
 .tag-ph video { opacity: 0; }
 .tag-ph.shown video { opacity: 1; }
 /* A photo that did not load leaves the placeholder spot (DESIGN.md, «Заглушка»). */
-.tag-ph.no-photo { border: 2px dashed rgba(14, 14, 14, 0.35); box-shadow: none; }
+.tag-ph.no-photo { border: 2px dashed var(--text-muted); box-shadow: none; }
 .tag-ph.no-photo img { display: none; }
 .tag-role { display: block; font: 500 clamp(10px, 5.6cqmin, 11px)/1.2 var(--mono); text-transform: uppercase; color: rgba(14, 14, 14, 0.6); padding: 0 6% 6cqmin; }
 
@@ -95,6 +96,7 @@ html.calm .wall .hello { transition: none; }
   .wall > .sz-t { grid-column: span 1; grid-row: span 2; }
   .wall > .sz-fam { grid-column: span 2; grid-row: span 2; }
   .wall > .sw { grid-column: span 1; }
+  .wall > .sw .svc { padding: 8% 9%; }
   .wall > .d-only, .wall > .t6 { display: none; }
 }
 @media (pointer: coarse) {

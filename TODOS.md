@@ -5,8 +5,7 @@ Deferred on purpose. Each item names what it waits for.
 ## Waits for the studio's own data
 
 - Case texts: task, what was done, result, numbers. Now placeholders in `plugins/content/data/cases.json` and both `texts.*.json`.
-- Team: names, roles, photos. Now placeholders in `plugins/content/data/team.json`.
-- Contacts: real email, Telegram, WhatsApp, socials. Now placeholders in `plugins/content/data/contacts.json`; the `<noscript>` line in `site/index.html` repeats the email.
+- Contacts: real email, WhatsApp, socials (Telegram is real). Now placeholders in `plugins/content/data/contacts.json`; the `<noscript>` line in `site/index.html` repeats the email.
 - Subtitles for cases 3, 6 and 8 (the cases with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
 

@@ -71,8 +71,8 @@ export default function init(host: Host) {
     { rootMargin: "100% 0px" },
   );
 
-  // Badge photos are small and sit below the first poster: near the screen, and not before 2 s
-  // after load, so the first screen's bytes go to the case posters.
+  // 2 s after load: the ticker starts, and badge photos (small, below the first poster) may load
+  // near the screen, so the first screen's bytes go to the case posters.
   const later = new Promise<void>((go) => {
     const arm = () => setTimeout(go, 2000);
     if (document.readyState === "complete") arm();
@@ -130,7 +130,7 @@ export default function init(host: Host) {
           const m = team[slot.i];
           const name = h("span");
           const role = h("span", { class: "tag-role" });
-          const el = stickerEl("div", "tag", r, { "aria-hidden": "true" });
+          const el = stickerEl("div", "tag", r);
           // The photo sits in the round spot; a member with a video gets it on top, played by videos.ts.
           const photo = h("img", { alt: "", draggable: "false", decoding: "async" });
           const spot = h("span", { class: "tag-ph" }, photo);
@@ -301,14 +301,11 @@ export default function init(host: Host) {
       { rootMargin: "100px" },
     ).observe(tickerEl!);
     for (const el of sleepers.slice(1)) new IntersectionObserver((list) => list.forEach((r) => r.target.classList.toggle("asleep", !r.isIntersecting)), { rootMargin: "100px" }).observe(el);
-    const start = () =>
-      setTimeout(() => {
-        started = true;
-        section.classList.add("awake");
-        runTicker();
-      }, 2000);
-    if (document.readyState === "complete") start();
-    else addEventListener("load", start, { once: true });
+    void later.then(() => {
+      started = true;
+      section.classList.add("awake");
+      runTicker();
+    });
     motion.onChange(() => {
       runTicker();
       videos.update();

@@ -1,9 +1,9 @@
 // Dive and tidy: the dock in the bottom-right corner (T§2.9) and the dive block on the wall.
 //
 //   «Рандомный кейс»  pick a case (never the last one) -> tidy -> shuffle the wall with the target
-//                   between two cases -> scroll to it -> spotlight roulette (desktop) or slot
-//                   reel in the tile (phone) -> open the case. Calm: open a random case at once.
-//   «Прибраться»    every moved piece home, the wall back in its order, toast with the count.
+//                     between two cases -> scroll to it -> spotlight roulette (desktop) or slot
+//                     reel in the tile (phone) -> open the case. Calm: open a random case at once.
+//   «Прибраться»      every moved piece home, the wall back in its order, toast with the count.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { h, icon, toast } from "../../platform/ui/parts.ts";
@@ -52,11 +52,13 @@ export default function init(host: Host) {
   const live = h("div", { class: "sr-only", role: "status", "aria-live": "polite" });
   host.region("overlay").append(live);
 
+  // Ring text and label size wait for the fonts: measured earlier they would be measured twice.
+  let fontsReady = false;
   const showCore = () => {
     const [first, ...rest] = content.text("dive.title").split(" ");
     coreTop.textContent = first;
     coreBottom.textContent = rest.join(" ");
-    fitCore();
+    if (fontsReady) fitCore();
   };
   // The label stays inside the ink disc: a long word gets a smaller size, never under 10 px.
   // Phones show a die there instead and say the name on the ring.
@@ -70,7 +72,6 @@ export default function init(host: Host) {
   showCore();
 
   // Ring text: drawn once the mono font is there, again only for a new language or size.
-  let fontsReady = false;
   const paintRing = () => {
     if (!fontsReady) return;
     const size = phone.matches ? 84 : tablet.matches ? 128 : 156;
