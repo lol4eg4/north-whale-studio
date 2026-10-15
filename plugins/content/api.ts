@@ -21,8 +21,25 @@ export interface CaseItem {
     full: string | null; // full video for the open case; null for a still
     still: string | null; // full-size picture for a still case
   };
-  story: { task: string; did: string; result: string }; // placeholders until the studio sends texts
+  story: { task: string; did: string; result: string }; // placeholders, for a case with no page yet
+  page: CasePage | null; // the studio's own case text (data/pages.*.json)
   sr: string; // what a screen reader says for the tile
+}
+
+// One case told the way the reference tells it. Text may mark ==highlights==.
+export interface CasePage {
+  eyebrow: string;
+  title: string;
+  client: string;
+  category: string;
+  services: string;
+  lead: string;
+  media: string; // label on the video
+  how: { title: string; kicker: string; text: string[] };
+  card: { label: string; headline: string; copy: string; hand: string } | null;
+  role: { items: string[]; deliverables: string };
+  results: { items: { value: string; label: string }[]; note: string | null } | null;
+  links: { label: string; url: string }[];
 }
 
 export interface Service {

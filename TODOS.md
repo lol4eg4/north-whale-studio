@@ -4,13 +4,13 @@ Deferred on purpose. Each item names what it waits for.
 
 ## Waits for the studio's own data
 
-- Case texts: task, what was done, result, numbers. Now placeholders in `plugins/content/data/cases.json` and both `texts.*.json`.
+- Case pages for AG1 (2), Mabrook (4), Sergey Ibadov (6) and DeckForge (8): placeholders until the studio sends texts. Waldorf (1), Dear Passengers (3), King’s (5) and Antiquerus (7) have pages in `plugins/content/data/pages.*.json`.
+- Brand films for Waldorf Astoria Berlin (1) and King’s Resort & Casino (5): their pages name a film, but the case videos are the website recordings.
 - Contacts: real email, WhatsApp, socials (Telegram is real). Now placeholders in `plugins/content/data/contacts.json`; the `<noscript>` line in `site/index.html` repeats the email.
 - Subtitles for cases 3, 6 and 8 (the cases with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
 - Case previews for Kings Resort & Casino (5), Antikrus (7) and DeckForge (8): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`).
 - Kings Resort & Casino result figure: `result` is null, so its tile has no lemon plate.
-- Links from cases to outside resources: a separate task, when the case texts are assembled.
 
 ## Waits for publication
 

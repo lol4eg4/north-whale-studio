@@ -358,8 +358,8 @@ describe("wall media", () => {
     expect(await tile.evaluate((t) => t === document.activeElement && t.matches(":focus-visible"))).toBe(true);
     expect((await look()).stat).toBe(1);
 
-    // Kings Resort & Casino has no result figure: no lemon plate, even under the mouse.
-    const kings = page.locator('.wall .tile[aria-label*="Kings"]');
+    // King’s Resort & Casino has no result figure: no lemon plate, even under the mouse.
+    const kings = page.locator('.wall .tile[aria-label*="King’s"]');
     await kings.scrollIntoViewIfNeeded();
     await kings.hover({ position: { x: 100, y: 100 } });
     await page.waitForTimeout(700);

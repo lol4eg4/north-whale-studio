@@ -36,8 +36,8 @@
   },
   "what": null,
   "result": {
-   "ru": "50 млн+ просмотров на YouTube",
-   "en": "50M+ views on YouTube"
+   "ru": "100 млн+ просмотров",
+   "en": "100M+ views"
   },
   "size": "xl",
   "kind": "video",
@@ -60,8 +60,8 @@
  {
   "id": 5,
   "client": {
-   "ru": "Kings Resort & Casino",
-   "en": "Kings Resort & Casino"
+   "ru": "King’s Resort & Casino",
+   "en": "King’s Resort & Casino"
   },
   "what": {
    "ru": "Курорт и казино",
@@ -93,7 +93,7 @@
   "id": 7,
   "client": {
    "ru": "Антикрус",
-   "en": "Antikrus"
+   "en": "Antiquerus"
   },
   "what": {
    "ru": "Аукционный дом",

@@ -1,17 +1,20 @@
 // The content itself: texts in two languages and the studio's data, read in the chosen language.
 // Pure (no DOM), so it is tested directly.
 import { media } from "../../platform/media.ts";
-import type { CaseItem, Client, Contacts, Lang, Member, Service } from "./api.ts";
+import type { CaseItem, CasePage, Client, Contacts, Lang, Member, Service } from "./api.ts";
 import casesData from "./data/cases.json";
 import clientsData from "./data/clients.json";
 import contactsData from "./data/contacts.json";
 import servicesData from "./data/services.json";
 import teamData from "./data/team.json";
+import pagesEn from "./data/pages.en.json";
+import pagesRu from "./data/pages.ru.json";
 import en from "./data/texts.en.json";
 import ru from "./data/texts.ru.json";
 
 type Local = { ru: string; en: string };
 const texts: Record<Lang, Record<string, string>> = { ru, en };
+const pages: Record<Lang, Record<string, CasePage>> = { ru: pagesRu, en: pagesEn };
 
 // Address first, then the last visit, then the browser; anything but Russian reads English.
 export function pickLanguage(search: string, remembered: string | null, browser: readonly string[]): Lang {
@@ -58,6 +61,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
           still: still ? media(`/media/c${c.id}-full.webp`) : null,
         },
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
+        page: pages[getLang()][c.id] ?? null,
         sr: [format("case.label", { n: c.id }), client, what, result]
           .filter(Boolean)
           .join(". "),

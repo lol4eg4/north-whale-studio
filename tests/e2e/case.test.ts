@@ -71,23 +71,26 @@ describe("open and close", () => {
     await context.close();
   });
 
-  test("Next from case 8 opens case 1 without a new history entry; closing focuses tile 1", async () => {
+  test("Next names the next case and opens it without a new history entry; on the last case it leads back to the wall", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     const before = await page.evaluate(() => history.length);
-    await openTile(page, 8);
-    expect(await title(page)).toBe("DeckForge");
+    await openTile(page, 7);
+    expect(await title(page)).toBe("Пространство времени");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: DeckForge");
     await page.click("dialog.case .case-next");
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Waldorf Astoria Berlin");
-    expect(await hash(page)).toBe("#case-1");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
+    expect(await hash(page)).toBe("#case-8");
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
-    await page.keyboard.press("Escape");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
+    await page.click("dialog.case .case-next");
     await waitClosed(page);
-    expect(await focusIs(page, tileSel(1))).toBe(true);
+    expect(await hash(page)).toBe("");
+    expect(await focusIs(page, tileSel(8))).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
   });
 
-  test("«Обсудить похожий проект» closes the case and goes to contacts", async () => {
+  test("«Написать нам» closes the case and goes to contacts", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     await openTile(page, 1);
     await page.click("dialog.case .case-talk");
@@ -151,7 +154,7 @@ describe("links and history", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
     expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Next case");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Next: AG1");
     await page.keyboard.press("Escape");
     await waitClosed(page);
     expect(page.url()).toBe(`${srv.url}/?lang=en`);
@@ -198,20 +201,48 @@ describe("player", () => {
     await context.close();
   });
 
-  test("Kings Resort & Casino (case 5) has its video and player, in Russian and English", async () => {
+  test("King’s Resort & Casino (case 5) has its video, player and own page, in Russian and English", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`);
     await page.waitForSelector("dialog.case[open]");
-    expect(await page.textContent("dialog.case .case-title")).toBe("Kings Resort & Casino");
-    expect(await page.textContent("dialog.case .case-sub")).toBe("Курорт и казино");
+    expect(await page.textContent("dialog.case .case-title")).toBe("По-королевски");
+    expect(await page.textContent("dialog.case .case-eyebrow")).toBe("King’s Resort · Розвадов");
+    expect(await page.isVisible("dialog.case .case-sub")).toBe(false);
+    expect(await page.textContent("dialog.case .case-meta dd")).toBe("King’s Resort & Casino");
     expect(plain(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src")))).toBe("/media/c5-full.mp4");
     expect(await page.isVisible("dialog.case .player")).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
     const en = await open(browser, `${srv.url}/?lang=en#case-5`);
     await en.page.waitForSelector("dialog.case[open]");
-    expect(await en.page.textContent("dialog.case .case-sub")).toBe("Resort & casino");
+    expect(await en.page.textContent("dialog.case .case-title")).toBe("Like a King");
+    expect(await en.page.textContent("dialog.case .case-media-tag")).toBe("The website");
     expect(en.errors).toEqual([]);
     await en.context.close();
+  });
+
+  test("a case page: meta, highlights, cards, results and outside links; a case with no page keeps its placeholders", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=en#case-3`);
+    await page.waitForSelector("dialog.case[open]");
+    expect(await page.$$eval("dialog.case .case-meta dt", (els) => els.map((e) => e.textContent))).toEqual(["Client", "Category", "Services"]);
+    expect(await page.textContent("dialog.case .case-how mark")).toBe("pure in-flight chaos");
+    expect(await page.$$eval("dialog.case .case-tag", (els) => els.map((e) => e.textContent))).toEqual(["One launch", "Our role", "The results"]);
+    expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["100M+", "322%", "100×", "500K+"]);
+    const link = page.locator("dialog.case .case-out a");
+    expect(await link.textContent()).toBe("Watch the trailer →");
+    expect(await link.getAttribute("href")).toBe("https://www.youtube.com/watch?v=bH9zvvhGitY");
+    expect(await link.getAttribute("target")).toBe("_blank");
+    expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
+    // Waldorf's link opens the hotel's page in the visitor's language.
+    await page.evaluate(() => (location.hash = "#case-1"));
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Berlin Deco");
+    expect(await page.getAttribute("dialog.case .case-out a", "href")).toBe("https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/");
+    await page.evaluate(() => (location.hash = "#case-2"));
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
+    expect(await page.$$("dialog.case .ph-box")).toHaveLength(3);
+    expect(await page.isVisible("dialog.case .case-eyebrow")).toBe(false);
+    expect(await page.isVisible("dialog.case .case-media-tag")).toBe(false);
+    expect(errors).toEqual([]);
+    await context.close();
   });
 
   test("a case plays as soon as it opens; a click on the picture pauses it, another plays it", async () => {

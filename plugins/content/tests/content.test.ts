@@ -47,16 +47,35 @@ describe("cases", () => {
       expect(c.kind === "still" ? c.media.still : c.media.full).toBeTruthy();
     }
     expect(cases.every((c) => c.kind === "video" && c.media.ring === `/media/c${c.id}-ring.mp4`)).toBe(true);
-    expect(cases.find((c) => c.id === 5)!.client).toBe("Kings Resort & Casino");
+    expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
     expect(cases.find((c) => c.id === 8)!.size).toBe("t");
   });
 
   test("screen readers hear number, client and what the file name says", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 50 млн+ просмотров на YouTube");
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ просмотров");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Full-cycle production");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1");
     expect(store("ru").caseById(9)).toBeUndefined();
+  });
+
+  test("case pages: same cases and same shape in both languages, real links, closed highlights", () => {
+    const shape = (id: number, lang: "ru" | "en") => {
+      const p = store(lang).caseById(id)!.page;
+      if (!p) return null;
+      return [p.how.text.length, !!p.card, p.role.items.length, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
+    };
+    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 3, 5, 7]);
+    for (const c of cases) {
+      expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
+      const p = c.page;
+      if (!p) continue;
+      for (const v of [p.eyebrow, p.title, p.client, p.category, p.services, p.lead, p.media, p.how.title, p.how.kicker, p.role.deliverables]) expect(v.trim()).not.toBe("");
+      const texts = [p.lead, ...p.how.text, p.card?.copy ?? "", p.role.deliverables];
+      for (const t of texts) expect(t.split("==").length % 2, t).toBe(1);
+      for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
+    }
+    expect(store("en").caseById(3)!.page!.links[0].url).toBe(store("ru").caseById(3)!.page!.links[0].url);
   });
 
   test("the media files a case names exist once the media pipeline ran", () => {

@@ -1,19 +1,32 @@
 // Open case: a native modal dialog over the wall, kept in step with the address (history.ts).
 //
 //   [ media frame + player ][ North Whale Studio · Кейс 03 из 08     [× Назад к стене Esc] ]
-//   [                      ][ Client / what · result / story placeholders                 ]
-//   [                      ][ [Обсудить похожий проект] [Следующий кейс →] Скопировать ссылку ]
+//   [                      ][ eyebrow / title / client · category · services / lead       ]
+//   [                      ][ how we did it, cards: one batch, our role, results; links    ]
+//   [                      ][ [Дальше: <next case> →] [Написать нам] Скопировать ссылку    ]
+// A case with no page in data/pages.*.json shows its client, what · result and story placeholders.
 import type { CaseFrom } from "../../platform/events.ts";
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { button, goTo, h, icon, overlay, placeholderBox, toast } from "../../platform/ui/parts.ts";
-import type { CaseItem, ContentApi } from "../content/api.ts";
+import type { CaseItem, CasePage, ContentApi } from "../content/api.ts";
 import type { CaseApi } from "./api.ts";
 import { onLoad, onNavigate, onNext, onOpen, onRequestClose, type Act } from "./history.ts";
 import { createPlayer } from "./player.ts";
 import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
+// A rise with no figure ("↑"): the display font has no arrow, so it is the site's own, turned up.
+const up = () => {
+  const el = icon("arrowRight", 48);
+  el.classList.add("case-up");
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-hidden", "false");
+  el.setAttribute("aria-label", "↑");
+  return el;
+};
+// ==text== in the studio's copy is a marker highlight.
+const marked = (s: string, cls?: string) => s.split("==").map((part, i) => (i % 2 ? h("mark", { class: cls }, part) : part));
 // Absolute, so it never leaves the site whatever the path looks like ("//x" would be another host).
 const address = (hash: string) => {
   const url = new URL(location.href);
@@ -34,12 +47,15 @@ export default function init(host: Host) {
 
   const counter = h("span", { class: "case-count" });
   const closeBtn = h("button", { type: "button", class: "btn case-x" }, icon("close", 14), h("span", { class: "case-x-t" }), h("kbd", {}, "Esc"));
+  const eyebrow = h("p", { class: "case-eyebrow mono" });
   const titleEl = h("h2", { class: "case-title", id: "case-title" });
   const sub = h("div", { class: "case-sub" });
   const story = h("div", { class: "case-story" });
-  const talk = button("", "action", { class: "case-talk" });
+  const mediaTag = h("span", { class: "case-media-tag mono" });
+  player.el.append(mediaTag);
+  const talk = button("", "ghost", { class: "case-talk" });
   const nextText = h("span");
-  const next = button("", "ghost", { class: "case-next" });
+  const next = button("", "action", { class: "case-next" });
   next.append(nextText, icon("arrowRight", 18));
   const copy = h("button", { type: "button", class: "link-copy" });
   const field = t.bind(h("input", { class: "case-link", type: "text", readonly: true, hidden: true }), "case.copyLink", "aria-label");
@@ -47,10 +63,11 @@ export default function init(host: Host) {
     "div",
     { class: "case-body" },
     h("div", { class: "case-top" }, h("span", { class: "mono" }, h("b", { class: "cw" }, "North Whale Studio"), " · ", counter), closeBtn),
+    eyebrow,
     titleEl,
     sub,
     story,
-    h("div", { class: "case-actions" }, talk, next, copy, field),
+    h("div", { class: "case-actions" }, next, talk, copy, field),
   );
   const panel = h("div", { class: "case-in on-cobalt" }, player.el, body);
   dlg.el.append(panel);
@@ -64,15 +81,55 @@ export default function init(host: Host) {
   const tiles = new Map<number, HTMLElement>();
   const ctx = () => ({ open: openId, closing, ids: ids() });
 
+  const page = (p: CasePage) => [
+    h("dl", { class: "case-meta" }, ...(
+      [
+        ["case.client", p.client],
+        ["case.category", p.category],
+        ["case.services", p.services],
+      ] as const
+    ).map(([key, value]) => h("div", {}, h("dt", { class: "mono" }, text(key)), h("dd", {}, value)))),
+    h("p", { class: "case-lead" }, ...marked(p.lead)),
+    h("section", { class: "case-how" }, h("h3", { class: "mono" }, p.how.title), h("p", { class: "case-kicker" }, p.how.kicker), ...p.how.text.map((s) => h("p", {}, ...marked(s)))),
+    p.card &&
+      h("section", { class: "case-card" }, h("h3", { class: "case-tag" }, p.card.label), h("p", { class: "case-card-h" }, p.card.headline), h("p", {}, ...marked(p.card.copy, "b")), h("p", { class: "case-hand" }, p.card.hand)),
+    h(
+      "section",
+      { class: "case-card case-role" },
+      h("h3", { class: "case-tag" }, text("case.role")),
+      h("ul", { class: "case-pills" }, ...p.role.items.map((r) => h("li", {}, r))),
+      h("p", {}, `${text("case.deliverables")} ${p.role.deliverables}`),
+    ),
+    p.results &&
+      h(
+        "section",
+        { class: "case-card case-results" },
+        h("h3", { class: "case-tag" }, text("case.results")),
+        h("ul", {}, ...p.results.items.map((r) => h("li", {}, h("b", {}, r.value === "↑" ? up() : r.value), h("span", {}, r.label)))),
+        p.results.note && h("p", {}, p.results.note),
+      ),
+    p.links.length > 0 && h("p", { class: "case-out" }, ...p.links.map((l) => h("a", { href: l.url, target: "_blank", rel: "noopener" }, `${l.label} →`))),
+  ].filter((x): x is HTMLElement => !!x);
+
   const render = (c: CaseItem) => {
     const all = content().cases();
-    counter.textContent = content().format("case.counter", { n: two(all.findIndex((x) => x.id === c.id) + 1), total: two(all.length) });
-    titleEl.textContent = c.client;
+    const i = all.findIndex((x) => x.id === c.id);
+    counter.textContent = content().format("case.counter", { n: two(i + 1), total: two(all.length) });
+    eyebrow.textContent = c.page?.eyebrow ?? "";
+    eyebrow.hidden = !c.page;
+    titleEl.textContent = c.page?.title ?? c.client;
     sub.replaceChildren(...[c.what && h("span", {}, c.what), c.result && h("span", { class: "case-result" }, c.result)].filter((x): x is HTMLSpanElement => !!x));
-    sub.hidden = !c.what && !c.result;
-    story.replaceChildren(placeholderBox(c.story.task), placeholderBox(c.story.did), placeholderBox(c.story.result));
+    sub.hidden = !!c.page || (!c.what && !c.result);
+    story.classList.toggle("own", !!c.page);
+    story.replaceChildren(...(c.page ? page(c.page) : [placeholderBox(c.story.task), placeholderBox(c.story.did), placeholderBox(c.story.result)]));
+    mediaTag.textContent = c.page?.media ?? "";
+    mediaTag.hidden = !c.page;
+    // Next names the next case; the last one leads back to the wall.
+    const n = all[i + 1];
+    nextText.textContent = n ? content().format("case.nextTo", { title: n.page?.title ?? n.client }) : text("case.toWall");
     field.hidden = true;
   };
+  const isLast = () => openId !== null && openId === ids().at(-1);
 
   const show = (id: number, from: CaseFrom) => {
     const c = content().caseById(id);
@@ -165,7 +222,7 @@ export default function init(host: Host) {
   });
   closeBtn.addEventListener("click", () => requestClose());
   talk.addEventListener("click", () => requestClose(() => goTo("#contacts")));
-  next.addEventListener("click", () => run(onNext(ctx())));
+  next.addEventListener("click", () => (isLast() ? requestClose() : run(onNext(ctx()))));
   copy.addEventListener("click", async () => {
     if (openId === null) return;
     const link = address(`#case-${openId}`);
@@ -208,8 +265,7 @@ export default function init(host: Host) {
     t.bind(closeBtn.querySelector(".case-x-t")!, "case.close");
     t.bind(closeBtn, "case.close", "aria-label");
     t.bind(closeBtn, "cursor.close", "data-cursor");
-    t.bind(talk, "case.discuss");
-    t.bind(nextText, "case.next");
+    t.bind(talk, "nav.write");
     t.bind(copy, "case.copyLink");
     run(onLoad(location.hash, ctx()));
   });

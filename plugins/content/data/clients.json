@@ -46,8 +46,8 @@
  {
   "caseId": 5,
   "name": {
-   "ru": "Kings Resort",
-   "en": "Kings Resort"
+   "ru": "King’s Resort",
+   "en": "King’s Resort"
   },
   "shape": "pill",
   "bg": "mint",
@@ -58,7 +58,7 @@
   "caseId": 7,
   "name": {
    "ru": "Антикрус",
-   "en": "Antikrus"
+   "en": "Antiquerus"
   },
   "shape": "circle",
   "bg": "signal",
