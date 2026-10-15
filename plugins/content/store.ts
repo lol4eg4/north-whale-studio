@@ -12,6 +12,15 @@ import ru from "./data/texts.ru.json";
 type Local = { ru: string; en: string };
 const texts: Record<Lang, Record<string, string>> = { ru, en };
 
+// Media addresses with their file's content hash. build.ts puts the hashes in the bundle; the unit
+// tests run without a bundle, and there __MEDIA__ does not exist.
+declare const __MEDIA__: Record<string, string>;
+let versions: Record<string, string> = {};
+try {
+  versions = __MEDIA__;
+} catch {}
+const media = (path: string) => (versions[path] ? `${path}?v=${versions[path]}` : path);
+
 // Address first, then the last visit, then the browser; anything but Russian reads English.
 export function pickLanguage(search: string, remembered: string | null, browser: readonly string[]): Lang {
   const asked = new URLSearchParams(search).get("lang");
@@ -49,12 +58,12 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         sound: c.sound,
         vertical: c.vertical,
         media: {
-          poster: `/media/c${c.id}.webp`,
-          posterPhone: `/media/c${c.id}-phone.webp`,
-          ring: still ? null : `/media/c${c.id}-ring.mp4`,
-          ringPoster: `/media/c${c.id}-ring.webp`,
-          full: still ? null : `/media/c${c.id}-full.mp4`,
-          still: still ? `/media/c${c.id}-full.webp` : null,
+          poster: media(`/media/c${c.id}.webp`),
+          posterPhone: media(`/media/c${c.id}-phone.webp`),
+          ring: still ? null : media(`/media/c${c.id}-ring.mp4`),
+          ringPoster: media(`/media/c${c.id}-ring.webp`),
+          full: still ? null : media(`/media/c${c.id}-full.mp4`),
+          still: still ? media(`/media/c${c.id}-full.webp`) : null,
         },
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         sr: [format("case.label", { n: c.id }), client, what, result]
@@ -65,7 +74,8 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
 
   const services = (): Service[] =>
     servicesData.map((s) => ({ id: s.id, main: s.main, title: local(s.title), phrase: local(s.phrase), includes: s.includes.map(local) }));
-  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: m.photo, video: m.video ?? null }));
+  const team = (): Member[] =>
+    teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: media(m.photo), video: m.video ? media(m.video) : null }));
   const clients = (): Client[] =>
     clientsData.map((c) => ({ caseId: c.caseId, name: local(c.name), shape: c.shape as Client["shape"], bg: c.bg, fg: c.fg, phone: c.phone }));
   const contacts = (): Contacts => contactsData;

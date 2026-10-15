@@ -3,8 +3,9 @@
 // 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
 // team badges (names, roles, photos, Maria's loop, roll call, opening big), no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
-import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
+import { launch, open, phone, plain, startServer, wallHoles } from "./helpers.ts";
 
 const HOLE_WIDTHS = [1440, 1280, 1100, 1024, 768, 390, 320];
 const SCROLL_WIDTHS = [320, 390, 768, 1024, 1280, 1440];
@@ -161,7 +162,7 @@ describe("wall media", () => {
       expect(tile.label.startsWith(`Кейс ${id}.`)).toBe(true);
       const near = tile.top < 2 * vh && tile.bottom > -vh;
       // Posters, like loops, wait until their tile is within one screen of the viewport.
-      expect(tile.poster, `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
+      expect(plain(tile.poster), `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
       if (loops.some((l) => l.id === id)) expect(near, `tile ${id} loaded but is far from the screen`).toBe(true);
     });
     expect(loops.some((l) => l.id === 1)).toBe(true);
@@ -194,7 +195,7 @@ describe("wall media", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     const asked: string[] = [];
-    await page.route("**/media/*-ring.mp4", (route) => {
+    await page.route(/\/media\/c\d-ring\.mp4/, (route) => {
       asked.push(route.request().url());
       return route.abort();
     });
@@ -276,8 +277,8 @@ describe("wall media", () => {
       src: document.querySelector(".wall .tile video")!.getAttribute("src"),
       playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
     }));
-    expect(r.poster.endsWith("/media/c1-phone.webp")).toBe(true);
-    expect(r.src).toBe("/media/c1-ring.mp4");
+    expect(plain(new URL(r.poster).pathname + new URL(r.poster).search)).toBe("/media/c1-phone.webp");
+    expect(plain(r.src)).toBe("/media/c1-ring.mp4");
     expect(r.playing).toBeLessThanOrEqual(4);
     expect(errors).toEqual([]);
     await context.close();
@@ -300,6 +301,16 @@ describe("wall media", () => {
     await context.close();
   });
 
+  test("media addresses carry the file's content hash, so a replaced picture is never shown from a cache", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const src = await page.getAttribute(".wall .tile-poster", "src");
+    expect(src).toMatch(/^\/media\/c1\.webp\?v=[0-9a-f]{8}$/);
+    const hash = new Bun.CryptoHasher("sha1").update(await Bun.file(join(import.meta.dir, "..", "..", "site", "media", "c1.webp")).arrayBuffer()).digest("hex").slice(0, 8);
+    expect(src).toBe(`/media/c1.webp?v=${hash}`);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
   test("a tile is a still poster: its only video is the round badge's loop", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
     await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
@@ -311,7 +322,7 @@ describe("wall media", () => {
       })),
     );
     expect(r).toEqual(Array.from({ length: 8 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
-    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster"))).toBe("/media/c1-ring.webp");
+    expect(plain(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster")))).toBe("/media/c1-ring.webp");
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -420,7 +431,7 @@ describe("team badges", () => {
     const imgs = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].map((i) => ({ src: i.getAttribute("src"), alt: i.getAttribute("alt"), w: i.naturalWidth, shown: getComputedStyle(i).display !== "none", round: getComputedStyle(i.parentElement!).borderRadius })),
     );
-    expect(imgs.map((i) => i.src)).toEqual(PHOTOS);
+    expect(imgs.map((i) => plain(i.src))).toEqual(PHOTOS);
     for (const i of imgs) {
       expect(i.alt).toBe("");
       expect(i.w).toBe(320);
@@ -444,11 +455,11 @@ describe("team badges", () => {
     await page.waitForTimeout(1800);
     const src = () => page.evaluate(() => [...document.querySelectorAll(".wall .tag-ph img")].map((i) => i.getAttribute("src")));
     const first = await src();
-    expect(first[0]).toBe(PHOTOS[0]);
+    expect(plain(first[0])).toBe(PHOTOS[0]);
     expect(first[3], "the last badge is far below the first screen").toBeNull();
     await toBadge(page, 3);
     await page.waitForFunction(() => document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")[3].naturalWidth > 0, null, { timeout: 5000 });
-    expect((await src())[3]).toBe(PHOTOS[3]);
+    expect(plain((await src())[3])).toBe(PHOTOS[3]);
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -459,7 +470,8 @@ describe("team badges", () => {
     expect(await page.locator(".wall .tag-ph video").getAttribute("aria-hidden")).toBe("true");
     await toBadge(page, MARIA);
     await waitPlaying(page);
-    expect(await video(page)).toMatchObject({ paused: false, muted: true, loop: true, inline: true, src: "/media/team-3.mp4" });
+    const v = await video(page);
+    expect({ ...v, src: plain(v.src) }).toMatchObject({ paused: false, muted: true, loop: true, inline: true, src: "/media/team-3.mp4" });
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag video")!).opacity)).toBe("1");
 
     await page.click(".pause-btn");
@@ -482,7 +494,7 @@ describe("team badges", () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
     const page = await context.newPage();
     const loops: string[] = [];
-    page.on("request", (r) => r.url().endsWith("/media/team-3.mp4") && loops.push(r.url()));
+    page.on("request", (r) => r.url().includes("/media/team-3.mp4") && loops.push(r.url()));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await sweep(page);
     await toBadge(page, MARIA);
@@ -494,14 +506,14 @@ describe("team badges", () => {
       const img = spot.querySelector("img")!;
       return { poster: img.getAttribute("src"), drawn: img.complete && img.naturalWidth > 0, videoHidden: getComputedStyle(spot.querySelector("video")!).opacity === "0" };
     });
-    expect(still).toEqual({ poster: "/media/team-3.webp", drawn: true, videoHidden: true });
+    expect({ ...still, poster: plain(still.poster) }).toEqual({ poster: "/media/team-3.webp", drawn: true, videoHidden: true });
     await context.close();
   });
 
   test("a picture that does not load leaves the placeholder spot, not a broken image", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-    await page.route("**/media/team-1.webp", (route) => route.abort());
+    await page.route(/\/media\/team-1\.webp/, (route) => route.abort());
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await sweep(page);
     await page.waitForSelector(".wall .tag-ph.no-photo", { timeout: 5000 });

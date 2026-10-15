@@ -30,6 +30,9 @@ export async function launch(): Promise<Browser> {
   return chromium.launch();
 }
 
+// A media address without its content hash: "/media/c1.webp?v=1a2b3c4d" -> "/media/c1.webp".
+export const plain = (url: string | null) => url?.replace(/\?v=[0-9a-f]+$/, "") ?? null;
+
 // Phone-like context: touch, coarse pointer, small screen.
 export const phone: BrowserContextOptions = { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 };
 

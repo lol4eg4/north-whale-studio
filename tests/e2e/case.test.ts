@@ -2,7 +2,7 @@
 // address, the player (plays on open, sound, error + retry) and the copy link fallback.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { chromium, type Browser, type Page } from "playwright-core";
-import { launch, open, phone, startServer } from "./helpers.ts";
+import { launch, open, phone, plain, startServer } from "./helpers.ts";
 
 let srv: { url: string; stop(): void };
 let browser: Browser;
@@ -183,13 +183,13 @@ describe("links and history", () => {
 describe("player", () => {
   test("a failed video shows the poster and «Повторить», which recovers once the video loads", async () => {
     const { context, page } = await open(browser, `${srv.url}/?lang=ru`);
-    await page.route("**/media/c1-full.mp4", (r) => r.abort());
+    await page.route(/\/media\/c1-full\.mp4/, (r) => r.abort());
     await openTile(page, 1);
     await page.waitForSelector("dialog.case .case-art.err", { timeout: 10000 });
     expect(await page.isVisible("dialog.case .case-pic")).toBe(true);
-    expect(await page.getAttribute("dialog.case .case-pic", "src")).toBe("/media/c1.webp");
+    expect(plain(await page.getAttribute("dialog.case .case-pic", "src"))).toBe("/media/c1.webp");
     expect(await page.textContent("dialog.case .case-retry")).toBe("Повторить");
-    await page.unroute("**/media/c1-full.mp4");
+    await page.unroute(/\/media\/c1-full\.mp4/);
     await page.click("dialog.case .case-retry");
     await page.waitForFunction(() => {
       const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
@@ -203,7 +203,7 @@ describe("player", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(await page.textContent("dialog.case .case-title")).toBe("Kings Resort & Casino");
     expect(await page.textContent("dialog.case .case-sub")).toBe("Курорт и казино");
-    expect(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src"))).toBe("/media/c5-full.mp4");
+    expect(plain(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src")))).toBe("/media/c5-full.mp4");
     expect(await page.isVisible("dialog.case .player")).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
@@ -226,7 +226,7 @@ describe("player", () => {
       return !v.paused && v.currentTime > 0;
     }, null, { timeout: 10000 });
     expect(await state()).toEqual({ paused: false, loop: true });
-    expect(await page.getAttribute("dialog.case video", "poster")).toBe("/media/c1.webp");
+    expect(plain(await page.getAttribute("dialog.case video", "poster"))).toBe("/media/c1.webp");
     expect(await page.textContent("dialog.case .go")).toBe("Пауза");
     await page.click("dialog.case video");
     expect((await state()).paused).toBe(true);
