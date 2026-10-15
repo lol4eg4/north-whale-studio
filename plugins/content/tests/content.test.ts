@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import type { Lang } from "../api.ts";
 import en from "../data/texts.en.json";
 import ru from "../data/texts.ru.json";
@@ -91,6 +91,17 @@ describe("cases", () => {
         expect(Bun.file(`${import.meta.dir}/../../../site${p.logo}`).size, p.logo).toBeGreaterThan(0);
         expect(p.ratio).toBeGreaterThan(1);
       }
+    }
+  });
+
+  test("logos taken from other sites are plain drawings: no scripts, handlers, embedded pictures or outside addresses", () => {
+    const dir = `${import.meta.dir}/../../../site/media`;
+    const files = readdirSync(dir).filter((f) => /^(client|partner|platform|press)-.*\.svg$/.test(f));
+    expect(files.length).toBeGreaterThanOrEqual(19); // 9 clients, 3 partners, 3 platforms, 4 publications
+    for (const f of files) {
+      const svg = readFileSync(`${dir}/${f}`, "utf8");
+      expect(svg.trimStart().startsWith("<svg") || svg.trimStart().startsWith("<?xml"), f).toBe(true);
+      for (const bad of [/<script/i, /\son[a-z]+\s*=/i, /<foreignObject/i, /<image/i, /href\s*=/i, /@import/i, /url\(\s*['"]?(https?:|\/\/)/i, /data:/i]) expect(bad.test(svg), `${f}: ${bad}`).toBe(false);
     }
   });
 

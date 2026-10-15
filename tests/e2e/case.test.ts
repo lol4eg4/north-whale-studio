@@ -354,6 +354,14 @@ describe("player", () => {
     expect(errors).toEqual([]);
     await context.close();
   });
+
+  test("phone: the outside links in a case are a finger tall", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-3`, phone);
+    await page.waitForSelector("dialog.case[open] .case-out a");
+    expect(await page.$eval("dialog.case .case-out a", (a) => a.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 });
 
 describe("copy link", () => {

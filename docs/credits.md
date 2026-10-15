@@ -38,3 +38,39 @@ ffmpeg -i src.wav -filter_complex "
 [xf][body]concat=n=2:v=0:a=1[out]" -map "[out]" -c:a pcm_f32le loop.wav
 ffmpeg -i loop.wav -af volume=3.7dB -map_metadata -1 -c:a aac -b:a 128k -ar 44100 -ac 2 -movflags +faststart site/media/music.m4a
 ```
+
+## Logos: site/media/{client,partner,platform,press}-*.svg
+
+Each logo is the trademark of its owner. The site shows it only to name a client, a publication that wrote about a case, a case's partner or the platform its results come from. Every file is one colour: the site draws it through a CSS mask, so only its shape counts. A test (`plugins/content/tests/content.test.ts`) keeps scripts, event handlers, embedded pictures and outside addresses out of these files.
+
+Clients ("Our clients" sheet on the wall), accessed 2026-10-15:
+
+- `client-mercedes-benz.svg`: Wikimedia Commons, `Mercedes-Benz (2025).svg`. The star and the wordmark stand side by side instead of stacked, so the wordmark stays readable when small.
+- `client-lavazza.svg`: lavazza.com, the header logo glyph from the site's `icomoon.ttf` icon font. Wordmark without the TORINO line.
+- `client-burger-king.svg`: simple-icons 13.21.0, `burgerking.svg`.
+- `client-danone.svg`: danone.it, the header logo (WebP, 1280 px), traced to vector. Emblem and wordmark, no tagline.
+- `client-efes.svg`: anadoluefes.com.tr, `efeslogo26.png`, traced to vector. The current Anadolu Efes logo; the Efes beer wordmark exists only as a small raster.
+- `client-skillbox.svg`: skillbox.ru, the header logo file.
+- `client-skyeng.svg`: skyeng.ru, the header file `skyeng-logo-dark.svg`. A thin gap cut around the front arrow, so both arrows read in one colour.
+- `client-skillfactory.svg`: skillfactory.ru, the header logo.
+- `client-geekbrains.svg`: ru.wikipedia, `Файл:Geekbrains_logo.svg`.
+- VK uses `partner-vk.svg` (below).
+
+Publications (Waldorf Astoria Berlin, "As seen in" and "In the press"):
+
+- `press-rolling-stone-uk.svg`: Wikimedia Commons, `Rolling_Stone_logo.svg`, with a small "UK" added after the wordmark.
+- `press-forbes-travel-guide.svg`: https://secure.s.forbestravelguide.com/images/ftg-logo.svg
+- `press-conde-nast-traveler.svg`: the header logo of https://www.cntraveler.com/hotels/berlin/waldorf-astoria-berlin
+- `press-business-traveller.svg`: the header logo of https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/
+
+Partners (DeckForge, "Official partners"):
+
+- `partner-vk.svg`: Wikimedia Commons, `VK Full Logo (2021-present).svg`.
+- `partner-rustore.svg`: https://static.rustore.ru/rustore-strapi/6/logo_color_30_px_2_fa2039288f.svg (the rustore.ru header logo).
+- `partner-xiaomi.svg`: Wikimedia Commons, `Xiaomi logo horizontal (2021-).svg`.
+
+Platforms (Dear Passengers, "Platforms"):
+
+- `platform-youtube.svg`: Wikimedia Commons, `YouTube_Logo_2017.svg`.
+- `platform-instagram.svg`: the glyph from simple-icons 13.21.0 `instagram.svg`, the wordmark from Wikimedia Commons `Instagram_logo.svg`.
+- `platform-tiktok.svg`: the glyph from simple-icons 13.21.0 `tiktok.svg`, the wordmark from Wikimedia Commons `Tiktok_logo_text.svg`.
