@@ -1,5 +1,6 @@
 // The content itself: texts in two languages and the studio's data, read in the chosen language.
 // Pure (no DOM), so it is tested directly.
+import { media } from "../../platform/media.ts";
 import type { CaseItem, Client, Contacts, Lang, Member, Service } from "./api.ts";
 import casesData from "./data/cases.json";
 import clientsData from "./data/clients.json";
@@ -11,12 +12,6 @@ import ru from "./data/texts.ru.json";
 
 type Local = { ru: string; en: string };
 const texts: Record<Lang, Record<string, string>> = { ru, en };
-
-// Media addresses with their file's content hash. build.ts puts the hashes in the bundle; the unit
-// tests run without a bundle, and there __MEDIA__ does not exist.
-declare const __MEDIA__: Record<string, string>;
-const versions: Record<string, string> = typeof __MEDIA__ === "undefined" ? {} : __MEDIA__;
-const media = (path: string) => (versions[path] ? `${path}?v=${versions[path]}` : path);
 
 // Address first, then the last visit, then the browser; anything but Russian reads English.
 export function pickLanguage(search: string, remembered: string | null, browser: readonly string[]): Lang {

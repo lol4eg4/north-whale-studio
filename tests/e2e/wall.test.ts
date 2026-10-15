@@ -607,9 +607,84 @@ describe("team badges", () => {
     await toBadge(page, 0);
     await page.click(".wall .tag >> nth=0");
     await page.waitForSelector("dialog.meet[open]");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
     await page.mouse.click(20, 20);
     await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
     expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a click next to the open card, still inside its box, sends it back", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+    const box = (await page.locator(".meet-box").boundingBox())!;
+    const card = (await page.locator(".meet-card").boundingBox())!;
+    expect(card.x - box.x).toBeGreaterThan(8);
+    await page.mouse.click(box.x + (card.x - box.x) / 2, box.y + box.height / 2);
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a double click leaves the badge open; Esc in flight turns it back from where it is; two quick Esc leave the wall whole", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const closed = async () => {
+      await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+      await page.waitForTimeout(700);
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("visible");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+    };
+    await toBadge(page, 0);
+    await page.dblclick(".wall .tag >> nth=0");
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(true);
+    await page.keyboard.press("Escape");
+    await closed();
+
+    // Held 200 ms into the flight, then Esc: the way back starts at that size, not at the full one.
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.evaluate(() => {
+      const a = document.querySelector(".meet-card")!.getAnimations()[0];
+      a.pause();
+      a.currentTime = 200;
+    });
+    await page.keyboard.press("Escape");
+    const scale = await page.evaluate(() => {
+      const from = String((document.querySelector(".meet-card")!.getAnimations()[0].effect as KeyframeEffect).getKeyframes()[0].transform);
+      const [a, b] = from.match(/-?[\d.e-]+/g)!.map(Number);
+      return Math.hypot(a, b);
+    });
+    expect(scale).toBeLessThan(0.95);
+    await closed();
+
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await closed();
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a lifted tile drops its corner clip, so its drag shadow is whole", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const tile = page.locator(".wall .tile").nth(2);
+    await tile.scrollIntoViewIfNeeded();
+    const b = (await tile.boundingBox())!;
+    expect(await tile.evaluate((t) => getComputedStyle(t).clipPath)).not.toBe("none");
+    await page.mouse.move(b.x + 100, b.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(b.x + 130, b.y + 110, { steps: 5 });
+    await page.mouse.move(b.x + 160, b.y + 120, { steps: 5 });
+    expect(await tile.evaluate((t) => [t.classList.contains("lifted"), getComputedStyle(t).clipPath])).toEqual([true, "none"]);
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await tile.evaluate((t) => getComputedStyle(t).clipPath)).not.toBe("none");
     expect(errors).toEqual([]);
     await context.close();
   });

@@ -314,7 +314,7 @@ describe("sound", () => {
     page.on("console", (m) => m.type() === "warning" && warnings.push(m.text()));
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(String(e)));
-    await page.route("**/media/music.m4a", (route) => route.fulfill({ status: 404, body: "no" }));
+    await page.route("**/media/music.m4a*", (route) => route.fulfill({ status: 404, body: "no" }));
     await page.reload({ waitUntil: "load" });
     const btn = page.locator(".ctrl .sound-btn");
     await btn.click();

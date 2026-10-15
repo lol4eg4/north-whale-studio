@@ -39,8 +39,9 @@
 dialog.sheet.meet { background: rgba(14, 14, 14, 0.45); }
 dialog.sheet.meet::backdrop { background: transparent; }
 dialog.sheet.meet[open] { display: grid; place-items: center; }
-.meet-box { --w: min(600px, calc(100vw - 48px), calc((100dvh - 120px) * 1.25)); width: var(--w); height: calc(var(--w) * 0.8); container-type: size; display: grid; place-items: center; }
-.meet-card { position: relative; width: 90cqw; height: 86cqh; cursor: pointer; }
+/* The box lets clicks through to the dialog: a click next to the card is a click outside. */
+.meet-box { --w: min(600px, calc(100vw - 48px), calc((100dvh - 120px) * 1.25)); width: var(--w); height: calc(var(--w) * 0.8); container-type: size; display: grid; place-items: center; pointer-events: none; }
+.meet-card { position: relative; width: 90cqw; height: 86cqh; cursor: pointer; pointer-events: auto; }
 .meet .tag { width: 100%; height: 100%; border-width: 1.2cqmin; box-shadow: var(--float); }
 .meet .tag-band b { font-size: 11cqmin; }
 .meet .tag-band i { font-size: 5cqmin; margin-top: 1.2cqmin; }

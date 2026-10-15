@@ -20,6 +20,7 @@ export function createMeet(motion: Motion, closeText: () => string, cursorText: 
 
   let badge: HTMLElement | null = null;
   let closing = false;
+  let openedAt = 0;
 
   // The badge's place on screen as a transform of the card: centre, size and tilt. The card sits
   // in the middle of the box, which never moves.
@@ -36,6 +37,7 @@ export function createMeet(motion: Motion, closeText: () => string, cursorText: 
     if (badge) return;
     badge = el;
     closing = false;
+    openedAt = performance.now();
     const copy = el.cloneNode(true) as HTMLElement;
     copy.className = "sticker tag";
     copy.removeAttribute("style");
@@ -44,18 +46,19 @@ export function createMeet(motion: Motion, closeText: () => string, cursorText: 
     copy.tabIndex = -1;
     copy.querySelector("img")?.setAttribute("src", photo);
     // A badge with a video plays it like the wall does: never in calm or with the pause on, where
-    // the photo shows. The copy has no listeners of its own, so it shows the video once it plays.
+    // the photo shows. The copy carries the wall video's address but none of its listeners: the
+    // address goes before it starts loading, and the copy shows the video once it plays.
     const clip = copy.querySelector("video");
     if (clip) {
       const spot = clip.parentElement!;
+      clip.removeAttribute("src");
+      clip.preload = "none";
+      spot.classList.remove("shown");
       if (video && !motion.calm && !motion.paused) {
         clip.muted = true;
         clip.addEventListener("playing", () => spot.classList.add("shown"));
         clip.src = video;
         void clip.play().catch(() => {});
-      } else {
-        spot.classList.remove("shown");
-        clip.removeAttribute("src");
       }
     }
     dlg.el.setAttribute("aria-label", label);
@@ -75,26 +78,55 @@ export function createMeet(motion: Motion, closeText: () => string, cursorText: 
     dlg.el.animate([{ backgroundColor: "transparent" }, { backgroundColor: DIM }], { duration: 300 });
   };
 
-  const done = () => {
+  const stop = () => {
     for (const a of [...card.getAnimations(), ...x.getAnimations(), ...dlg.el.getAnimations()]) a.cancel();
-    card.style.transform = "";
-    card.replaceChildren();
-    badge?.classList.remove("meeting");
-    dlg.close();
+  };
+
+  // Puts everything back. It also runs when the browser closes the dialog itself (a second Esc
+  // while the badge flies back); then the focus goes back to the badge from here.
+  const done = () => {
+    const el = badge;
+    if (!el) return;
     badge = null;
     closing = false;
+    stop();
+    card.style.transform = "";
+    card.replaceChildren();
+    el.classList.remove("meeting");
+    if (dlg.el.open) dlg.close();
+    else if (el.isConnected) el.focus({ preventScroll: true });
   };
 
   function close() {
     if (!badge || closing) return;
     closing = true;
     if (still()) return done();
-    const back = card.animate([{ transform: TILT }, { transform: from() }], { duration: 520, easing: BACK, fill: "forwards" });
-    x.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" });
-    dlg.el.animate([{ backgroundColor: DIM }, { backgroundColor: "transparent" }], { duration: 520, fill: "forwards" });
-    void back.finished.then(done);
+    // From wherever the card is now: Esc while it still flies out turns it around in the air.
+    const at = getComputedStyle(card).transform;
+    const dim = getComputedStyle(dlg.el).backgroundColor;
+    const shown = getComputedStyle(x).opacity;
+    stop();
+    const back = card.animate([{ transform: at === "none" ? TILT : at }, { transform: from() }], { duration: 520, easing: BACK, fill: "forwards" });
+    x.animate([{ opacity: shown }, { opacity: 0 }], { duration: 120, fill: "forwards" });
+    dlg.el.animate([{ backgroundColor: dim }, { backgroundColor: "transparent" }], { duration: 520, fill: "forwards" });
+    back.finished.then(done, () => {}); // cancelled: done() already ran
   }
 
   card.addEventListener("click", close);
+  dlg.el.addEventListener("close", done);
+  // A double click opens the badge: its second click must not send it straight back. The close
+  // button and Esc work at once.
+  dlg.el.addEventListener(
+    "click",
+    (e) => performance.now() - openedAt < 500 && !x.contains(e.target as Node) && e.stopImmediatePropagation(),
+    true,
+  );
+  // A hidden tab stops the badge's video, like every other video on the page.
+  document.addEventListener("visibilitychange", () => {
+    const clip = card.querySelector("video");
+    if (!clip?.getAttribute("src")) return;
+    if (document.hidden) clip.pause();
+    else if (!motion.calm && !motion.paused) void clip.play().catch(() => {});
+  });
   return { open, close };
 }
