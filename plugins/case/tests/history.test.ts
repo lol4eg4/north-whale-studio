@@ -18,10 +18,10 @@ describe("hash", () => {
     expect(parseHash("", ids)).toBe(null);
   });
 
-  test("Next wraps from the last case to the first", () => {
+  test("Next goes to the following case; there is none after the last", () => {
     expect(nextId(1, ids)).toBe(2);
     expect(nextId(7, ids)).toBe(8);
-    expect(nextId(8, ids)).toBe(1);
+    expect(nextId(8, ids)).toBeNull();
   });
 
   test("our own history entries carry nwsCase", () => {
@@ -60,9 +60,9 @@ describe("open and Next", () => {
     expect(onOpen(3, "tile", ctx(2, true))).toEqual([]);
   });
 
-  test("Next replaces the address and wraps 8 -> 1", () => {
+  test("Next replaces the address; on the last case it does nothing here", () => {
     expect(onNext(ctx(3))).toEqual([{ t: "replace", hash: "#case-4", id: 4 }, { t: "show", id: 4, from: "next" }]);
-    expect(onNext(ctx(8))).toEqual([{ t: "replace", hash: "#case-1", id: 1 }, { t: "show", id: 1, from: "next" }]);
+    expect(onNext(ctx(8))).toEqual([]); // the last case's Next closes it instead
     expect(onNext(ctx())).toEqual([]);
     expect(onNext(ctx(8, true))).toEqual([]);
   });

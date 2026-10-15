@@ -127,7 +127,7 @@ html.calm .wall .hello { transition: none; }
   .wall > .sz-fam { grid-column: span 2; grid-row: span 2; }
   .wall > .sw { grid-column: span 1; }
   .wall > .sz-sheet { grid-column: span 2; grid-row: span 2; }
-  .brand-sheet .logo-mark { --lh: clamp(14px, 9cqh, 30px); }
+  .brand-sheet .logo-mark { --lh: clamp(14px, 8cqh, 30px); }
   .wall > .sw .svc { padding: 8% 9%; }
   .wall > .d-only, .wall > .t6 { display: none; }
 }

@@ -266,6 +266,11 @@ describe("player", () => {
     ]);
     expect(await page.$$("dialog.case .case-out a")).toHaveLength(0);
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
+    // Antiquerus: a rise with no figure is the site's arrow, turned up, named for screen readers.
+    await page.evaluate(() => (location.hash = "#case-7"));
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Antiquerus");
+    expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.querySelector(".case-up")?.getAttribute("aria-label") ?? e.textContent))).toEqual(["↑", "↑", "500+"]);
+    expect(await page.$$eval("dialog.case .case-up", (els) => els.map((e) => e.getAttribute("role")))).toEqual(["img", "img"]);
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -351,6 +356,34 @@ describe("player", () => {
       const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
       return !v.paused && v.currentTime > 0;
     }, null, { timeout: 10000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("the focus ring reads on every case colour (3:1), and inside the torn press clippings", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`);
+    await page.waitForSelector("dialog.case[open]");
+    await page.keyboard.press("Tab"); // keyboard modality, so focus() shows the ring
+    const ratios: Record<number, number> = {};
+    for (const id of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      await page.evaluate((n) => (location.hash = `#case-${n}`), id);
+      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.includes(`0${n}`), id);
+      await page.focus("dialog.case .case-next");
+      ratios[id] = await page.evaluate(() => {
+        const lum = (c: string) => {
+          const [r, g, b] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map((x) => Number(x) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const ring = lum(getComputedStyle(document.activeElement!).outlineColor);
+        const panel = lum(getComputedStyle(document.querySelector(".case-in")!).backgroundColor);
+        return Math.round(((Math.max(ring, panel) + 0.05) / (Math.min(ring, panel) + 0.05)) * 100) / 100;
+      });
+    }
+    for (const [id, r] of Object.entries(ratios)) expect(r, `case ${id}`).toBeGreaterThanOrEqual(3);
+    await page.evaluate(() => (location.hash = "#case-1"));
+    await page.waitForSelector("dialog.case .case-clip");
+    await page.focus("dialog.case .case-clip");
+    expect(await page.$eval("dialog.case .case-clip", (e) => [getComputedStyle(e).outlineColor, parseFloat(getComputedStyle(e).outlineOffset) < 0])).toEqual(["rgb(14, 14, 14)", true]);
     expect(errors).toEqual([]);
     await context.close();
   });

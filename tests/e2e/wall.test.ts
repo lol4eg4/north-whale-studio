@@ -327,6 +327,35 @@ describe("wall media", () => {
     await context.close();
   });
 
+  test("Waldorf's tile: «В прессе» and four publication logos, drawn with its badge; other tiles show none", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const seen = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>(".wall .tile .plate-seen")].map((s) => ({
+          shown: !s.hidden,
+          label: s.querySelector(".mono")?.textContent ?? null,
+          logos: [...s.querySelectorAll(".logo-mark")].map((m) => [m.getAttribute("aria-label"), getComputedStyle(m).maskImage !== "none"]),
+        })),
+      );
+    const before = await seen();
+    expect(before[0].logos.every(([, drawn]) => !drawn)).toBe(true);
+    await page.waitForSelector(".wall .tile .plate-seen.on", { timeout: 8000 });
+    const after = await seen();
+    expect(after[0]).toEqual({
+      shown: true,
+      label: "В прессе",
+      logos: [
+        ["Rolling Stone UK", true],
+        ["Forbes Travel Guide", true],
+        ["Condé Nast Traveler", true],
+        ["Business Traveller", true],
+      ],
+    });
+    expect(after.slice(1).every((s) => !s.shown && s.logos.length === 0)).toBe(true);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
   test("hover: the lemon result flies out only under the mouse, the corner curls; touch screens show the result", async () => {
     // Headless Chromium reports no hover; these settings give it a mouse.
     const mouse = await chromium.launch({ args: ["--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4"] });
@@ -515,6 +544,18 @@ describe("team badges", () => {
       return Promise.all(urls.map(async (u) => (await fetch(u)).ok));
     });
     expect(ok.every(Boolean)).toBe(true);
+    // Every logo inside the sheet, and the sheet inside its cell, from the narrowest phone up.
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.waitForTimeout(150);
+      const fit = await page.evaluate(() => {
+        const s = document.querySelector<HTMLElement>(".wall .brand-sheet")!;
+        const box = s.getBoundingClientRect(), cell = s.parentElement!.getBoundingClientRect();
+        const marks = [...s.querySelectorAll(".logo-mark")].map((m) => m.getBoundingClientRect());
+        return { inCell: box.height <= cell.height + 0.5, inSheet: marks.every((m) => m.top >= box.top && m.bottom <= box.bottom && m.right <= box.right + 0.5) };
+      });
+      expect(fit, `${width} px`).toEqual({ inCell: true, inSheet: true });
+    }
     expect(errors).toEqual([]);
     await context.close();
   });

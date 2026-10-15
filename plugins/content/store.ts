@@ -66,7 +66,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         },
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         page: pages[getLang()][c.id] ?? null,
-        sr: [format("case.label", { n: c.id }), client, what, result]
+        sr: [format("case.label", { n: c.id }), client, what, result, c.press.length ? `${text("case.seenIn")}: ${c.press.map((p) => p.name).join(", ")}` : null]
           .filter(Boolean)
           .join(". "),
       };

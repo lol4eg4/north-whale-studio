@@ -1,7 +1,7 @@
 // Case history model: the address hash is the truth. Pure decisions; index.ts carries them out.
 //
 //   open from the page   pushState #case-N            (replaceState when a case is already open)
-//   Next                 replaceState #case-(N+1), 8 -> 1
+//   Next                 replaceState #case-(N+1); none after the last case (index.ts closes it)
 //   load with #case-N    replaceState(no hash), pushState #case-N, open from "link"
 //   Back / hash change   valid #case-N opens, anything else closes
 //   close                our own entry -> history.back(); else replaceState #cases
@@ -29,7 +29,8 @@ export function parseHash(hash: string, ids: number[]): number | "unknown" | nul
   return ids.includes(n) ? n : "unknown";
 }
 
-export const nextId = (id: number, ids: number[]) => ids[(ids.indexOf(id) + 1) % ids.length];
+// null after the last case: its Next leads back to the wall.
+export const nextId = (id: number, ids: number[]): number | null => ids[ids.indexOf(id) + 1] ?? null;
 
 export const isOurEntry = (state: unknown) => typeof state === "object" && state !== null && "nwsCase" in state;
 
@@ -49,6 +50,7 @@ export function onOpen(id: number, from: CaseFrom, ctx: Ctx): Act[] {
 export function onNext(ctx: Ctx): Act[] {
   if (ctx.open === null || ctx.closing) return [];
   const id = nextId(ctx.open, ctx.ids);
+  if (id === null) return [];
   return [{ t: "replace", hash: `#case-${id}`, id }, { t: "show", id, from: "next" }];
 }
 

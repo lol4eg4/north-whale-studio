@@ -12,7 +12,7 @@ import { button, goTo, h, icon, overlay, placeholderBox, toast } from "../../pla
 import { logoMark } from "../../platform/ui/tile.ts";
 import type { CaseItem, CasePage, ContentApi } from "../content/api.ts";
 import type { CaseApi } from "./api.ts";
-import { onLoad, onNavigate, onNext, onOpen, onRequestClose, type Act } from "./history.ts";
+import { nextId, onLoad, onNavigate, onNext, onOpen, onRequestClose, type Act } from "./history.ts";
 import { createPlayer } from "./player.ts";
 import "./style.css";
 
@@ -140,11 +140,10 @@ export default function init(host: Host) {
     mediaTag.textContent = c.page?.media ?? "";
     mediaTag.hidden = !c.page;
     // Next names the next case; the last one leads back to the wall.
-    const n = all[i + 1];
-    nextText.textContent = n ? content().format("case.nextTo", { title: n.client }) : text("case.toWall");
+    const n = nextId(c.id, ids());
+    nextText.textContent = n !== null ? content().format("case.nextTo", { title: content().caseById(n)!.client }) : text("case.toWall");
     field.hidden = true;
   };
-  const isLast = () => openId !== null && openId === ids().at(-1);
 
   const show = (id: number, from: CaseFrom) => {
     const c = content().caseById(id);
@@ -237,7 +236,7 @@ export default function init(host: Host) {
   });
   closeBtn.addEventListener("click", () => requestClose());
   talk.addEventListener("click", () => requestClose(() => goTo("#contacts")));
-  next.addEventListener("click", () => (isLast() ? requestClose() : run(onNext(ctx()))));
+  next.addEventListener("click", () => (openId !== null && nextId(openId, ids()) === null ? requestClose() : run(onNext(ctx()))));
   copy.addEventListener("click", async () => {
     if (openId === null) return;
     const link = address(`#case-${openId}`);

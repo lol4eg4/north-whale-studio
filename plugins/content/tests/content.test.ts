@@ -54,9 +54,9 @@ describe("cases", () => {
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
-  test("screen readers hear number, client and what the file name says", () => {
+  test("screen readers hear number, client, what, result and the press that wrote about it", () => {
     expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ органических просмотров");
-    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production");
+    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. 200% средняя окупаемость рекламы");
     expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook. Редизайн сайта");
     expect(store("ru").caseById(9)).toBeUndefined();
@@ -137,6 +137,18 @@ describe("studio data", () => {
       expect(b.ratio).toBeGreaterThan(0);
       expect(b.scale).toBeGreaterThan(0);
     }
+  });
+
+  test("a logo used twice (VK on the sheet and in DeckForge's partners) has one name, ratio and scale", () => {
+    const s = store("ru");
+    const all = [...s.brands(), ...s.cases().flatMap((c) => [...c.logos, ...c.press])];
+    const seen = new Map<string, string>();
+    for (const l of all) {
+      const shape = JSON.stringify([l.name, l.ratio, l.scale]);
+      expect(seen.get(l.logo) ?? shape, l.logo).toBe(shape);
+      seen.set(l.logo, shape);
+    }
+    expect(seen.size).toBeLessThan(all.length);
   });
 
   test("clients come from the cases; websites and packaging lead the services", () => {

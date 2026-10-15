@@ -2,8 +2,10 @@
    colour (--case-bg, from cases.json), as each case page of the reference does; dark colours
    (.on-ink) take light text. */
 dialog.sheet.case { padding: 28px; }
-.case-in { --case-bg: var(--cobalt); --case-fg: var(--ink); --case-soft: color-mix(in srgb, var(--case-fg) 80%, transparent); height: 100%; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: var(--case-bg); color: var(--case-fg); border-radius: 10px; overflow: hidden; }
+.case-in { --case-bg: var(--cobalt); --case-fg: var(--ink); --case-soft: color-mix(in srgb, var(--case-fg) 85%, transparent); height: 100%; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: var(--case-bg); color: var(--case-fg); border-radius: 10px; overflow: hidden; }
 .case-in.on-ink { --case-fg: var(--paper); }
+/* Cobalt is under 3:1 on buoy and jellyfish: the focus ring is ink there. */
+.case-in:is([data-bg="buoy"], [data-bg="jellyfish"]) :focus-visible { outline-color: var(--ink); }
 
 /* Media: an inset card on the case colour */
 .case-art { position: relative; display: flex; flex-direction: column; min-height: 0; min-width: 0; margin: 14px 0 14px 14px; border-radius: 8px; overflow: hidden; background: var(--ink); }
@@ -67,9 +69,10 @@ dialog.sheet.case { padding: 28px; }
 .case-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin: 0; padding: 14px 0 16px; border-block: 2px solid var(--case-fg); }
 .case-meta dt { font-size: 11px; color: var(--case-soft); margin-bottom: 6px; }
 .case-meta dd { margin: 0; font: 600 16px/1.3 var(--sans); }
-.case-lead { font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); }
+.case-lead { max-width: 62ch; font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); }
 .case-how { display: flex; flex-direction: column; gap: 12px; font: 500 17px/1.45 var(--sans); }
 .case-how h3 { margin: 0; color: var(--case-soft); }
+.case-how p { max-width: 62ch; }
 .case-kicker { font: 700 16px/1.3 var(--sans); }
 .case-lead mark, .case-how mark { color: var(--ink); background-position: 0 0; background-size: var(--mark, 100%) 100%; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .case-card { position: relative; display: flex; flex-direction: column; gap: 12px; margin-top: 14px; padding: 32px 22px 22px; background: var(--paper); color: var(--ink); border-radius: var(--rounded-card); box-shadow: var(--die); rotate: -0.6deg; font: 500 16px/1.45 var(--sans); }
@@ -95,6 +98,8 @@ dialog.sheet.case { padding: 28px; }
 .case-clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 14px; }
 .case-clip { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 16px 16px; background: var(--tape); color: var(--ink); text-decoration: none; rotate: -0.8deg; clip-path: polygon(0 5px, 9% 1px, 18% 5px, 29% 0, 41% 4px, 52% 1px, 63% 5px, 74% 0, 86% 4px, 94% 1px, 100% 4px, 100% calc(100% - 3px), 92% calc(100% - 6px), 81% 100%, 69% calc(100% - 5px), 57% calc(100% - 1px), 45% calc(100% - 6px), 33% 100%, 22% calc(100% - 5px), 11% calc(100% - 1px), 0 calc(100% - 5px)); transition: rotate 0.3s var(--ease-spring), translate 0.3s var(--ease-spring); }
 .case-clip:nth-child(even) { rotate: 0.7deg; }
+/* The torn edge clips anything outside the clipping: the ring goes inside, ink on cream. */
+.case-in .case-clip:focus-visible { outline: 3px solid var(--ink); outline-offset: -8px; }
 .case-clip .logo-mark { --lh: 22px; max-width: 100%; }
 .case-clip-t { font: 700 17px/1.2 var(--sans); letter-spacing: -0.01em; }
 .case-clip .mono { margin-top: auto; color: rgba(14, 14, 14, 0.6); }
@@ -114,6 +119,7 @@ html.calm .case-card, html.calm .case-tag, html.calm .case-hand { rotate: none; 
 .case-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: auto; padding-top: 8px; }
 /* Next: ink on light colours, lemon on dark ones; Say hello: an outline in the text colour. */
 .btn.case-next { white-space: normal; text-align: left; background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.btn.case-next svg { flex: none; } /* a long name wraps; the arrow keeps its size */
 .on-ink .btn.case-next { background: var(--lemon); border-color: var(--lemon); color: var(--ink); }
 .case-in .btn-ghost { border-color: var(--case-soft); color: var(--case-fg); }
 @media (hover: hover) {

@@ -16,11 +16,13 @@
    a small tile has no room for them. */
 .plate-seen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(14, 14, 14, 0.15); }
 .plate-seen[hidden] { display: none; }
-.plate-seen .mono { font-style: normal; font-size: 9.5px; color: rgba(14, 14, 14, 0.65); }
+.plate-seen .mono { font-style: normal; font-size: 10px; color: rgba(14, 14, 14, 0.65); }
 .plate-seen .logo-mark { --lh: clamp(10px, 3cqmin, 15px); }
 .plate-seen:not(.on) .logo-mark { -webkit-mask-image: none; mask-image: none; background: transparent; }
 @container (max-width: 340px) { .plate-seen { display: none; } }
 .logo-mark { display: inline-block; flex: none; height: calc(var(--lh, 14px) * var(--s, 1)); aspect-ratio: var(--ar); background: currentColor; -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; }
+/* High contrast mode drops the ink background, and the mask would paint nothing. */
+@media (forced-colors: active) { .logo-mark { forced-color-adjust: none; background: CanvasText; } }
 /* The result: a lemon plate that flies out of the plate on hover (always out on touch screens). */
 .plate-more { display: grid; grid-template-rows: 0fr; margin-top: 0; transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin-top 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .plate-more[hidden] { display: none; }
