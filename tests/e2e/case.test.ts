@@ -233,6 +233,15 @@ describe("player", () => {
     expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
     await page.click("dialog.case video");
     await page.waitForFunction(() => !document.querySelector<HTMLVideoElement>("dialog.case video")!.paused, null, { timeout: 5000 });
+    // In full screen the browser's own controls take the click: ours must not toggle it back.
+    expect(await page.evaluate(() => {
+      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+      v.controls = true;
+      v.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      const paused = v.paused;
+      v.controls = false;
+      return paused;
+    })).toBe(false);
     expect(errors).toEqual([]);
     await context.close();
   });

@@ -88,7 +88,8 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
     render();
   };
   go.addEventListener("click", toggle);
-  video.addEventListener("click", toggle);
+  // In full screen the browser's own controls already play and pause on a click.
+  video.addEventListener("click", () => video.controls || toggle());
   mute.addEventListener("click", () => {
     video.muted = !video.muted;
     render();

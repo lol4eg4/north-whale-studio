@@ -81,13 +81,14 @@ async function mediaVersions(root: string): Promise<Record<string, string>> {
   const dir = join(root, "site", "media");
   const versions: Record<string, string> = {};
   // A root without a media folder (the build tests' small sites) has nothing to version.
-  const names = await readdir(dir).catch((e: NodeJS.ErrnoException) => {
+  const entries = await readdir(dir, { withFileTypes: true }).catch((e: NodeJS.ErrnoException) => {
     if (e.code === "ENOENT") return [];
     throw e;
   });
-  for (const name of names) {
-    const bytes = new Uint8Array(await Bun.file(join(dir, name)).arrayBuffer());
-    versions[`/media/${name}`] = createHash("sha1").update(bytes).digest("hex").slice(0, 8);
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const bytes = new Uint8Array(await Bun.file(join(dir, entry.name)).arrayBuffer());
+    versions[`/media/${entry.name}`] = createHash("sha1").update(bytes).digest("hex").slice(0, 8);
   }
   return versions;
 }
