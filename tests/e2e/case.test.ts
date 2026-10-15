@@ -100,6 +100,24 @@ describe("open and close", () => {
     await context.close();
   });
 
+  // Regression: ISSUE-001 — «Написать нам» set #contacts but the page stayed where it was:
+  // the browser restored the scroll after Back. Found by QA on 2026-10-15.
+  for (const [how, url] of [["a tile", "/?lang=ru"], ["a link", "/?lang=ru#case-4"]] as const) {
+    test(`«Написать нам» in a case opened from ${how} brings the contacts into view`, async () => {
+      const { context, page, errors } = await open(browser, `${srv.url}${url}`);
+      if (how === "a tile") await openTile(page, 4);
+      else await page.waitForSelector("dialog.case[open]");
+      await page.click("dialog.case .case-talk");
+      await waitClosed(page);
+      await page.waitForFunction(() => {
+        const r = document.querySelector("#contacts")!.getBoundingClientRect();
+        return r.top >= 0 && r.top < innerHeight / 2;
+      }, null, { timeout: 5000 });
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
+
   test("a press inside the panel released on the outer margin keeps the case open; a plain click there closes it", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     await openTile(page, 2);

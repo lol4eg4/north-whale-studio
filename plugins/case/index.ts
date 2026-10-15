@@ -235,7 +235,8 @@ export default function init(host: Host) {
     if (openId !== null && !closing) requestClose();
   });
   closeBtn.addEventListener("click", () => requestClose());
-  talk.addEventListener("click", () => requestClose(() => goTo("#contacts")));
+  // After Back the browser puts the scroll back where it was: jump to contacts once it has.
+  talk.addEventListener("click", () => requestClose(() => setTimeout(() => goTo("#contacts"))));
   next.addEventListener("click", () => (openId !== null && nextId(openId, ids()) === null ? requestClose() : run(onNext(ctx()))));
   copy.addEventListener("click", async () => {
     if (openId === null) return;
