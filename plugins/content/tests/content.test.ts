@@ -65,19 +65,31 @@ describe("cases", () => {
     const shape = (id: number, lang: "ru" | "en") => {
       const p = store(lang).caseById(id)!.page;
       if (!p) return null;
-      return [p.how.text.length, !!p.card, p.role.items.length, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
+      return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
     };
-    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 3, 5, 7]);
+    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     for (const c of cases) {
       expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
       const p = c.page;
       if (!p) continue;
-      for (const v of [p.eyebrow, p.title, p.client, p.category, p.lead, p.media, p.how.title, p.how.kicker, p.role.deliverables]) expect(v.trim()).not.toBe("");
-      const texts = [p.lead, ...p.how.text, p.card?.copy ?? "", p.role.deliverables];
+      expect(p.sections.length).toBeGreaterThan(0);
+      for (const v of [p.eyebrow, p.title, p.client, p.category, p.lead, p.media, ...p.sections.map((x) => x.title), p.role.deliverables]) expect(v.trim()).not.toBe("");
+      const texts = [p.lead, ...p.sections.flatMap((x) => x.text), p.card?.copy ?? "", p.role.deliverables];
       for (const t of texts) expect(t.split("==").length % 2, t).toBe(1);
       for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
     }
     expect(store("en").caseById(3)!.page!.links[0].url).toBe(store("ru").caseById(3)!.page!.links[0].url);
+  });
+
+  test("partners: DeckForge's three, shown in its results, each logo on disk", () => {
+    expect(cases.find((c) => c.id === 8)!.partners.map((p) => p.name)).toEqual(["VK", "RuStore", "Xiaomi"]);
+    for (const c of cases) {
+      if (c.partners.length) expect(c.page?.results, `case ${c.id}`).toBeTruthy(); // the logo row lives in the results card
+      for (const p of c.partners) {
+        expect(Bun.file(`${import.meta.dir}/../../../site${p.logo}`).size, p.logo).toBeGreaterThan(0);
+        expect(p.ratio).toBeGreaterThan(1);
+      }
+    }
   });
 
   test("press: Waldorf's four publications, each with a logo on disk, a ratio, a headline and a link", () => {

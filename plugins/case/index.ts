@@ -92,7 +92,7 @@ export default function init(host: Host) {
       ] as const
     ).map(([key, value]) => h("div", {}, h("dt", { class: "mono" }, text(key)), h("dd", {}, value)))),
     h("p", { class: "case-lead" }, ...marked(p.lead)),
-    h("section", { class: "case-how" }, h("h3", { class: "mono" }, p.how.title), h("p", { class: "case-kicker" }, p.how.kicker), ...p.how.text.map((s) => h("p", {}, ...marked(s)))),
+    ...p.sections.map((x) => h("section", { class: "case-how" }, h("h3", { class: "mono" }, x.title), x.kicker && h("p", { class: "case-kicker" }, x.kicker), ...x.text.map((s) => h("p", {}, ...marked(s))))),
     p.card &&
       h("section", { class: "case-card" }, h("h3", { class: "case-tag" }, p.card.label), h("p", { class: "case-card-h" }, p.card.headline), h("p", {}, ...marked(p.card.copy, "b")), h("p", { class: "case-hand" }, p.card.hand)),
     h(
@@ -109,6 +109,7 @@ export default function init(host: Host) {
         h("h3", { class: "case-tag" }, text("case.results")),
         h("ul", {}, ...p.results.items.map((r) => h("li", {}, h("b", {}, r.value === "↑" ? up() : r.value), h("span", {}, r.label)))),
         p.results.note && h("p", {}, p.results.note),
+        c.partners.length > 0 && h("div", { class: "case-partners" }, h("span", { class: "mono" }, text("case.partners")), ...c.partners.map((m) => logoMark(m))),
       ),
     c.press.length > 0 &&
       h(

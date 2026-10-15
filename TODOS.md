@@ -4,7 +4,9 @@ Deferred on purpose. Each item names what it waits for.
 
 ## Waits for the studio's own data
 
-- Case pages for AG1 (2), Mabrook (4), Sergey Ibadov (6) and DeckForge (8): placeholders until the studio sends texts. Waldorf (1), Dear Passengers (3), King’s (5) and Antiquerus (7) have pages in `plugins/content/data/pages.*.json`.
+- AG1 (2) results: the studio's text has [X] in place of the numbers and no baseline. The page has no results card until they arrive.
+- DeckForge (8) website link: the studio wrote «Visit the website» with no address; play.deckforge.net from their YouTube shows the host's «renew your subscription» page.
+- Pictures for AG1 (2: advertorials, landing pages) and Sergey Ibadov (6: brand identity): the pages show only the videos.
 - Brand films for Waldorf Astoria Berlin (1) and King’s Resort & Casino (5): their pages name a film, but the case videos are the website recordings.
 - Contacts: real email, WhatsApp, socials (Telegram is real). Now placeholders in `plugins/content/data/contacts.json`; the `<noscript>` line in `site/index.html` repeats the email.
 - Subtitles for cases 3, 6 and 8 (the cases with sound): add `<track>` files when the texts arrive.

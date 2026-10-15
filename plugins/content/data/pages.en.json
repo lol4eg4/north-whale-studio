@@ -6,21 +6,75 @@
   "category": "Branding, Website, Production",
   "lead": "A New York legend in a Berlin skyscraper. We gave it a look, a website and a film of its own.",
   "media": "The website",
-  "how": {
-   "title": "How we built it",
-   "kicker": "Identity · Website · Film",
-   "text": [
-    "We started from the hotel itself: ==art deco from Park Avenue, set inside the Zoofenster tower== above City West. We turned that into a visual identity and rebuilt the website around it, from the rooms and the spa to Lang Bar and Peacock Alley.",
-    "Then we shot the hotel the way guests live it: the lobby, the suites, the views and the bar after dark. The result is ==one consistent brand== across the website, social and the hotel itself."
-   ]
-  },
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Identity · Website · Film",
+    "text": [
+     "We started from the hotel itself: ==art deco from Park Avenue, set inside the Zoofenster tower== above City West. We turned that into a visual identity and rebuilt the website around it, from the rooms and the spa to Lang Bar and Peacock Alley.",
+     "Then we shot the hotel the way guests live it: the lobby, the suites, the views and the bar after dark. The result is ==one consistent brand== across the website, social and the hotel itself."
+    ]
+   }
+  ],
   "card": null,
   "role": {
-   "items": ["Production", "Branding", "Website"],
+   "items": [
+    "Production",
+    "Branding",
+    "Website"
+   ],
    "deliverables": "the brand identity, the redesigned website and the brand film."
   },
   "results": null,
-  "links": [{ "label": "The hotel’s website", "url": "https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/" }]
+  "links": [
+   {
+    "label": "The hotel’s website",
+    "url": "https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/"
+   }
+  ]
+ },
+ "2": {
+  "eyebrow": "AG1 · Europe",
+  "title": "Daily Ritual",
+  "client": "AG1",
+  "category": "Website Redesign, Performance Marketing",
+  "lead": "One scoop a day is an easy habit. Getting someone to try it for the first time is the hard part. We rebuilt the path from first click to first order.",
+  "media": "The work",
+  "sections": [
+   {
+    "title": "Overview",
+    "kicker": null,
+    "text": [
+     "AG1 came to us to make paid traffic work harder in Europe. We redesigned the website and built a system of advertorials and landing pages for each traffic source. Every click now lands on a page that ==continues the conversation the ad started==."
+    ]
+   },
+   {
+    "title": "The anatomy",
+    "kicker": "Advertorial · Landing page · Website",
+    "text": [
+     "The advertorial tells the story and earns the reader’s trust. The landing page turns that interest into a clear offer. The website closes the sale and brings people back.",
+     "Every page was built to be tested, so the team can ==swap angles, headlines and offers== without rebuilding the funnel."
+    ]
+   }
+  ],
+  "card": null,
+  "role": {
+   "items": [
+    "Web Design",
+    "Development",
+    "Copywriting",
+    "Advertorials",
+    "Landing Pages"
+   ],
+   "deliverables": "the redesigned website, a series of advertorials and landing pages for paid traffic."
+  },
+  "results": null,
+  "links": [
+   {
+    "label": "Visit drinkag1.com",
+    "url": "https://drinkag1.com/"
+   }
+  ]
  },
  "3": {
   "eyebrow": "FLEXUS · Game Trailer",
@@ -29,13 +83,15 @@
   "category": "Game Trailer",
   "lead": "A mobile studio’s first PC game had one shot at getting noticed. The reveal trailer took off, with 100M+ views in its first month.",
   "media": "The trailer",
-  "how": {
-   "title": "How we made it",
-   "kicker": "Concept · Production · Editing",
-   "text": [
-    "The world’s worst airline, in under a minute. We built the trailer around ==pure in-flight chaos==: turbulence, flying luggage and a crew one bad call away from disaster. Every beat sets up the game and lands a joke."
-   ]
-  },
+  "sections": [
+   {
+    "title": "How we made it",
+    "kicker": "Concept · Production · Editing",
+    "text": [
+     "The world’s worst airline, in under a minute. We built the trailer around ==pure in-flight chaos==: turbulence, flying luggage and a crew one bad call away from disaster. Every beat sets up the game and lands a joke."
+    ]
+   }
+  ],
   "card": {
    "label": "One launch",
    "headline": "1 trailer. Dozens of shorts. 100M+ views.",
@@ -43,19 +99,74 @@
    "hand": "Built to be clipped, shared and replayed."
   },
   "role": {
-   "items": ["Concept", "Production", "Editing"],
+   "items": [
+    "Concept",
+    "Production",
+    "Editing"
+   ],
    "deliverables": "the reveal trailer and a series of shorts for social."
   },
   "results": {
    "items": [
-    { "value": "100M+", "label": "views across all platforms in the first month" },
-    { "value": "322%", "label": "average return on ad spend" },
-    { "value": "100×", "label": "outlier on YouTube" },
-    { "value": "500K+", "label": "Steam wishlists" }
+    {
+     "value": "100M+",
+     "label": "views across all platforms in the first month"
+    },
+    {
+     "value": "322%",
+     "label": "average return on ad spend"
+    },
+    {
+     "value": "100×",
+     "label": "outlier on YouTube"
+    },
+    {
+     "value": "500K+",
+     "label": "Steam wishlists"
+    }
    ],
    "note": "Within the first month after release."
   },
-  "links": [{ "label": "Watch the trailer", "url": "https://www.youtube.com/watch?v=bH9zvvhGitY" }]
+  "links": [
+   {
+    "label": "Watch the trailer",
+    "url": "https://www.youtube.com/watch?v=bH9zvvhGitY"
+   }
+  ]
+ },
+ "4": {
+  "eyebrow": "Mabrook · Dubai",
+  "title": "Congratulations",
+  "client": "Mabrook",
+  "category": "Website Redesign",
+  "lead": "Mabrook is Arabic for “congratulations”. The app packs short video, live streams, games, music challenges and a marketplace into one login. The website had to explain all of it in one scroll.",
+  "media": "The website",
+  "sections": [
+   {
+    "title": "How we rebuilt it",
+    "kicker": "Strategy · Design · Development",
+    "text": [
+     "A super app is a hard thing to explain. We built the site as ==one continuous story==: start with the feed, then music challenges, game battles, AI personalization and the marketplace. Each feature gets one idea, one screen and one line.",
+     "Real app screens and motion do the talking, not feature lists. The page is split for ==both sides of the platform==: creators who want to go live and get paid, and brands that want to reach their communities."
+    ]
+   }
+  ],
+  "card": null,
+  "role": {
+   "items": [
+    "Web Design",
+    "Development",
+    "Motion"
+   ],
+   "deliverables": "the redesigned mabrook.ai, from structure and copy flow to the final build."
+  },
+  "results": null,
+  "links": [
+   {
+    "label": "Visit mabrook.ai",
+    "url": "https://mabrook.ai/"
+   }
+  ]
  },
  "5": {
   "eyebrow": "King’s Resort · Rozvadov",
@@ -64,21 +175,62 @@
   "category": "Branding, Website, Production",
   "lead": "Europe’s biggest poker room, the home of the WSOP Europe, needed a brand to match. We built it end to end.",
   "media": "The website",
-  "how": {
-   "title": "How we built it",
-   "kicker": "Brand · Website · Film",
-   "text": [
-    "We created ==one kingdom across every touchpoint==: a new identity, a website designed around the guest’s day, and a brand film that opens it.",
-    "We spent five days on site filming the resort live: the poker room, the casino floor, the suites, the spa and the restaurant. The result is a ==full-cycle brand== that feels the same online and on the floor."
-   ]
-  },
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Brand · Website · Film",
+    "text": [
+     "We created ==one kingdom across every touchpoint==: a new identity, a website designed around the guest’s day, and a brand film that opens it.",
+     "We spent five days on site filming the resort live: the poker room, the casino floor, the suites, the spa and the restaurant. The result is a ==full-cycle brand== that feels the same online and on the floor."
+    ]
+   }
+  ],
   "card": null,
   "role": {
-   "items": ["Production", "Branding", "Website"],
+   "items": [
+    "Production",
+    "Branding",
+    "Website"
+   ],
    "deliverables": "the Kings identity, the website and the brand film."
   },
   "results": null,
-  "links": [{ "label": "The resort’s website", "url": "https://kings-resort.com/" }]
+  "links": [
+   {
+    "label": "The resort’s website",
+    "url": "https://kings-resort.com/"
+   }
+  ]
+ },
+ "6": {
+  "eyebrow": "Sergey Ibadov · Real Estate Agent",
+  "title": "A Name Worth Calling",
+  "client": "Sergey Ibadov",
+  "category": "Personal Branding, Website",
+  "lead": "In real estate, people don’t choose an agency. They choose a person. We turned Sergey into the agent clients trust before the first viewing.",
+  "media": "The brand",
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Positioning · Identity · Website",
+    "text": [
+     "Buying or selling a home is one of the biggest decisions people make, and they want someone they can rely on. We built Sergey’s brand around that: ==a clear position, a calm, confident look== and one tone of voice across the website, social and listings.",
+     "The website has one job: more inquiries. It shows his properties and closed deals, explains how he works and makes it easy to book a call. New clients ==arrive already trusting him==, so the first meeting starts with the property, not the pitch."
+    ]
+   }
+  ],
+  "card": null,
+  "role": {
+   "items": [
+    "Positioning",
+    "Branding",
+    "Web Design",
+    "Development"
+   ],
+   "deliverables": "the personal brand identity and a website built to generate inquiries."
+  },
+  "results": null,
+  "links": []
  },
  "7": {
   "eyebrow": "Antiquerus · Moscow, Paris, Dubai",
@@ -87,14 +239,16 @@
   "category": "Website Redesign",
   "lead": "Antiques, gems and Swiss watches deserve a site that feels as valuable as what it buys. We redesigned Antiquerus from the ground up.",
   "media": "The website",
-  "how": {
-   "title": "How we rebuilt it",
-   "kicker": "Design · Development · SEO",
-   "text": [
-    "Antiquerus buys everything from Fabergé-era silver to Tibetan thangkas and Cartier. We turned a long, complex catalog into ==a calm, gallery-like experience==, where every category has its own page, its own visuals and a short path to an appraisal.",
-    "The new structure was built for search from day one. The site climbed in search rankings, and more visitors went all the way to ==request a valuation==."
-   ]
-  },
+  "sections": [
+   {
+    "title": "How we rebuilt it",
+    "kicker": "Design · Development · SEO",
+    "text": [
+     "Antiquerus buys everything from Fabergé-era silver to Tibetan thangkas and Cartier. We turned a long, complex catalog into ==a calm, gallery-like experience==, where every category has its own page, its own visuals and a short path to an appraisal.",
+     "The new structure was built for search from day one. The site climbed in search rankings, and more visitors went all the way to ==request a valuation==."
+    ]
+   }
+  ],
   "card": {
    "label": "One catalog",
    "headline": "500+ visuals. 60+ pages. One visual language.",
@@ -102,14 +256,78 @@
    "hand": "Nothing off the shelf."
   },
   "role": {
-   "items": ["Web Design", "Development", "SEO", "Illustration", "Production"],
+   "items": [
+    "Web Design",
+    "Development",
+    "SEO",
+    "Illustration",
+    "Production"
+   ],
    "deliverables": "the redesigned antiquerus.ru, 500+ custom images and elements, and an SEO-ready structure."
   },
   "results": {
    "items": [
-    { "value": "↑", "label": "conversion to valuation requests" },
-    { "value": "↑", "label": "search rankings" },
-    { "value": "500+", "label": "custom visuals" }
+    {
+     "value": "↑",
+     "label": "conversion to valuation requests"
+    },
+    {
+     "value": "↑",
+     "label": "search rankings"
+    },
+    {
+     "value": "500+",
+     "label": "custom visuals"
+    }
+   ],
+   "note": null
+  },
+  "links": []
+ },
+ "8": {
+  "eyebrow": "DeckForge · MMO Roguelike Card Battler",
+  "title": "Shape the Universe",
+  "client": "DeckForge",
+  "category": "Website, Art, Game Teaser",
+  "lead": "A free-to-play card battler with a whole multiverse behind it. We gave it a home, its heroes and a first glimpse of gameplay.",
+  "media": "The teaser",
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Website · Characters · Illustration · Teaser",
+    "text": [
+     "DeckForge mixes ==relic cards, seasonal updates and endless replayability== across PC, mobile and consoles. We built the website as a gateway into that multiverse: the world, the heroes and the platforms are one click from “Play”.",
+     "We designed the characters and illustrations that give the universe its faces, then cut a gameplay teaser that shows ==how a run actually feels==: draw, play, forge, repeat."
+    ]
+   }
+  ],
+  "card": {
+   "label": "One universe",
+   "headline": "1 website. A cast of heroes. 1 teaser.",
+   "copy": "Every piece was made by one team, so the site, the characters and the teaser ==share a single visual language==, ready for every platform the game ships on.",
+   "hand": "Forge your deck. We forged the rest."
+  },
+  "role": {
+   "items": [
+    "Web Design",
+    "Development",
+    "Character Design",
+    "Illustration",
+    "Production",
+    "Editing"
+   ],
+   "deliverables": "the DeckForge website, character designs and illustrations, and the gameplay teaser."
+  },
+  "results": {
+   "items": [
+    {
+     "value": "100K+",
+     "label": "players"
+    },
+    {
+     "value": "1h+",
+     "label": "average session"
+    }
    ],
    "note": null
   },

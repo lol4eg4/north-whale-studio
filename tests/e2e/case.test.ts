@@ -31,7 +31,7 @@ describe("open and close", () => {
   test("a tile opens the case; Esc closes it and focus returns to the tile", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     await openTile(page, 2);
-    expect(await title(page)).toBe("AG1");
+    expect(await title(page)).toBe("Ежедневный ритуал");
     expect(await hash(page)).toBe("#case-2");
     expect(await page.textContent(".case-count")).toBe("Кейс 02 из 08");
     expect(await focusIs(page, "dialog.case .case-x")).toBe(true);
@@ -76,9 +76,9 @@ describe("open and close", () => {
     const before = await page.evaluate(() => history.length);
     await openTile(page, 7);
     expect(await title(page)).toBe("Пространство времени");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: DeckForge");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Создай вселенную");
     await page.click("dialog.case .case-next");
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Создай вселенную");
     expect(await hash(page)).toBe("#case-8");
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
     expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
@@ -154,7 +154,7 @@ describe("links and history", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
     expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Next: AG1");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Next: Daily Ritual");
     await page.keyboard.press("Escape");
     await waitClosed(page);
     expect(page.url()).toBe(`${srv.url}/?lang=en`);
@@ -168,7 +168,7 @@ describe("links and history", () => {
     await page.evaluate(() => history.pushState(null, "", "#case-3"));
     expect(await isOpen(page)).toBe(false);
     await openTile(page, 2);
-    expect(await title(page)).toBe("AG1");
+    expect(await title(page)).toBe("Ежедневный ритуал");
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Dear Passengers", null, { timeout: 5000 });
     expect(await isOpen(page)).toBe(true);
@@ -220,7 +220,7 @@ describe("player", () => {
     await en.context.close();
   });
 
-  test("a case page: meta, highlights, cards, results and outside links; a case with no page keeps its placeholders", async () => {
+  test("a case page: meta, highlights, cards, results, partners and outside links", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=en#case-3`);
     await page.waitForSelector("dialog.case[open]");
     expect(await page.$$eval("dialog.case .case-meta dt", (els) => els.map((e) => e.textContent))).toEqual(["Client", "Category"]);
@@ -244,11 +244,23 @@ describe("player", () => {
       ["Business Traveller", "_blank"],
     ]);
     expect(await page.textContent("dialog.case .case-clip .mono")).toBe("Read it →");
+    // AG1 tells it in two parts, the first with no kicker; no results until the studio sends its numbers.
     await page.evaluate(() => (location.hash = "#case-2"));
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
-    expect(await page.$$("dialog.case .ph-box")).toHaveLength(3);
-    expect(await page.isVisible("dialog.case .case-eyebrow")).toBe(false);
-    expect(await page.isVisible("dialog.case .case-media-tag")).toBe(false);
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Daily Ritual");
+    expect(await page.$$eval("dialog.case .case-how h3", (els) => els.map((e) => e.textContent))).toEqual(["Overview", "The anatomy"]);
+    expect(await page.$$eval("dialog.case .case-kicker", (els) => els.map((e) => e.textContent))).toEqual(["Advertorial · Landing page · Website"]);
+    expect(await page.$$("dialog.case .case-results")).toHaveLength(0);
+    // DeckForge: its partners' logos under the numbers.
+    await page.evaluate(() => (location.hash = "#case-8"));
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Shape the Universe");
+    expect(await page.textContent("dialog.case .case-partners .mono")).toBe("Official partners");
+    expect(await page.$$eval("dialog.case .case-partners .logo-mark", (els) => els.map((e) => [e.getAttribute("aria-label"), Math.round(e.getBoundingClientRect().width)]))).toEqual([
+      ["VK", 127],
+      ["RuStore", 88],
+      ["Xiaomi", 83],
+    ]);
+    expect(await page.$$("dialog.case .case-out a")).toHaveLength(0);
+    expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
     expect(errors).toEqual([]);
     await context.close();
   });

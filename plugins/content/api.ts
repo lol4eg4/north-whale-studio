@@ -15,6 +15,7 @@ export interface CaseItem {
   vertical: boolean;
   color: string; // token name: the open case's own colour
   press: Press[]; // publications that wrote about the client: "As seen in" on the tile, cards in the case
+  partners: Logo[]; // the client's official partners: a logo row under the case results
   media: {
     poster: string; // the tile's still
     posterPhone: string; // used at <= 700 px
@@ -28,11 +29,14 @@ export interface CaseItem {
   sr: string; // what a screen reader says for the tile
 }
 
-export interface Press {
+export interface Logo {
   name: string;
-  logo: string; // the publication's logo, drawn in one colour through a CSS mask
+  logo: string; // drawn in one colour through a CSS mask
   ratio: number; // logo width / height
   scale: number; // a logo with small letters (a script wordmark) draws taller
+}
+
+export interface Press extends Logo {
   title: string; // the article's own headline, in its own language
   url: string;
 }
@@ -45,7 +49,7 @@ export interface CasePage {
   category: string;
   lead: string;
   media: string; // label on the video
-  how: { title: string; kicker: string; text: string[] };
+  sections: { title: string; kicker: string | null; text: string[] }[]; // how we built it; some cases tell it in two parts
   card: { label: string; headline: string; copy: string; hand: string } | null;
   role: { items: string[]; deliverables: string };
   results: { items: { value: string; label: string }[]; note: string | null } | null;

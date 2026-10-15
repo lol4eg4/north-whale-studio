@@ -54,6 +54,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         vertical: c.vertical,
         color: c.color,
         press: c.press.map((p) => ({ ...p, logo: media(p.logo) })),
+        partners: c.partners.map((p) => ({ ...p, logo: media(p.logo) })),
         media: {
           poster: media(`/media/c${c.id}.webp`),
           posterPhone: media(`/media/c${c.id}-phone.webp`),

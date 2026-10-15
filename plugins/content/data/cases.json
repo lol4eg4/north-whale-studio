@@ -51,7 +51,8 @@
     "url": "https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/",
     "scale": 1
    }
-  ]
+  ],
+  "partners": []
  },
  {
   "id": 2,
@@ -66,7 +67,8 @@
   "sound": false,
   "vertical": false,
   "color": "mint",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 3,
@@ -84,7 +86,8 @@
   "sound": true,
   "vertical": false,
   "color": "buoy",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 4,
@@ -99,7 +102,8 @@
   "sound": false,
   "vertical": false,
   "color": "jellyfish",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 5,
@@ -117,7 +121,8 @@
   "sound": false,
   "vertical": false,
   "color": "royal",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 6,
@@ -135,7 +140,8 @@
   "sound": true,
   "vertical": false,
   "color": "lemon",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 7,
@@ -153,7 +159,8 @@
   "sound": false,
   "vertical": false,
   "color": "tape",
-  "press": []
+  "press": [],
+  "partners": []
  },
  {
   "id": 8,
@@ -171,6 +178,26 @@
   "sound": true,
   "vertical": true,
   "color": "cobalt",
-  "press": []
+  "press": [],
+  "partners": [
+   {
+    "name": "VK",
+    "logo": "/media/partner-vk.svg",
+    "ratio": 5.75,
+    "scale": 1
+   },
+   {
+    "name": "RuStore",
+    "logo": "/media/partner-rustore.svg",
+    "ratio": 4,
+    "scale": 1
+   },
+   {
+    "name": "Xiaomi",
+    "logo": "/media/partner-xiaomi.svg",
+    "ratio": 3.75,
+    "scale": 1
+   }
+  ]
  }
 ]
