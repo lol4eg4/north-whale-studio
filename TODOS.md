@@ -7,6 +7,7 @@ Deferred on purpose. Each item names what it waits for.
 - DeckForge (8) website link: the studio wrote «Visit the website» with no address; play.deckforge.net from their YouTube shows the host's «renew your subscription» page.
 - Pictures for AG1 (2: advertorials, landing pages) and Sergey Ibadov (6: brand identity): the pages show only the videos.
 - Brand films for Waldorf Astoria Berlin (1) and King’s Resort & Casino (5): their pages name a film, but the case videos are the website recordings.
+- Like Center logo for the clients' sheet: no vector logo found (likecentre.ru and like.center do not answer from the server). Add it to `brands.json` when the studio sends the file.
 - Contacts: Behance and VK addresses. Now stamped placeholders in `plugins/content/data/contacts.json` (email, Telegram and WhatsApp are real; the `<noscript>` line in `site/index.html` repeats the email).
 - Subtitles for cases 3, 6 and 8 (the cases with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
