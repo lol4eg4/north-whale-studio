@@ -28,7 +28,7 @@ The studio's one-page site: a wall of live cases, a case window, services, a man
 ## Docs
 
 - [docs/tutorial-first-run.md](docs/tutorial-first-run.md): the site on your computer, step by step.
-- [docs/how-to-update-content.md](docs/how-to-update-content.md): change texts, cases, contacts, the team, the music.
+- [docs/how-to-update-content.md](docs/how-to-update-content.md): change texts, cases, contacts, the clients' sheet, the team, the music.
 - [docs/reference-site.md](docs/reference-site.md): commands, settings, addresses, data files, media limits, plugins.
 - [docs/explanation-site-design.md](docs/explanation-site-design.md): why the site is built this way.
 - [docs/product/system-architecture.md](docs/product/system-architecture.md): the blocks, their layers, APIs and events. Also [scope](docs/product/scope.md) and [user stories](docs/product/user-stories.md).
