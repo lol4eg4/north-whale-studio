@@ -31,7 +31,7 @@ describe("open and close", () => {
   test("a tile opens the case; Esc closes it and focus returns to the tile", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     await openTile(page, 2);
-    expect(await title(page)).toBe("Ежедневный ритуал");
+    expect(await title(page)).toBe("AG1");
     expect(await hash(page)).toBe("#case-2");
     expect(await page.textContent(".case-count")).toBe("Кейс 02 из 08");
     expect(await focusIs(page, "dialog.case .case-x")).toBe(true);
@@ -75,10 +75,10 @@ describe("open and close", () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     const before = await page.evaluate(() => history.length);
     await openTile(page, 7);
-    expect(await title(page)).toBe("Пространство времени");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Создай вселенную");
+    expect(await title(page)).toBe("Антикрус");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: DeckForge");
     await page.click("dialog.case .case-next");
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Создай вселенную");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
     expect(await hash(page)).toBe("#case-8");
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
     expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
@@ -154,7 +154,7 @@ describe("links and history", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
     expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Next: Daily Ritual");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Next: AG1");
     await page.keyboard.press("Escape");
     await waitClosed(page);
     expect(page.url()).toBe(`${srv.url}/?lang=en`);
@@ -168,7 +168,7 @@ describe("links and history", () => {
     await page.evaluate(() => history.pushState(null, "", "#case-3"));
     expect(await isOpen(page)).toBe(false);
     await openTile(page, 2);
-    expect(await title(page)).toBe("Ежедневный ритуал");
+    expect(await title(page)).toBe("AG1");
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Dear Passengers", null, { timeout: 5000 });
     expect(await isOpen(page)).toBe(true);
@@ -204,7 +204,7 @@ describe("player", () => {
   test("King’s Resort & Casino (case 5) has its video, player and own page, in Russian and English", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`);
     await page.waitForSelector("dialog.case[open]");
-    expect(await page.textContent("dialog.case .case-title")).toBe("По-королевски");
+    expect(await page.textContent("dialog.case .case-title")).toBe("King’s Resort & Casino");
     expect(await page.textContent("dialog.case .case-eyebrow")).toBe("King’s Resort · Розвадов");
     expect(await page.isVisible("dialog.case .case-sub")).toBe(false);
     expect(await page.textContent("dialog.case .case-meta dd")).toBe("King’s Resort & Casino");
@@ -214,7 +214,7 @@ describe("player", () => {
     await context.close();
     const en = await open(browser, `${srv.url}/?lang=en#case-5`);
     await en.page.waitForSelector("dialog.case[open]");
-    expect(await en.page.textContent("dialog.case .case-title")).toBe("Like a King");
+    expect(await en.page.textContent("dialog.case .case-title")).toBe("King’s Resort & Casino");
     expect(await en.page.textContent("dialog.case .case-media-tag")).toBe("The website");
     expect(en.errors).toEqual([]);
     await en.context.close();
@@ -234,7 +234,7 @@ describe("player", () => {
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
     // Waldorf's link opens the hotel's page in the visitor's language; its press clippings open the articles.
     await page.evaluate(() => (location.hash = "#case-1"));
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Berlin Deco");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Waldorf Astoria Berlin");
     expect(await page.getAttribute("dialog.case .case-out a", "href")).toBe("https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/");
     expect(await page.textContent("dialog.case .case-sub")).toBe("Full-cycle production");
     expect(await page.$$eval("dialog.case .case-clip", (els) => els.map((e) => [e.querySelector(".logo-mark")!.getAttribute("aria-label"), e.getAttribute("target")]))).toEqual([
@@ -246,13 +246,13 @@ describe("player", () => {
     expect(await page.textContent("dialog.case .case-clip .mono")).toBe("Read it →");
     // AG1 tells it in two parts, the first with no kicker; no results until the studio sends its numbers.
     await page.evaluate(() => (location.hash = "#case-2"));
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Daily Ritual");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
     expect(await page.$$eval("dialog.case .case-how h3", (els) => els.map((e) => e.textContent))).toEqual(["Overview", "The anatomy"]);
     expect(await page.$$eval("dialog.case .case-kicker", (els) => els.map((e) => e.textContent))).toEqual(["Advertorial · Landing page · Website"]);
     expect(await page.$$("dialog.case .case-results")).toHaveLength(0);
     // DeckForge: its partners' logos under the numbers.
     await page.evaluate(() => (location.hash = "#case-8"));
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Shape the Universe");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
     expect(await page.textContent("dialog.case .case-partners .mono")).toBe("Official partners");
     expect(await page.$$eval("dialog.case .case-partners .logo-mark", (els) => els.map((e) => [e.getAttribute("aria-label"), Math.round(e.getBoundingClientRect().width)]))).toEqual([
       ["VK", 127],

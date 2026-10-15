@@ -1,7 +1,7 @@
 // Open case: a native modal dialog over the wall, kept in step with the address (history.ts).
 //
 //   [ media frame + player ][ North Whale Studio · Кейс 03 из 08     [× Назад к стене Esc] ]
-//   [                      ][ eyebrow / title / client · category / lead                  ]
+//   [                      ][ eyebrow / client / client · category / lead                 ]
 //   [                      ][ how we did it, cards: one batch, our role, results; links    ]
 //   [                      ][ [Дальше: <next case> →] [Написать нам] Скопировать ссылку    ]
 // A case with no page in data/pages.*.json shows its client, what · result and story placeholders.
@@ -130,7 +130,7 @@ export default function init(host: Host) {
     panel.classList.toggle("on-ink", dark.has(c.color));
     eyebrow.textContent = c.page?.eyebrow ?? "";
     eyebrow.hidden = !c.page;
-    titleEl.textContent = c.page?.title ?? c.client;
+    titleEl.textContent = c.client;
     // A case page has client and category of its own: under its title only the lemon result.
     const subs = [!c.page && c.what && h("span", {}, c.what), c.result && h("span", { class: "case-result" }, c.result)].filter((x): x is HTMLSpanElement => !!x);
     sub.replaceChildren(...subs);
@@ -141,7 +141,7 @@ export default function init(host: Host) {
     mediaTag.hidden = !c.page;
     // Next names the next case; the last one leads back to the wall.
     const n = all[i + 1];
-    nextText.textContent = n ? content().format("case.nextTo", { title: n.page?.title ?? n.client }) : text("case.toWall");
+    nextText.textContent = n ? content().format("case.nextTo", { title: n.client }) : text("case.toWall");
     field.hidden = true;
   };
   const isLast = () => openId !== null && openId === ids().at(-1);

@@ -43,8 +43,7 @@ export interface Press extends Logo {
 
 // One case told the way the reference tells it. Text may mark ==highlights==.
 export interface CasePage {
-  eyebrow: string;
-  title: string;
+  eyebrow: string; // the title under it is the client, as on the tile
   client: string;
   category: string;
   lead: string;

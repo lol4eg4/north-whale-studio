@@ -73,7 +73,7 @@ describe("cases", () => {
       const p = c.page;
       if (!p) continue;
       expect(p.sections.length).toBeGreaterThan(0);
-      for (const v of [p.eyebrow, p.title, p.client, p.category, p.lead, p.media, ...p.sections.map((x) => x.title), p.role.deliverables]) expect(v.trim()).not.toBe("");
+      for (const v of [p.eyebrow, p.client, p.category, p.lead, p.media, ...p.sections.map((x) => x.title), p.role.deliverables]) expect(v.trim()).not.toBe("");
       const texts = [p.lead, ...p.sections.flatMap((x) => x.text), p.card?.copy ?? "", p.role.deliverables];
       for (const t of texts) expect(t.split("==").length % 2, t).toBe(1);
       for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
