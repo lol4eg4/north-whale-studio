@@ -12,6 +12,7 @@ import type { CaseApi } from "../case/api.ts";
 import type { CaseItem, ContentApi } from "../content/api.ts";
 import type { ServiceApi } from "../service/api.ts";
 import { isSticker, SERVICE_COLORS, starPoints, tilts, W, type Slot } from "./layout.ts";
+import { createMeet } from "./meet.ts";
 import { createRollCall } from "./rollcall.ts";
 import { createVideos } from "./videos.ts";
 import "./style.css";
@@ -80,6 +81,7 @@ export default function init(host: Host) {
   });
 
   const refresh: (() => void)[] = [];
+  const meet = createMeet(motion, () => content().text("tag.close"), () => content().text("cursor.close"));
 
   host.ready(() => {
     const api = content();
@@ -116,12 +118,13 @@ export default function init(host: Host) {
       switch (slot.k) {
         case "tile": {
           const c = api.caseById(slot.id)!;
-          const tile = caseTile(tileText(c), { poster: c.media.poster, posterPhone: c.media.posterPhone, ring: c.ring, eager: c.id === 1 });
+          const tile = caseTile(tileText(c), { poster: c.media.poster, posterPhone: c.media.posterPhone, ringPoster: c.media.ringPoster, eager: c.id === 1 });
           t.bind(tile.el, "cursor.open", "data-cursor");
           tile.el.addEventListener("click", () => host.use<CaseApi>("case").open(c.id, "tile", tile.el));
           tile.el.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && host.emit("tile-hovered", { id: c.id }));
-          videos.add(c.id, tile.el, tile.video, { wide: c.media.tile, phone: c.media.phone }, tile.drawing);
-          posterLoads.set(tile.el, tile.loadPoster);
+          if (c.media.ring) videos.add(c.id, tile.el, tile.video, c.media.ring);
+          // The badge's still waits like the badge photos: the first screen's bytes go to the posters.
+          posterLoads.set(tile.el, () => (tile.loadPoster(), void later.then(tile.loadRing)));
           posters.observe(tile.el);
           host.use<CaseApi>("case").setTile?.(c.id, tile.el);
           refresh.push(() => tile.set(tileText(content().caseById(c.id)!)));
@@ -131,7 +134,7 @@ export default function init(host: Host) {
           const m = team[slot.i];
           const name = h("span");
           const role = h("span", { class: "tag-role" });
-          const el = stickerEl("div", "tag", r);
+          const el = stickerEl("button", "tag", r, { type: "button" });
           // The photo sits in the round spot; a member with a video gets it on top, played by videos.ts.
           const photo = h("img", { alt: "", draggable: "false", decoding: "async" });
           const spot = h("span", { class: "tag-ph" }, photo);
@@ -155,7 +158,7 @@ export default function init(host: Host) {
             video.addEventListener("playing", () => spot.classList.add("shown"));
             video.addEventListener("emptied", () => spot.classList.remove("shown"));
             spot.append(video);
-            videos.add(TAG_VIDEO + m.id, el, video, { wide: m.video, phone: m.video }, () => {});
+            videos.add(TAG_VIDEO + m.id, el, video, m.video);
           }
           el.append(
             h(
@@ -167,14 +170,20 @@ export default function init(host: Host) {
             h("span", { class: "tag-nm" }, spot, name),
             role,
           );
+          const label = () => {
+            const now = content().team()[slot.i];
+            return `${now.name}, ${now.role}`;
+          };
           const set = () => {
             const now = content().team()[slot.i];
             name.textContent = now.name;
             role.textContent = now.role;
+            el.setAttribute("aria-label", content().format("tag.open", { name: label() }));
           };
           set();
           refresh.push(set);
-          t.bind(el, "cursor.drag", "data-cursor");
+          t.bind(el, "cursor.meet", "data-cursor");
+          el.addEventListener("click", () => meet.open(el, label(), m.photo, m.video));
           const c = cell("sz-s tag-cell", el, "sticker");
           tagCells.push(c);
           return c;

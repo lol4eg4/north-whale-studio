@@ -31,7 +31,7 @@ h1, h2, h3, p { margin: 0; }
   transition: scale 0.25s, rotate 0.2s;
 }
 .piece.lifted { scale: 1.05; rotate: calc(var(--r, 0deg) + 3deg); filter: drop-shadow(0 14px 14px rgba(14, 14, 14, 0.22)); z-index: 50; }
-/* A tile is a plain rounded box playing video: box-shadow spares re-blurring every frame. */
+/* A tile is a plain rounded box: box-shadow is cheaper than a drop-shadow filter. */
 .tile.piece.lifted { filter: none; box-shadow: 0 14px 28px rgba(14, 14, 14, 0.22); }
 html.calm .piece { transition: none; }
 html.calm .piece.lifted { rotate: var(--r, 0deg); }

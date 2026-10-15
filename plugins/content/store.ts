@@ -1,5 +1,6 @@
 // The content itself: texts in two languages and the studio's data, read in the chosen language.
 // Pure (no DOM), so it is tested directly.
+import { media } from "../../platform/media.ts";
 import type { CaseItem, Client, Contacts, Lang, Member, Service } from "./api.ts";
 import casesData from "./data/cases.json";
 import clientsData from "./data/clients.json";
@@ -49,14 +50,13 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         sound: c.sound,
         vertical: c.vertical,
         media: {
-          tile: `/media/c${c.id}-tile.mp4`,
-          phone: `/media/c${c.id}-phone.mp4`,
-          poster: `/media/c${c.id}.webp`,
-          posterPhone: `/media/c${c.id}-phone.webp`,
-          full: still ? null : `/media/c${c.id}-full.mp4`,
-          still: still ? `/media/c${c.id}-full.webp` : null,
+          poster: media(`/media/c${c.id}.webp`),
+          posterPhone: media(`/media/c${c.id}-phone.webp`),
+          ring: still ? null : media(`/media/c${c.id}-ring.mp4`),
+          ringPoster: media(`/media/c${c.id}-ring.webp`),
+          full: still ? null : media(`/media/c${c.id}-full.mp4`),
+          still: still ? media(`/media/c${c.id}-full.webp`) : null,
         },
-        ring: c.ring as [number, number],
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         sr: [format("case.label", { n: c.id }), client, what, result]
           .filter(Boolean)
@@ -66,7 +66,8 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
 
   const services = (): Service[] =>
     servicesData.map((s) => ({ id: s.id, main: s.main, title: local(s.title), phrase: local(s.phrase), includes: s.includes.map(local) }));
-  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: m.photo, video: m.video ?? null }));
+  const team = (): Member[] =>
+    teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: media(m.photo), video: m.video ? media(m.video) : null }));
   const clients = (): Client[] =>
     clientsData.map((c) => ({ caseId: c.caseId, name: local(c.name), shape: c.shape as Client["shape"], bg: c.bg, fg: c.fg, phone: c.phone }));
   const contacts = (): Contacts => contactsData;

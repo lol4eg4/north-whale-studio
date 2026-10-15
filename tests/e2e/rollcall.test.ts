@@ -2,7 +2,7 @@
 // while they hop, and the wall has no holes afterwards (on 6 columns it had 18, on 8 it had 8).
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Browser } from "playwright-core";
-import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
+import { launch, open, phone, plain, startServer, wallHoles } from "./helpers.ts";
 
 let server: { url: string; stop(): void };
 let browser: Browser;
@@ -51,7 +51,7 @@ describe("roll call", () => {
       photos: [...document.querySelectorAll(".wall .tag-ph img")].map((img) => img.getAttribute("src")),
     }));
     expect(at.sinceLoad).toBeLessThan(2000);
-    expect(at.photos).toEqual(["/media/team-1.webp", "/media/team-2.webp", "/media/team-3.webp", "/media/team-4.webp"]);
+    expect(at.photos.map(plain)).toEqual(["/media/team-1.webp", "/media/team-2.webp", "/media/team-3.webp", "/media/team-4.webp"]);
     await page.waitForSelector(".wall.rollcall", { timeout: 10000 });
     await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].every((img) => img.complete && img.naturalWidth > 0));
     expect(errors).toEqual([]);

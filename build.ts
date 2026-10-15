@@ -6,6 +6,7 @@
 // The build fails when a plugin reaches into another plugin, a ui part reaches into a
 // plugin, or plugin.json "uses" goes up a layer or round in a circle.
 import { createHash } from "node:crypto";
+import { readdir } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
 import type { BunPlugin } from "bun";
 
@@ -56,6 +57,7 @@ export async function build(appFile = "app.json", root = import.meta.dir): Promi
       entrypoints: [join(root, "platform", "main.ts")],
       target: "browser",
       minify: true,
+      define: { __MEDIA__: JSON.stringify(await mediaVersions(root)) },
       plugins: [appPlugins(entry), importRules(root)],
     });
   } catch (e) {
@@ -71,6 +73,24 @@ export async function build(appFile = "app.json", root = import.meta.dir): Promi
   const hash = createHash("sha1").update(js).update(css).digest("hex").slice(0, 10);
   const gz = (text: string) => Bun.gzipSync(text) as Uint8Array<ArrayBuffer>;
   return { js, css, jsGz: gz(js), cssGz: gz(css), hash };
+}
+
+// Each site/media file's content hash. The page asks for /media/<file>?v=<hash>, so a picture or
+// video replaced under the same name gets a new address: no browser shows the old one from its cache.
+async function mediaVersions(root: string): Promise<Record<string, string>> {
+  const dir = join(root, "site", "media");
+  const versions: Record<string, string> = {};
+  // A root without a media folder (the build tests' small sites) has nothing to version.
+  const entries = await readdir(dir, { withFileTypes: true }).catch((e: NodeJS.ErrnoException) => {
+    if (e.code === "ENOENT") return [];
+    throw e;
+  });
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const bytes = new Uint8Array(await Bun.file(join(dir, entry.name)).arrayBuffer());
+    versions[`/media/${entry.name}`] = createHash("sha1").update(bytes).digest("hex").slice(0, 8);
+  }
+  return versions;
 }
 
 function checkUses(appFile: string, metas: Map<string, PluginMeta>) {

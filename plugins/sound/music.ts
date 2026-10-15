@@ -6,7 +6,9 @@
 // Start is a needle drop: the lowpass sits at 110 Hz for half a second, then opens to 20 kHz while the
 // gain comes up. Stop is the reverse; after the fade the source stops. Web Audio puts nothing on a lock
 // screen. The file is asked for on the first start, never before.
-export const MUSIC_SRC = "/media/music.m4a";
+import { media } from "../../platform/media.ts";
+
+export const MUSIC_SRC = media("/media/music.m4a");
 export const LEVEL = 0.44;
 const DULL = 110; // Hz, the lowpass shut
 const OPEN = 20000; // Hz, the lowpass open

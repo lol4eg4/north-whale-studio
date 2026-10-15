@@ -13,11 +13,7 @@
   "size": "xl",
   "kind": "video",
   "sound": false,
-  "vertical": false,
-  "ring": [
-   0.52,
-   0.55
-  ]
+  "vertical": false
  },
  {
   "id": 2,
@@ -30,11 +26,7 @@
   "size": "l",
   "kind": "video",
   "sound": false,
-  "vertical": false,
-  "ring": [
-   0.54,
-   0.44
-  ]
+  "vertical": false
  },
  {
   "id": 3,
@@ -50,11 +42,7 @@
   "size": "xl",
   "kind": "video",
   "sound": true,
-  "vertical": false,
-  "ring": [
-   0.45,
-   0.4
-  ]
+  "vertical": false
  },
  {
   "id": 4,
@@ -67,31 +55,23 @@
   "size": "xl",
   "kind": "video",
   "sound": false,
-  "vertical": false,
-  "ring": [
-   0.5,
-   0.45
-  ]
+  "vertical": false
  },
  {
   "id": 5,
   "client": {
-   "ru": "UNION",
-   "en": "UNION"
+   "ru": "Kings Resort & Casino",
+   "en": "Kings Resort & Casino"
   },
   "what": {
-   "ru": "Стоматология",
-   "en": "Dental clinic"
+   "ru": "Курорт и казино",
+   "en": "Resort & casino"
   },
   "result": null,
   "size": "xl",
-  "kind": "still",
+  "kind": "video",
   "sound": false,
-  "vertical": false,
-  "ring": [
-   0.74,
-   0.4
-  ]
+  "vertical": false
  },
  {
   "id": 6,
@@ -107,11 +87,7 @@
   "size": "xl",
   "kind": "video",
   "sound": true,
-  "vertical": false,
-  "ring": [
-   0.5,
-   0.38
-  ]
+  "vertical": false
  },
  {
   "id": 7,
@@ -127,11 +103,7 @@
   "size": "l",
   "kind": "video",
   "sound": false,
-  "vertical": false,
-  "ring": [
-   0.38,
-   0.65
-  ]
+  "vertical": false
  },
  {
   "id": 8,
@@ -147,10 +119,6 @@
   "size": "t",
   "kind": "video",
   "sound": true,
-  "vertical": true,
-  "ring": [
-   0.5,
-   0.42
-  ]
+  "vertical": true
  }
 ]

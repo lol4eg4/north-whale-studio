@@ -1,8 +1,9 @@
 // The open case's own player.
-//   silent video: autoplays muted and looped (not in calm or paused), play/pause, seek, time, full screen
-//   video with sound: poster + «Смотреть со звуком»; that click starts it with sound, then the same
-//     controls plus a mute toggle
-//   still picture (UNION): no player
+//   video: plays as soon as the case opens (not in calm, with the pause button on or in a hidden
+//     tab), with sound where it has some; a browser that allows no sound before a click gets it
+//     muted, and the sound button turns it on. Silent videos loop. Play/pause (also a click on the
+//     picture), seek, time, full screen, and the sound button for a video with sound.
+//   still picture: no player
 //   error: poster + «Повторить», which reloads the source
 import type { Motion } from "../../platform/motion.ts";
 import { h, icon } from "../../platform/ui/parts.ts";
@@ -36,19 +37,16 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
 
   let item: CaseItem | null = null;
   let mode: Mode = "still";
-  let started = false; // sound videos start only on the visitor's click
   let failed = false;
 
   const render = () => {
     el.classList.toggle("still", mode === "still");
     el.classList.toggle("err", failed);
     bar.hidden = mode === "still";
-    const waiting = mode === "sound" && !started;
-    const playing = !video.paused && !video.ended && !waiting;
+    const playing = !video.paused && !video.ended;
     goIcon.replaceChildren(icon(playing ? "pause" : "play", 14));
-    goText.textContent = text(waiting ? "case.watchSound" : playing ? "case.pause" : "case.play");
-    go.classList.toggle("wait", waiting);
-    mute.hidden = !(mode === "sound" && started);
+    goText.textContent = text(playing ? "case.pause" : "case.play");
+    mute.hidden = mode !== "sound";
     mute.replaceChildren(icon(video.muted ? "muted" : "soundOn", 20));
     mute.setAttribute("aria-label", text(video.muted ? "case.unmute" : "case.mute"));
     full.setAttribute("aria-label", text("case.fullscreen"));
@@ -65,28 +63,33 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
     time.textContent = `${clock(video.currentTime)} / ${clock(d)}`;
   };
   const play = () => {
-    video.play().then(render, () => render()); // refused: the poster and the play button stay
+    video.play().then(render, (err: unknown) => {
+      // No sound before the visitor's own click: it plays muted, the sound button turns it on.
+      if (err instanceof DOMException && err.name === "NotAllowedError" && !video.muted) {
+        video.muted = true;
+        play();
+      } else render(); // refused: the poster and the play button stay
+    });
   };
-  const autoplay = () => mode === "silent" && !motion.calm && !motion.paused && !document.hidden;
+  const autoplay = () => !motion.calm && !motion.paused && !document.hidden;
 
-  const load = () => {
+  const load = (start: boolean) => {
     if (!item?.media.full) return;
     failed = false;
     video.src = item.media.full;
     video.load();
-    if (autoplay() || (mode === "sound" && started)) play();
+    if (start) play();
     render();
   };
 
-  go.addEventListener("click", () => {
-    if (mode === "sound" && !started) {
-      started = true;
-      video.muted = false;
-      play();
-    } else if (video.paused || video.ended) play();
+  const toggle = () => {
+    if (video.paused || video.ended) play();
     else video.pause();
     render();
-  });
+  };
+  go.addEventListener("click", toggle);
+  // In full screen the browser's own controls already play and pause on a click.
+  video.addEventListener("click", () => video.controls || toggle());
   mute.addEventListener("click", () => {
     video.muted = !video.muted;
     render();
@@ -102,7 +105,7 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
   });
   // In full screen our bar is outside the frame, so the browser's own controls stand in.
   document.addEventListener("fullscreenchange", () => (video.controls = document.fullscreenElement === frame));
-  retry.addEventListener("click", load);
+  retry.addEventListener("click", () => load(true));
 
   for (const type of ["play", "pause", "ended", "playing"]) video.addEventListener(type, render);
   for (const type of ["timeupdate", "loadedmetadata", "durationchange", "seeked"]) video.addEventListener(type, tick);
@@ -117,24 +120,21 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
     render();
   });
   document.addEventListener("visibilitychange", () => document.hidden && video.pause());
-  // Pause stops case loops too; un-pausing leaves them for the visitor to start.
-  motion.onChange(() => motion.paused && mode === "silent" && video.pause());
 
   return {
     el,
     show(c: CaseItem) {
       this.stop();
       item = c;
-      started = false;
       failed = false;
       mode = c.kind === "still" || !c.media.full ? "still" : c.sound ? "sound" : "silent";
       el.classList.toggle("tall", c.vertical);
       picture.src = mode === "still" ? c.media.still ?? c.media.poster : c.media.poster;
       if (mode !== "still") {
         video.poster = c.media.poster;
-        video.muted = mode === "silent";
+        video.muted = false;
         video.loop = mode === "silent";
-        load();
+        load(autoplay());
       }
       tick();
       render();

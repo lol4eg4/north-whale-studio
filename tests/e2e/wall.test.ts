@@ -1,9 +1,11 @@
-// Wall: dense packing without holes, no sideways scroll, the first tile in view,
-// lazy loops (nothing before 2 s, only near the screen, at most 3 loading), posters that stay
-// when a loop fails, the four team badges (names, roles, photos, Maria's loop, roll call), no console errors.
+// Wall: dense packing without holes, no sideways scroll, the first tile in view, still posters
+// with a moving round badge, the hover (result plate, curled corner), lazy loops (nothing before
+// 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
+// team badges (names, roles, photos, Maria's loop, roll call, opening big), no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Browser, Page } from "playwright-core";
-import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
+import { join } from "node:path";
+import { chromium, type Browser, type Page } from "playwright-core";
+import { launch, open, phone, plain, startServer, wallHoles } from "./helpers.ts";
 
 const HOLE_WIDTHS = [1440, 1280, 1100, 1024, 768, 390, 320];
 const SCROLL_WIDTHS = [320, 390, 768, 1024, 1280, 1440];
@@ -114,7 +116,7 @@ describe("wall media", () => {
     const seq: string[] = []; // "poster:<id>" and "loop:<id>" in request order
     let loadAt = 0;
     page.on("request", (r) => {
-      const m = /\/media\/c(\d)-(tile|phone)\.mp4/.exec(r.url());
+      const m = /\/media\/c(\d)-ring\.mp4/.exec(r.url());
       if (m) {
         loops.push({ id: Number(m[1]), at: Date.now() });
         seq.push(`loop:${m[1]}`);
@@ -160,7 +162,7 @@ describe("wall media", () => {
       expect(tile.label.startsWith(`Кейс ${id}.`)).toBe(true);
       const near = tile.top < 2 * vh && tile.bottom > -vh;
       // Posters, like loops, wait until their tile is within one screen of the viewport.
-      expect(tile.poster, `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
+      expect(plain(tile.poster), `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
       if (loops.some((l) => l.id === id)) expect(near, `tile ${id} loaded but is far from the screen`).toBe(true);
     });
     expect(loops.some((l) => l.id === 1)).toBe(true);
@@ -181,7 +183,7 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("every loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
+  test("every badge loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     // The page's videos that fired an error, to know when the failures have happened.
     await context.addInitScript(() => {
@@ -193,7 +195,7 @@ describe("wall media", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     const asked: string[] = [];
-    await page.route("**/media/*-tile.mp4", (route) => {
+    await page.route(/\/media\/c\d-ring\.mp4/, (route) => {
       asked.push(route.request().url());
       return route.abort();
     });
@@ -230,7 +232,7 @@ describe("wall media", () => {
             label: t.getAttribute("aria-label")!.slice(0, 8),
             hasPoster: img.hasAttribute("src"),
             posterDrawn: img.complete && img.naturalWidth > 0 && getComputedStyle(img).visibility === "visible" && !t.classList.contains("no-poster"),
-            videoShown: t.classList.contains("shown") || getComputedStyle(video).opacity !== "0",
+            videoPlaying: !video.paused,
             videoSrc: video.getAttribute("src"),
           };
         }),
@@ -239,7 +241,7 @@ describe("wall media", () => {
       expect(tiles.filter((t) => t.hasPoster).length, `tiles with a poster ${when}`).toBeGreaterThanOrEqual(sure);
       for (const t of tiles) {
         expect(t.videoSrc, `source of ${t.label} ${when}`).toBeNull();
-        expect(t.videoShown, `video of ${t.label} shown ${when}`).toBe(false);
+        expect(t.videoPlaying, `loop of ${t.label} playing ${when}`).toBe(false);
         if (t.hasPoster) expect(t.posterDrawn, `poster of ${t.label} visible ${when}`).toBe(true);
       }
     };
@@ -259,7 +261,7 @@ describe("wall media", () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
     const page = await context.newPage();
     const loops: string[] = [];
-    page.on("request", (r) => /\/media\/c\d-(tile|phone)\.mp4/.test(r.url()) && loops.push(r.url()));
+    page.on("request", (r) => /\/media\/c\d-ring\.mp4/.test(r.url()) && loops.push(r.url()));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await page.waitForTimeout(3000);
     expect(loops).toEqual([]);
@@ -267,7 +269,7 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("phone loads phone posters and phone loops, at most 4 playing", async () => {
+  test("phone loads phone posters and the same badge loops, at most 4 playing", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, phone);
     await page.waitForTimeout(3500);
     const r = await page.evaluate(() => ({
@@ -275,8 +277,8 @@ describe("wall media", () => {
       src: document.querySelector(".wall .tile video")!.getAttribute("src"),
       playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
     }));
-    expect(r.poster.endsWith("/media/c1-phone.webp")).toBe(true);
-    expect(r.src).toBe("/media/c1-phone.mp4");
+    expect(plain(new URL(r.poster).pathname + new URL(r.poster).search)).toBe("/media/c1-phone.webp");
+    expect(plain(r.src)).toBe("/media/c1-ring.mp4");
     expect(r.playing).toBeLessThanOrEqual(4);
     expect(errors).toEqual([]);
     await context.close();
@@ -297,6 +299,78 @@ describe("wall media", () => {
     await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
     expect(errors).toEqual([]);
     await context.close();
+  });
+
+  test("media addresses carry the file's content hash, so a replaced picture is never shown from a cache", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const src = await page.getAttribute(".wall .tile-poster", "src");
+    expect(src).toMatch(/^\/media\/c1\.webp\?v=[0-9a-f]{8}$/);
+    const hash = new Bun.CryptoHasher("sha1").update(await Bun.file(join(import.meta.dir, "..", "..", "site", "media", "c1.webp")).arrayBuffer()).digest("hex").slice(0, 8);
+    expect(src).toBe(`/media/c1.webp?v=${hash}`);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a tile is a still poster: its only video is the round badge's loop", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    const r = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => ({
+        videos: t.querySelectorAll("video").length,
+        inRing: !!t.querySelector(".tile-ring > video"),
+        poster: t.querySelector(".tile-poster")!.tagName,
+      })),
+    );
+    expect(r).toEqual(Array.from({ length: 8 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
+    expect(plain(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster")))).toBe("/media/c1-ring.webp");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("hover: the lemon result flies out only under the mouse, the corner curls; touch screens show the result", async () => {
+    // Headless Chromium reports no hover; these settings give it a mouse.
+    const mouse = await chromium.launch({ args: ["--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4"] });
+    const { context, page, errors } = await open(mouse, `${full.url}/?lang=ru`);
+    const tile = page.locator(".wall .tile").nth(2); // Dear Passengers: the case with a result
+    await tile.scrollIntoViewIfNeeded();
+    const look = () =>
+      tile.evaluate((t) => ({
+        stat: Number(getComputedStyle(t.querySelector(".plate-stat")!).opacity),
+        corner: t.querySelector<HTMLElement>(".tile-peel")!.offsetWidth,
+      }));
+    const before = await look();
+    expect(before.stat).toBe(0);
+    expect(before.corner).toBeGreaterThan(0);
+    await tile.hover({ position: { x: 100, y: 100 } });
+    await page.waitForTimeout(700);
+    const over = await look();
+    expect(over.stat).toBe(1);
+    expect(over.corner).toBeGreaterThan(before.corner);
+    await page.mouse.move(1, 1);
+    await page.waitForTimeout(700);
+    expect(await look()).toEqual(before);
+
+    // The keyboard gets what the mouse gets: Tab onto the tile flies the result out.
+    await tile.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await page.waitForTimeout(700);
+    expect(await tile.evaluate((t) => t === document.activeElement && t.matches(":focus-visible"))).toBe(true);
+    expect((await look()).stat).toBe(1);
+
+    // Kings Resort & Casino has no result figure: no lemon plate, even under the mouse.
+    const kings = page.locator('.wall .tile[aria-label*="Kings"]');
+    await kings.scrollIntoViewIfNeeded();
+    await kings.hover({ position: { x: 100, y: 100 } });
+    await page.waitForTimeout(700);
+    expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-more")!).display)).toBe("none");
+    expect(errors).toEqual([]);
+    await context.close();
+    await mouse.close();
+
+    const touch = await open(browser, `${full.url}/?lang=ru`, phone);
+    expect(await touch.page.evaluate(() => getComputedStyle(document.querySelectorAll(".wall .plate-stat")[0]).opacity)).toBe("1");
+    await touch.context.close();
   });
 
   test("opening a case pauses the wall loops; closing resumes them", async () => {
@@ -364,6 +438,26 @@ describe("team badges", () => {
     await context.close();
   });
 
+  test("every badge shows its whole role, from 320 to 1440 px, RU and EN (tablets in portrait too)", async () => {
+    const context = await browser.newContext({ locale: "ru-RU" });
+    const page = await context.newPage();
+    const cut: string[] = [];
+    for (const width of [320, 390, 701, 744, 768, 834, 870, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const lang of ["ru", "en"]) {
+        await page.goto(`${full.url}/?lang=${lang}`, { waitUntil: "load" });
+        await page.evaluate(() => document.fonts.ready);
+        const over = await page.evaluate(() =>
+          [...document.querySelectorAll(".wall .tag")].map((t) => t.querySelector(".tag-role")!.getBoundingClientRect().bottom - t.getBoundingClientRect().bottom),
+        );
+        // Capitals sit on the baseline: 2 px of the line box below the edge cut nothing.
+        over.forEach((o, i) => o > 2 && cut.push(`${width} ${lang} badge ${i}: ${o.toFixed(1)} px`));
+      }
+    }
+    expect(cut).toEqual([]);
+    await context.close();
+  });
+
   test("every team picture and Maria's loop answer and load; the badge pictures have an empty alt", async () => {
     for (const url of [...PHOTOS, "/media/team-3.mp4"]) expect((await fetch(`${full.url}${url}`)).status, url).toBe(200);
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
@@ -372,7 +466,7 @@ describe("team badges", () => {
     const imgs = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].map((i) => ({ src: i.getAttribute("src"), alt: i.getAttribute("alt"), w: i.naturalWidth, shown: getComputedStyle(i).display !== "none", round: getComputedStyle(i.parentElement!).borderRadius })),
     );
-    expect(imgs.map((i) => i.src)).toEqual(PHOTOS);
+    expect(imgs.map((i) => plain(i.src))).toEqual(PHOTOS);
     for (const i of imgs) {
       expect(i.alt).toBe("");
       expect(i.w).toBe(320);
@@ -396,11 +490,11 @@ describe("team badges", () => {
     await page.waitForTimeout(1800);
     const src = () => page.evaluate(() => [...document.querySelectorAll(".wall .tag-ph img")].map((i) => i.getAttribute("src")));
     const first = await src();
-    expect(first[0]).toBe(PHOTOS[0]);
+    expect(plain(first[0])).toBe(PHOTOS[0]);
     expect(first[3], "the last badge is far below the first screen").toBeNull();
     await toBadge(page, 3);
     await page.waitForFunction(() => document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")[3].naturalWidth > 0, null, { timeout: 5000 });
-    expect((await src())[3]).toBe(PHOTOS[3]);
+    expect(plain((await src())[3])).toBe(PHOTOS[3]);
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -411,7 +505,8 @@ describe("team badges", () => {
     expect(await page.locator(".wall .tag-ph video").getAttribute("aria-hidden")).toBe("true");
     await toBadge(page, MARIA);
     await waitPlaying(page);
-    expect(await video(page)).toMatchObject({ paused: false, muted: true, loop: true, inline: true, src: "/media/team-3.mp4" });
+    const v = await video(page);
+    expect({ ...v, src: plain(v.src) }).toMatchObject({ paused: false, muted: true, loop: true, inline: true, src: "/media/team-3.mp4" });
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag video")!).opacity)).toBe("1");
 
     await page.click(".pause-btn");
@@ -434,7 +529,7 @@ describe("team badges", () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
     const page = await context.newPage();
     const loops: string[] = [];
-    page.on("request", (r) => r.url().endsWith("/media/team-3.mp4") && loops.push(r.url()));
+    page.on("request", (r) => r.url().includes("/media/team-3.mp4") && loops.push(r.url()));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await sweep(page);
     await toBadge(page, MARIA);
@@ -446,20 +541,224 @@ describe("team badges", () => {
       const img = spot.querySelector("img")!;
       return { poster: img.getAttribute("src"), drawn: img.complete && img.naturalWidth > 0, videoHidden: getComputedStyle(spot.querySelector("video")!).opacity === "0" };
     });
-    expect(still).toEqual({ poster: "/media/team-3.webp", drawn: true, videoHidden: true });
+    expect({ ...still, poster: plain(still.poster) }).toEqual({ poster: "/media/team-3.webp", drawn: true, videoHidden: true });
     await context.close();
   });
 
   test("a picture that does not load leaves the placeholder spot, not a broken image", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-    await page.route("**/media/team-1.webp", (route) => route.abort());
+    await page.route(/\/media\/team-1\.webp/, (route) => route.abort());
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await sweep(page);
     await page.waitForSelector(".wall .tag-ph.no-photo", { timeout: 5000 });
     expect(await page.locator(".wall .tag-ph.no-photo").count()).toBe(1);
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag-ph.no-photo")!).borderStyle)).toBe("dashed");
     await context.close();
+  });
+
+  for (const device of ["computer", "phone"] as const) {
+    test(`${device}: a badge opens big over the page; a second click, the close button and Esc send it back`, async () => {
+      const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, device === "phone" ? phone : {});
+      const press = (sel: string) => (device === "phone" ? page.tap(sel) : page.click(sel));
+      await toBadge(page, 0);
+      const small = await page.locator(".wall .tag").first().boundingBox();
+      expect(await page.locator(".wall .tag").first().getAttribute("aria-label")).toBe("Познакомиться: Погорелов, Арт-директор");
+      const opened = async () => {
+        await page.waitForSelector("dialog.meet[open]");
+        await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+        const big = (await page.locator(".meet-card .tag").boundingBox())!;
+        expect(big.width).toBeGreaterThan(small!.width * 1.8);
+        expect(await page.locator(".meet-card .tag-nm").textContent()).toBe("Погорелов");
+        expect(await page.isVisible(".meet-x")).toBe(true);
+        expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("hidden");
+      };
+      const closed = async () => {
+        await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+        expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("visible");
+      };
+      await press(".wall .tag >> nth=0");
+      await opened();
+      expect(await page.evaluate(() => document.activeElement?.className)).toBe("meet-x");
+      await press(".meet-card .tag");
+      await closed();
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+      await press(".wall .tag >> nth=0");
+      await opened();
+      expect(await page.textContent(".meet-x")).toBe("Закрыть");
+      await press(".meet-x");
+      await closed();
+      await page.focus(".wall .tag >> nth=0");
+      await page.keyboard.press("Enter");
+      await opened();
+      await page.keyboard.press("Escape");
+      await closed();
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
+
+  test("English: the badge and its close button speak English", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=en`);
+    await toBadge(page, 1);
+    expect(await page.locator(".wall .tag").nth(1).getAttribute("aria-label")).toBe("Meet SHAN, Project Manager");
+    await page.click(".wall .tag >> nth=1");
+    await page.waitForSelector("dialog.meet[open]");
+    expect(await page.textContent(".meet-x")).toBe("Close");
+    expect(await page.getAttribute("dialog.meet", "aria-label")).toBe("SHAN, Project Manager");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("calm: the badge opens and closes at once, without flying", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    expect(await page.evaluate(() => document.querySelector(".meet-card")!.getAnimations().length)).toBe(0);
+    await page.click(".meet-x");
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(false);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a click outside the open badge sends it back, and focus returns to the badge", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+    await page.mouse.click(20, 20);
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a click next to the open card, still inside its box, sends it back", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+    const box = (await page.locator(".meet-box").boundingBox())!;
+    const card = (await page.locator(".meet-card").boundingBox())!;
+    expect(card.x - box.x).toBeGreaterThan(8);
+    await page.mouse.click(box.x + (card.x - box.x) / 2, box.y + box.height / 2);
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a double click leaves the badge open; Esc in flight turns it back from where it is; two quick Esc leave the wall whole", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const closed = async () => {
+      await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+      await page.waitForTimeout(700);
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("visible");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+    };
+    await toBadge(page, 0);
+    await page.dblclick(".wall .tag >> nth=0");
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(true);
+    await page.keyboard.press("Escape");
+    await closed();
+
+    // Held 200 ms into the flight, then Esc: the way back starts at that size, not at the full one.
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.evaluate(() => {
+      const a = document.querySelector(".meet-card")!.getAnimations()[0];
+      a.pause();
+      a.currentTime = 200;
+    });
+    await page.keyboard.press("Escape");
+    const scale = await page.evaluate(() => {
+      const from = String((document.querySelector(".meet-card")!.getAnimations()[0].effect as KeyframeEffect).getKeyframes()[0].transform);
+      const [a, b] = from.match(/-?[\d.e-]+/g)!.map(Number);
+      return Math.hypot(a, b);
+    });
+    expect(scale).toBeLessThan(0.95);
+    await closed();
+
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await closed();
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("a lifted tile drops its corner clip, so its drag shadow is whole", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    const tile = page.locator(".wall .tile").nth(2);
+    await tile.scrollIntoViewIfNeeded();
+    const b = (await tile.boundingBox())!;
+    expect(await tile.evaluate((t) => getComputedStyle(t).clipPath)).not.toBe("none");
+    await page.mouse.move(b.x + 100, b.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(b.x + 130, b.y + 110, { steps: 5 });
+    await page.mouse.move(b.x + 160, b.y + 120, { steps: 5 });
+    expect(await tile.evaluate((t) => [t.classList.contains("lifted"), getComputedStyle(t).clipPath])).toEqual([true, "none"]);
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await tile.evaluate((t) => getComputedStyle(t).clipPath)).not.toBe("none");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("dragging a badge moves it and does not open it", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    const b = (await page.locator(".wall .tag").first().boundingBox())!;
+    const [x, y] = [b.x + b.width / 2, b.y + b.height / 2];
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 30, y + 10, { steps: 5 });
+    await page.mouse.move(x + 60, y + 20, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(false);
+    expect((await page.locator(".wall .tag").first().boundingBox())!.x - b.x).toBeGreaterThan(30);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("Maria's open badge plays her video; with the pause on and in calm it stays still and shows her photo", async () => {
+    const clip = (page: Page) =>
+      page.evaluate(() => {
+        const v = document.querySelector<HTMLVideoElement>(".meet-card video")!;
+        return { paused: v.paused, src: v.getAttribute("src"), shown: v.parentElement!.classList.contains("shown") };
+      });
+    const openMaria = async (page: Page) => {
+      await toBadge(page, MARIA);
+      await page.click(`.wall .tag >> nth=${MARIA}`);
+      await page.waitForSelector("dialog.meet[open]");
+    };
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await openMaria(page);
+    await page.waitForFunction(() => {
+      const v = document.querySelector<HTMLVideoElement>(".meet-card video");
+      return !!v && !v.paused && v.parentElement!.classList.contains("shown");
+    }, null, { timeout: 10000 });
+    expect(plain((await clip(page)).src)).toBe("/media/team-3.mp4");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    await page.click(".pause-btn");
+    await openMaria(page);
+    await page.waitForTimeout(500);
+    expect(await clip(page)).toEqual({ paused: true, src: null, shown: false });
+    expect(errors).toEqual([]);
+    await context.close();
+
+    const calm = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
+    await openMaria(calm.page);
+    await calm.page.waitForTimeout(500);
+    expect(await clip(calm.page)).toEqual({ paused: true, src: null, shown: false });
+    expect(calm.errors).toEqual([]);
+    await calm.context.close();
   });
 
   test("roll call: the team block and all four badges move to the top of the wall and each badge hops", async () => {

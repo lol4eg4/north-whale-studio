@@ -117,9 +117,9 @@ describe("serve.ts", () => {
   });
 
   test("a video answers a byte range with 206, Content-Range and exactly the bytes asked", async () => {
-    const res = await fetch(`${server.url}/media/c1-tile.mp4`, { headers: { Range: "bytes=0-99" } });
+    const res = await fetch(`${server.url}/media/c1-ring.mp4`, { headers: { Range: "bytes=0-99" } });
     expect(res.status).toBe(206);
-    const size = Bun.file(join(import.meta.dir, "..", "site", "media", "c1-tile.mp4")).size;
+    const size = Bun.file(join(import.meta.dir, "..", "site", "media", "c1-ring.mp4")).size;
     expect(res.headers.get("content-range")).toBe(`bytes 0-99/${size}`);
     expect((await res.arrayBuffer()).byteLength).toBe(100);
   });

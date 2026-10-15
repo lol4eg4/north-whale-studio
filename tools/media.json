@@ -1,13 +1,13 @@
 {
   "cases": [
-    { "id": 1, "src": "case1.mp4", "kind": "video", "size": "xl", "sound": false, "tileStart": 1, "tileLength": 8, "phoneFocus": [0.5, 0.5], "ring": [0.52, 0.55] },
-    { "id": 2, "src": "case2.mp4", "kind": "video", "size": "l", "sound": false, "tileStart": 0, "tileLength": 5.69, "phoneFocus": [0.43, 0.5], "ring": [0.54, 0.44] },
-    { "id": 3, "src": "case3.mp4", "kind": "video", "size": "xl", "sound": true, "tileStart": 1, "tileLength": 8, "phoneFocus": [0.5, 0.5], "ring": [0.45, 0.4] },
-    { "id": 4, "src": "case4.mp4", "kind": "video", "size": "xl", "sound": false, "tileStart": 7.25, "tileLength": 8, "phoneFocus": [0.32, 0.5], "ring": [0.5, 0.45] },
-    { "id": 5, "src": "case5.jpg", "kind": "still", "size": "xl", "sound": false, "tileStart": 0, "tileLength": 8, "phoneFocus": [0.7, 0.5], "ring": [0.74, 0.4] },
-    { "id": 6, "src": "case6.mp4", "kind": "video", "size": "xl", "sound": true, "tileStart": 0.5, "tileLength": 7.5, "phoneFocus": [0.5, 0.5], "ring": [0.5, 0.38] },
-    { "id": 7, "src": "case7.mp4", "kind": "video", "size": "l", "sound": false, "tileStart": 0, "tileLength": 7.25, "phoneFocus": [0.4, 0.5], "ring": [0.38, 0.65] },
-    { "id": 8, "src": "case8.mp4", "kind": "video", "size": "t", "sound": true, "tileStart": 6, "tileLength": 7, "phoneFocus": [0.5, 0.578], "ring": [0.5, 0.42] }
+    { "id": 1, "src": "case1.mp4", "kind": "video", "size": "xl", "sound": false, "poster": "case1-poster.jpg", "ringStart": 1, "ringLength": 8, "phoneFocus": [0.5, 0.5], "ring": [0.52, 0.55] },
+    { "id": 2, "src": "case2.mp4", "kind": "video", "size": "l", "sound": false, "poster": "case2-poster.jpg", "ringStart": 0, "ringLength": 5.69, "phoneFocus": [0.55, 0.5], "ring": [0.54, 0.44] },
+    { "id": 3, "src": "case3.mp4", "kind": "video", "size": "xl", "sound": true, "poster": "case3-poster.jpg", "ringStart": 1, "ringLength": 8, "phoneFocus": [0.3, 0.5], "ring": [0.45, 0.4] },
+    { "id": 4, "src": "case4.mp4", "kind": "video", "size": "xl", "sound": false, "poster": "case4-poster.jpg", "ringStart": 7.25, "ringLength": 8, "phoneFocus": [0.32, 0.5], "ring": [0.5, 0.45] },
+    { "id": 5, "src": "kings.mp4", "kind": "video", "size": "xl", "sound": false, "poster": 10.3, "ringStart": 3.4, "ringLength": 8, "phoneFocus": [0.2, 0.5], "ring": [0.57, 0.68], "crop": [0, 0, 2916, 1394] },
+    { "id": 6, "src": "case6.mp4", "kind": "video", "size": "xl", "sound": true, "poster": "case6-poster.png", "ringStart": 0.5, "ringLength": 7.5, "phoneFocus": [0.72, 0.5], "ring": [0.5, 0.38] },
+    { "id": 7, "src": "antikrus.mp4", "kind": "video", "size": "l", "sound": false, "poster": 0.45, "ringStart": 0, "ringLength": 7.3, "phoneFocus": [0.28, 0.5], "ring": [0.3, 0.6], "crop": [0, 0, 2916, 1394] },
+    { "id": 8, "src": "case8.mp4", "kind": "video", "size": "t", "sound": true, "poster": 41.2, "ringStart": 6, "ringLength": 7, "phoneFocus": [0.5, 0.578], "ring": [0.5, 0.51] }
   ],
   "team": [
     { "id": 1, "src": "pogorelov.jpg" },

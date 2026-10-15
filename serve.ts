@@ -24,7 +24,7 @@ try {
 
 let dirty = false;
 if (dev) {
-  for (const dir of ["platform", "plugins"]) watch(join(import.meta.dir, dir), { recursive: true }, () => (dirty = true));
+  for (const dir of ["platform", "plugins", "site/media"]) watch(join(import.meta.dir, dir), { recursive: true }, () => (dirty = true));
   watch(join(import.meta.dir, appFile), () => (dirty = true));
 }
 

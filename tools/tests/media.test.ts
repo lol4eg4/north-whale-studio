@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { cases, outDir, MUSIC, outputs, probe, TOTAL_LIMIT } from "../media.ts";
+import { cases, outDir, MUSIC, outputs, probe, RING_SIZE, TOTAL_LIMIT } from "../media.ts";
 import { readdir, stat } from "node:fs/promises";
 
 const path = (file: string) => join(outDir, file);
@@ -51,42 +51,32 @@ describe("streams", () => {
     });
   }
 
-  for (const c of cases) {
-    test(`case ${c.id}: tile and phone videos have video and no audio`, async () => {
-      for (const file of [`c${c.id}-tile.mp4`, `c${c.id}-phone.mp4`]) {
-        const info = await probe(path(file));
-        expect(info.width, `${file} has no video`).toBeGreaterThan(0);
-        expect(info.audio, `${file} has audio`).toBe(false);
-      }
-    });
-
-    // the still image (case 5) gets the same 8 s loop on the phone as on the wall
-    const phoneMax = c.kind === "still" ? 8 : 6;
-    test(`case ${c.id}: phone video is at most ${phoneMax} s and 720 wide`, async () => {
-      const info = await probe(path(`c${c.id}-phone.mp4`));
-      expect(info.duration).toBeLessThanOrEqual(phoneMax + 0.05);
-      expect(info.width).toBe(720);
-    });
-
-    test(`case ${c.id}: tile video is at most 8 s and 30 fps`, async () => {
-      const info = await probe(path(`c${c.id}-tile.mp4`));
+  for (const c of cases.filter((c) => c.kind === "video")) {
+    test(`case ${c.id}: the round badge's loop is ${RING_SIZE} square, silent, at most 8 s and 30 fps`, async () => {
+      const info = await probe(path(`c${c.id}-ring.mp4`));
+      expect([info.width, info.height]).toEqual([RING_SIZE, RING_SIZE]);
+      expect(info.audio).toBe(false);
       expect(info.duration).toBeLessThanOrEqual(8.05);
       expect(info.fps).toBeLessThanOrEqual(30);
     });
   }
 
   test("the vertical case 8 is 720x1080 as a tile and 720x1280 in full", async () => {
-    const tile = await probe(path("c8-tile.mp4"));
+    const tile = await probe(path("c8.webp"));
     expect([tile.width, tile.height]).toEqual([720, 1080]);
     const full = await probe(path("c8-full.mp4"));
     expect([full.width, full.height]).toEqual([720, 1280]);
+  });
+
+  test("no file of the old wall loops is left", async () => {
+    expect((await readdir(outDir)).filter((f) => /^c\d+-(tile|phone)\.mp4$/.test(f))).toEqual([]);
   });
 });
 
 describe("faststart", () => {
   const files = [
     ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-full.mp4`] : [])),
-    ...cases.flatMap((c) => [`c${c.id}-tile.mp4`, `c${c.id}-phone.mp4`]),
+    ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-ring.mp4`] : [])),
     MUSIC.file,
   ];
   for (const file of files) {
