@@ -8,6 +8,9 @@ Deferred on purpose. Each item names what it waits for.
 - Contacts: real email, WhatsApp, socials (Telegram is real). Now placeholders in `plugins/content/data/contacts.json`; the `<noscript>` line in `site/index.html` repeats the email.
 - Subtitles for cases 3, 6 and 8 (the cases with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
+- Case previews for Kings Resort & Casino (5), Antikrus (7) and DeckForge (8): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`).
+- Kings Resort & Casino result figure: `result` is null, so its tile has no lemon plate.
+- Links from cases to outside resources: a separate task, when the case texts are assembled.
 
 ## Waits for publication
 
