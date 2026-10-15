@@ -15,7 +15,7 @@ export interface CaseItem {
   vertical: boolean;
   color: string; // token name: the open case's own colour
   press: Press[]; // publications that wrote about the client: "As seen in" on the tile, cards in the case
-  partners: Logo[]; // the client's official partners: a logo row under the case results
+  logos: Logo[]; // a logo row under the case results: DeckForge's partners, Dear Passengers' platforms
   media: {
     poster: string; // the tile's still
     posterPhone: string; // used at <= 700 px
@@ -51,7 +51,7 @@ export interface CasePage {
   sections: { title: string; kicker: string | null; text: string[] }[]; // how we built it; some cases tell it in two parts
   card: { label: string; headline: string; copy: string; hand: string } | null;
   role: { items: string[]; deliverables: string };
-  results: { items: { value: string; label: string }[]; note: string | null } | null;
+  results: { items: { value: string; label: string }[]; note: string | null; logos: string | null } | null; // logos: the label over the case's logo row
   links: { label: string; url: string }[];
 }
 

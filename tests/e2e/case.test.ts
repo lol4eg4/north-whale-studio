@@ -220,7 +220,7 @@ describe("player", () => {
     await en.context.close();
   });
 
-  test("a case page: meta, highlights, cards, results, partners and outside links", async () => {
+  test("a case page: meta, highlights, cards, results, logo rows and outside links", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=en#case-3`);
     await page.waitForSelector("dialog.case[open]");
     expect(await page.$$eval("dialog.case .case-meta dt", (els) => els.map((e) => e.textContent))).toEqual(["Client", "Category"]);
@@ -228,9 +228,12 @@ describe("player", () => {
     expect(await page.$$eval("dialog.case .case-tag", (els) => els.map((e) => e.textContent))).toEqual(["One launch", "Our role", "The results"]);
     expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["100M+", "322%", "100×", "500K+"]);
     const link = page.locator("dialog.case .case-out a");
-    expect(await link.textContent()).toBe("Watch the trailer →");
+    expect(await link.textContent()).toBe("Watch on YouTube →");
     expect(await link.getAttribute("href")).toBe("https://www.youtube.com/watch?v=bH9zvvhGitY");
     expect(await link.getAttribute("target")).toBe("_blank");
+    expect(await page.textContent("dialog.case .case-sub")).toBe("100M+ organic views");
+    expect(await page.textContent("dialog.case .case-logos .mono")).toBe("Platforms");
+    expect(await page.$$eval("dialog.case .case-logos .logo-mark", (els) => els.map((e) => e.getAttribute("aria-label")))).toEqual(["Instagram", "YouTube", "TikTok"]);
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
     // Waldorf's link opens the hotel's page in the visitor's language; its press clippings open the articles.
     await page.evaluate(() => (location.hash = "#case-1"));
@@ -244,17 +247,19 @@ describe("player", () => {
       ["Business Traveller", "_blank"],
     ]);
     expect(await page.textContent("dialog.case .case-clip .mono")).toBe("Read it →");
-    // AG1 tells it in two parts, the first with no kicker; no results until the studio sends its numbers.
+    // AG1 tells it in two parts, the first with no kicker; its results have no logo row.
     await page.evaluate(() => (location.hash = "#case-2"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
     expect(await page.$$eval("dialog.case .case-how h3", (els) => els.map((e) => e.textContent))).toEqual(["Overview", "The anatomy"]);
     expect(await page.$$eval("dialog.case .case-kicker", (els) => els.map((e) => e.textContent))).toEqual(["Advertorial · Landing page · Website"]);
-    expect(await page.$$("dialog.case .case-results")).toHaveLength(0);
+    expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["170%", "36%", "42%"]);
+    expect(await page.$$("dialog.case .case-logos")).toHaveLength(0);
+    expect(await page.textContent("dialog.case .case-sub")).toBe("200% average return on ad spend");
     // DeckForge: its partners' logos under the numbers.
     await page.evaluate(() => (location.hash = "#case-8"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
-    expect(await page.textContent("dialog.case .case-partners .mono")).toBe("Official partners");
-    expect(await page.$$eval("dialog.case .case-partners .logo-mark", (els) => els.map((e) => [e.getAttribute("aria-label"), Math.round(e.getBoundingClientRect().width)]))).toEqual([
+    expect(await page.textContent("dialog.case .case-logos .mono")).toBe("Official partners");
+    expect(await page.$$eval("dialog.case .case-logos .logo-mark", (els) => els.map((e) => [e.getAttribute("aria-label"), Math.round(e.getBoundingClientRect().width)]))).toEqual([
       ["VK", 127],
       ["RuStore", 88],
       ["Xiaomi", 83],

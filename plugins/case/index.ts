@@ -109,7 +109,7 @@ export default function init(host: Host) {
         h("h3", { class: "case-tag" }, text("case.results")),
         h("ul", {}, ...p.results.items.map((r) => h("li", {}, h("b", {}, r.value === "↑" ? up() : r.value), h("span", {}, r.label)))),
         p.results.note && h("p", {}, p.results.note),
-        c.partners.length > 0 && h("div", { class: "case-partners" }, h("span", { class: "mono" }, text("case.partners")), ...c.partners.map((m) => logoMark(m))),
+        p.results.logos && h("div", { class: "case-logos" }, h("span", { class: "mono" }, p.results.logos), ...c.logos.map((m) => logoMark(m))),
       ),
     c.press.length > 0 &&
       h(

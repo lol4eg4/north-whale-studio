@@ -66,7 +66,24 @@
    ],
    "deliverables": "обновлённый сайт, серия адверториалов и лендингов для платного трафика."
   },
-  "results": null,
+  "results": {
+   "items": [
+    {
+     "value": "170%",
+     "label": "выше кликабельность в Snapchat"
+    },
+    {
+     "value": "36%",
+     "label": "ниже CAC в Meta"
+    },
+    {
+     "value": "42%",
+     "label": "ниже CAC в Google Ads"
+    }
+   ],
+   "note": null,
+   "logos": null
+  },
   "links": [
    {
     "label": "Перейти на drinkag1.com",
@@ -122,11 +139,12 @@
      "label": "добавлений в список желаемого Steam"
     }
    ],
-   "note": "В течение первого месяца после релиза."
+   "note": "В течение первого месяца после релиза.",
+   "logos": "Платформы"
   },
   "links": [
    {
-    "label": "Смотреть трейлер",
+    "label": "Смотреть на YouTube",
     "url": "https://www.youtube.com/watch?v=bH9zvvhGitY"
    }
   ]
@@ -273,7 +291,8 @@
      "label": "собственных изображений"
     }
    ],
-   "note": null
+   "note": null,
+   "logos": null
   },
   "links": []
  },
@@ -321,7 +340,8 @@
      "label": "средняя сессия"
     }
    ],
-   "note": null
+   "note": null,
+   "logos": "Официальные партнёры"
   },
   "links": []
  }

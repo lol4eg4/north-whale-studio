@@ -52,7 +52,7 @@
     "scale": 1
    }
   ],
-  "partners": []
+  "logos": []
  },
  {
   "id": 2,
@@ -61,14 +61,17 @@
    "en": "AG1"
   },
   "what": null,
-  "result": null,
+  "result": {
+   "ru": "200% средняя окупаемость рекламы",
+   "en": "200% average return on ad spend"
+  },
   "size": "l",
   "kind": "video",
   "sound": false,
   "vertical": false,
   "color": "mint",
   "press": [],
-  "partners": []
+  "logos": []
  },
  {
   "id": 3,
@@ -78,8 +81,8 @@
   },
   "what": null,
   "result": {
-   "ru": "100 млн+ просмотров",
-   "en": "100M+ views"
+   "ru": "100 млн+ органических просмотров",
+   "en": "100M+ organic views"
   },
   "size": "xl",
   "kind": "video",
@@ -87,7 +90,26 @@
   "vertical": false,
   "color": "buoy",
   "press": [],
-  "partners": []
+  "logos": [
+   {
+    "name": "Instagram",
+    "logo": "/media/platform-instagram.svg",
+    "ratio": 4.53,
+    "scale": 1.1
+   },
+   {
+    "name": "YouTube",
+    "logo": "/media/platform-youtube.svg",
+    "ratio": 4.48,
+    "scale": 1
+   },
+   {
+    "name": "TikTok",
+    "logo": "/media/platform-tiktok.svg",
+    "ratio": 4.92,
+    "scale": 0.85
+   }
+  ]
  },
  {
   "id": 4,
@@ -103,7 +125,7 @@
   "vertical": false,
   "color": "jellyfish",
   "press": [],
-  "partners": []
+  "logos": []
  },
  {
   "id": 5,
@@ -122,7 +144,7 @@
   "vertical": false,
   "color": "royal",
   "press": [],
-  "partners": []
+  "logos": []
  },
  {
   "id": 6,
@@ -141,7 +163,7 @@
   "vertical": false,
   "color": "lemon",
   "press": [],
-  "partners": []
+  "logos": []
  },
  {
   "id": 7,
@@ -153,14 +175,17 @@
    "ru": "Аукционный дом",
    "en": "Auction house"
   },
-  "result": null,
+  "result": {
+   "ru": "Полный цикл ребрендинга",
+   "en": "Full-cycle rebranding"
+  },
   "size": "l",
   "kind": "video",
   "sound": false,
   "vertical": false,
   "color": "tape",
   "press": [],
-  "partners": []
+  "logos": []
  },
  {
   "id": 8,
@@ -172,14 +197,17 @@
    "ru": "Игровой трейлер",
    "en": "Game trailer"
   },
-  "result": null,
+  "result": {
+   "ru": "100 тыс.+ игроков",
+   "en": "100K+ players"
+  },
   "size": "t",
   "kind": "video",
   "sound": true,
   "vertical": true,
   "color": "cobalt",
   "press": [],
-  "partners": [
+  "logos": [
    {
     "name": "VK",
     "logo": "/media/partner-vk.svg",

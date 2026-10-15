@@ -66,7 +66,24 @@
    ],
    "deliverables": "the redesigned website, a series of advertorials and landing pages for paid traffic."
   },
-  "results": null,
+  "results": {
+   "items": [
+    {
+     "value": "170%",
+     "label": "higher click-through on Snapchat"
+    },
+    {
+     "value": "36%",
+     "label": "lower CAC on Meta"
+    },
+    {
+     "value": "42%",
+     "label": "lower CAC on Google Ads"
+    }
+   ],
+   "note": null,
+   "logos": null
+  },
   "links": [
    {
     "label": "Visit drinkag1.com",
@@ -122,11 +139,12 @@
      "label": "Steam wishlists"
     }
    ],
-   "note": "Within the first month after release."
+   "note": "Within the first month after release.",
+   "logos": "Platforms"
   },
   "links": [
    {
-    "label": "Watch the trailer",
+    "label": "Watch on YouTube",
     "url": "https://www.youtube.com/watch?v=bH9zvvhGitY"
    }
   ]
@@ -273,7 +291,8 @@
      "label": "custom visuals"
     }
    ],
-   "note": null
+   "note": null,
+   "logos": null
   },
   "links": []
  },
@@ -321,7 +340,8 @@
      "label": "average session"
     }
    ],
-   "note": null
+   "note": null,
+   "logos": "Official partners"
   },
   "links": []
  }

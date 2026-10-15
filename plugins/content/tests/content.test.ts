@@ -55,9 +55,10 @@ describe("cases", () => {
   });
 
   test("screen readers hear number, client and what the file name says", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ просмотров");
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ органических просмотров");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production");
-    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1");
+    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. 200% средняя окупаемость рекламы");
+    expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook");
     expect(store("ru").caseById(9)).toBeUndefined();
   });
 
@@ -81,11 +82,12 @@ describe("cases", () => {
     expect(store("en").caseById(3)!.page!.links[0].url).toBe(store("ru").caseById(3)!.page!.links[0].url);
   });
 
-  test("partners: DeckForge's three, shown in its results, each logo on disk", () => {
-    expect(cases.find((c) => c.id === 8)!.partners.map((p) => p.name)).toEqual(["VK", "RuStore", "Xiaomi"]);
+  test("logo rows: Dear Passengers' platforms, DeckForge's partners, each under a label in its results, each logo on disk", () => {
+    expect(cases.find((c) => c.id === 3)!.logos.map((p) => p.name)).toEqual(["Instagram", "YouTube", "TikTok"]);
+    expect(cases.find((c) => c.id === 8)!.logos.map((p) => p.name)).toEqual(["VK", "RuStore", "Xiaomi"]);
     for (const c of cases) {
-      if (c.partners.length) expect(c.page?.results, `case ${c.id}`).toBeTruthy(); // the logo row lives in the results card
-      for (const p of c.partners) {
+      for (const lang of ["ru", "en"] as const) expect(!!store(lang).caseById(c.id)!.page?.results?.logos, `case ${c.id} ${lang}`).toBe(c.logos.length > 0);
+      for (const p of c.logos) {
         expect(Bun.file(`${import.meta.dir}/../../../site${p.logo}`).size, p.logo).toBeGreaterThan(0);
         expect(p.ratio).toBeGreaterThan(1);
       }
