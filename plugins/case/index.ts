@@ -30,7 +30,7 @@ export default function init(host: Host) {
 
   const dlg = overlay("case", () => requestClose());
   dlg.el.setAttribute("aria-labelledby", "case-title");
-  const player = createPlayer(text, motion);
+  const player = createPlayer(text);
 
   const counter = h("span", { class: "case-count" });
   const closeBtn = h("button", { type: "button", class: "btn case-x" }, icon("close", 14), h("span", { class: "case-x-t" }), h("kbd", {}, "Esc"));

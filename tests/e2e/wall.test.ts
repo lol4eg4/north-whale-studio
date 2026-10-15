@@ -1,8 +1,9 @@
-// Wall: dense packing without holes, no sideways scroll, the first tile in view,
-// lazy loops (nothing before 2 s, only near the screen, at most 3 loading), posters that stay
-// when a loop fails, the four team badges (names, roles, photos, Maria's loop, roll call), no console errors.
+// Wall: dense packing without holes, no sideways scroll, the first tile in view, still posters
+// with a moving round badge, the hover (result plate, curled corner), lazy loops (nothing before
+// 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
+// team badges (names, roles, photos, Maria's loop, roll call, opening big), no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Browser, Page } from "playwright-core";
+import { chromium, type Browser, type Page } from "playwright-core";
 import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
 
 const HOLE_WIDTHS = [1440, 1280, 1100, 1024, 768, 390, 320];
@@ -114,7 +115,7 @@ describe("wall media", () => {
     const seq: string[] = []; // "poster:<id>" and "loop:<id>" in request order
     let loadAt = 0;
     page.on("request", (r) => {
-      const m = /\/media\/c(\d)-(tile|phone)\.mp4/.exec(r.url());
+      const m = /\/media\/c(\d)-ring\.mp4/.exec(r.url());
       if (m) {
         loops.push({ id: Number(m[1]), at: Date.now() });
         seq.push(`loop:${m[1]}`);
@@ -181,7 +182,7 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("every loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
+  test("every badge loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     // The page's videos that fired an error, to know when the failures have happened.
     await context.addInitScript(() => {
@@ -193,7 +194,7 @@ describe("wall media", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     const asked: string[] = [];
-    await page.route("**/media/*-tile.mp4", (route) => {
+    await page.route("**/media/*-ring.mp4", (route) => {
       asked.push(route.request().url());
       return route.abort();
     });
@@ -230,7 +231,7 @@ describe("wall media", () => {
             label: t.getAttribute("aria-label")!.slice(0, 8),
             hasPoster: img.hasAttribute("src"),
             posterDrawn: img.complete && img.naturalWidth > 0 && getComputedStyle(img).visibility === "visible" && !t.classList.contains("no-poster"),
-            videoShown: t.classList.contains("shown") || getComputedStyle(video).opacity !== "0",
+            videoPlaying: !video.paused,
             videoSrc: video.getAttribute("src"),
           };
         }),
@@ -239,7 +240,7 @@ describe("wall media", () => {
       expect(tiles.filter((t) => t.hasPoster).length, `tiles with a poster ${when}`).toBeGreaterThanOrEqual(sure);
       for (const t of tiles) {
         expect(t.videoSrc, `source of ${t.label} ${when}`).toBeNull();
-        expect(t.videoShown, `video of ${t.label} shown ${when}`).toBe(false);
+        expect(t.videoPlaying, `loop of ${t.label} playing ${when}`).toBe(false);
         if (t.hasPoster) expect(t.posterDrawn, `poster of ${t.label} visible ${when}`).toBe(true);
       }
     };
@@ -259,7 +260,7 @@ describe("wall media", () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
     const page = await context.newPage();
     const loops: string[] = [];
-    page.on("request", (r) => /\/media\/c\d-(tile|phone)\.mp4/.test(r.url()) && loops.push(r.url()));
+    page.on("request", (r) => /\/media\/c\d-ring\.mp4/.test(r.url()) && loops.push(r.url()));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
     await page.waitForTimeout(3000);
     expect(loops).toEqual([]);
@@ -267,7 +268,7 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("phone loads phone posters and phone loops, at most 4 playing", async () => {
+  test("phone loads phone posters and the same badge loops, at most 4 playing", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, phone);
     await page.waitForTimeout(3500);
     const r = await page.evaluate(() => ({
@@ -276,7 +277,7 @@ describe("wall media", () => {
       playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
     }));
     expect(r.poster.endsWith("/media/c1-phone.webp")).toBe(true);
-    expect(r.src).toBe("/media/c1-phone.mp4");
+    expect(r.src).toBe("/media/c1-ring.mp4");
     expect(r.playing).toBeLessThanOrEqual(4);
     expect(errors).toEqual([]);
     await context.close();
@@ -297,6 +298,53 @@ describe("wall media", () => {
     await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
     expect(errors).toEqual([]);
     await context.close();
+  });
+
+  test("a tile is a still poster: its only video is the round badge's loop", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    const r = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => ({
+        videos: t.querySelectorAll("video").length,
+        inRing: !!t.querySelector(".tile-ring > video"),
+        poster: t.querySelector(".tile-poster")!.tagName,
+      })),
+    );
+    expect(r).toEqual(Array.from({ length: 8 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
+    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster"))).toBe("/media/c1-ring.webp");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("hover: the lemon result flies out only under the mouse, the corner curls; touch screens show the result", async () => {
+    // Headless Chromium reports no hover; these settings give it a mouse.
+    const mouse = await chromium.launch({ args: ["--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4"] });
+    const { context, page, errors } = await open(mouse, `${full.url}/?lang=ru`);
+    const tile = page.locator(".wall .tile").nth(2); // Dear Passengers: the case with a result
+    await tile.scrollIntoViewIfNeeded();
+    const look = () =>
+      tile.evaluate((t) => ({
+        stat: Number(getComputedStyle(t.querySelector(".plate-stat")!).opacity),
+        corner: t.querySelector<HTMLElement>(".tile-peel")!.offsetWidth,
+      }));
+    const before = await look();
+    expect(before.stat).toBe(0);
+    expect(before.corner).toBeGreaterThan(0);
+    await tile.hover({ position: { x: 100, y: 100 } });
+    await page.waitForTimeout(700);
+    const over = await look();
+    expect(over.stat).toBe(1);
+    expect(over.corner).toBeGreaterThan(before.corner);
+    await page.mouse.move(1, 1);
+    await page.waitForTimeout(700);
+    expect(await look()).toEqual(before);
+    expect(errors).toEqual([]);
+    await context.close();
+    await mouse.close();
+
+    const touch = await open(browser, `${full.url}/?lang=ru`, phone);
+    expect(await touch.page.evaluate(() => getComputedStyle(document.querySelectorAll(".wall .plate-stat")[0]).opacity)).toBe("1");
+    await touch.context.close();
   });
 
   test("opening a case pauses the wall loops; closing resumes them", async () => {
@@ -459,6 +507,71 @@ describe("team badges", () => {
     await page.waitForSelector(".wall .tag-ph.no-photo", { timeout: 5000 });
     expect(await page.locator(".wall .tag-ph.no-photo").count()).toBe(1);
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag-ph.no-photo")!).borderStyle)).toBe("dashed");
+    await context.close();
+  });
+
+  for (const device of ["computer", "phone"] as const) {
+    test(`${device}: a badge opens big over the page; a second click, the close button and Esc send it back`, async () => {
+      const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, device === "phone" ? phone : {});
+      const press = (sel: string) => (device === "phone" ? page.tap(sel) : page.click(sel));
+      await toBadge(page, 0);
+      const small = await page.locator(".wall .tag").first().boundingBox();
+      expect(await page.locator(".wall .tag").first().getAttribute("aria-label")).toBe("Познакомиться: Погорелов, Арт-директор");
+      const opened = async () => {
+        await page.waitForSelector("dialog.meet[open]");
+        await page.waitForFunction(() => document.querySelector(".meet-card")!.getAnimations().every((a) => a.playState === "finished"));
+        const big = (await page.locator(".meet-card .tag").boundingBox())!;
+        expect(big.width).toBeGreaterThan(small!.width * 1.8);
+        expect(await page.locator(".meet-card .tag-nm").textContent()).toBe("Погорелов");
+        expect(await page.isVisible(".meet-x")).toBe(true);
+        expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("hidden");
+      };
+      const closed = async () => {
+        await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+        expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag")!).visibility)).toBe("visible");
+      };
+      await press(".wall .tag >> nth=0");
+      await opened();
+      expect(await page.evaluate(() => document.activeElement?.className)).toBe("meet-x");
+      await press(".meet-card .tag");
+      await closed();
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+      await press(".wall .tag >> nth=0");
+      await opened();
+      expect(await page.textContent(".meet-x")).toBe("Закрыть");
+      await press(".meet-x");
+      await closed();
+      await page.focus(".wall .tag >> nth=0");
+      await page.keyboard.press("Enter");
+      await opened();
+      await page.keyboard.press("Escape");
+      await closed();
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
+
+  test("English: the badge and its close button speak English", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=en`);
+    await toBadge(page, 1);
+    expect(await page.locator(".wall .tag").nth(1).getAttribute("aria-label")).toBe("Meet SHAN, Project Manager");
+    await page.click(".wall .tag >> nth=1");
+    await page.waitForSelector("dialog.meet[open]");
+    expect(await page.textContent(".meet-x")).toBe("Close");
+    expect(await page.getAttribute("dialog.meet", "aria-label")).toBe("SHAN, Project Manager");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("calm: the badge opens and closes at once, without flying", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    expect(await page.evaluate(() => document.querySelector(".meet-card")!.getAnimations().length)).toBe(0);
+    await page.click(".meet-x");
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(false);
+    expect(errors).toEqual([]);
     await context.close();
   });
 

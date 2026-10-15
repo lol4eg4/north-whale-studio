@@ -49,14 +49,13 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         sound: c.sound,
         vertical: c.vertical,
         media: {
-          tile: `/media/c${c.id}-tile.mp4`,
-          phone: `/media/c${c.id}-phone.mp4`,
           poster: `/media/c${c.id}.webp`,
           posterPhone: `/media/c${c.id}-phone.webp`,
+          ring: still ? null : `/media/c${c.id}-ring.mp4`,
+          ringPoster: `/media/c${c.id}-ring.webp`,
           full: still ? null : `/media/c${c.id}-full.mp4`,
           still: still ? `/media/c${c.id}-full.webp` : null,
         },
-        ring: c.ring as [number, number],
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         sr: [format("case.label", { n: c.id }), client, what, result]
           .filter(Boolean)

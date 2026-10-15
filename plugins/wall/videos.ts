@@ -1,4 +1,4 @@
-// Wall loops: which tile videos get a source and which play.
+// Wall loops (the case tiles' round badges, Maria's badge): which get a source and which play.
 //
 //   near (within one viewport) + 2 s after load  -> attach src (max 3 loading at once)
 //   still loading but no longer near              -> drop the source, the slot frees
@@ -64,8 +64,7 @@ export function schedule(tiles: TileState[], p: Policy): Plan {
 interface Entry {
   state: TileState;
   video: HTMLVideoElement;
-  src: { wide: string; phone: string };
-  drawing(on: boolean): void;
+  src: string;
   stall: number; // timer: a source that brings no data for 20 s gives its slot back
 }
 
@@ -98,7 +97,6 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   const fail = (e: Entry) => {
     e.state.failed = true;
     e.state.loading = e.state.ready = e.state.playing = false;
-    e.drawing(false);
     e.video.removeAttribute("src");
     e.video.load();
     update();
@@ -106,21 +104,17 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   const attach = (e: Entry) => {
     e.state.attached = e.state.loading = true;
     e.video.preload = "auto";
-    e.video.src = opts.phone.matches ? e.src.phone : e.src.wide;
+    e.video.src = e.src;
     watch(e);
   };
   const play = (e: Entry) => {
     e.state.playing = true;
-    e.video.play().then(
-      // On phones the round badge stays a still frame (DESIGN.md, case tile).
-      () => e.state.playing && !opts.phone.matches && e.drawing(true),
-      (err: unknown) => {
-        // A pause that came first is not a failure.
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        // Refused (low-power mode, no autoplay): the poster stays, no retry loop.
-        if (e.state.playing) fail(e);
-      },
-    );
+    e.video.play().catch((err: unknown) => {
+      // A pause that came first is not a failure.
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      // Refused (low-power mode, no autoplay): the poster stays, no retry loop.
+      if (e.state.playing) fail(e);
+    });
   };
   // No data for 20 s: the slot goes back and the tile tries again later (a slow link keeps going
   // as long as data comes).
@@ -134,7 +128,6 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   };
   const pause = (e: Entry) => {
     e.state.playing = false;
-    e.drawing(false);
     e.video.pause();
   };
   const detach = (e: Entry) => {
@@ -167,11 +160,6 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     { threshold: [0, 0.01, 0.25, 0.5, 0.75, 1] },
   );
 
-  // Phone and desktop loops are different files: swap them when the breakpoint changes.
-  opts.phone.addEventListener("change", () => {
-    for (const e of entries) detach(e);
-    update();
-  });
   document.addEventListener("visibilitychange", update);
 
   const arm = () => setTimeout(() => ((armed = true), update()), 2000);
@@ -179,12 +167,11 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   else addEventListener("load", arm, { once: true });
 
   return {
-    add(id: number, el: HTMLElement, video: HTMLVideoElement, src: { wide: string; phone: string }, drawing: (on: boolean) => void) {
+    add(id: number, el: HTMLElement, video: HTMLVideoElement, src: string) {
       const e: Entry = {
         state: { id, near: false, visible: 0, attached: false, loading: false, ready: false, playing: false, failed: false },
         video,
         src,
-        drawing,
         stall: 0,
       };
       video.addEventListener("canplay", () => {

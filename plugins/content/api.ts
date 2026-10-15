@@ -14,14 +14,13 @@ export interface CaseItem {
   sound: boolean;
   vertical: boolean;
   media: {
-    tile: string;
-    phone: string;
-    poster: string;
-    posterPhone: string;
+    poster: string; // the tile's still
+    posterPhone: string; // used at <= 700 px
+    ring: string | null; // the round badge's loop; null for a still
+    ringPoster: string; // the badge's still until the loop plays
     full: string | null; // full video for the open case; null for a still
     still: string | null; // full-size picture for a still case
   };
-  ring: [number, number]; // close-up point (0..1) for the round badge
   story: { task: string; did: string; result: string }; // placeholders until the studio sends texts
   sr: string; // what a screen reader says for the tile
 }

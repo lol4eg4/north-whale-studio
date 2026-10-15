@@ -19,8 +19,9 @@
 .wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
 .wall > .t6 { display: none; }
 
-/* Team name badge */
-.wall .tag { width: 90cqw; height: 86cqh; border-radius: var(--rounded-sticker); overflow: hidden; background: var(--paper); display: flex; flex-direction: column; text-align: center; }
+/* Team name badge: on the wall, and big over the page when opened (meet.ts). */
+:is(.wall, .meet) .tag { width: 90cqw; height: 86cqh; margin: 0; padding: 0; border-radius: var(--rounded-sticker); overflow: hidden; background: var(--paper); color: var(--ink); font: inherit; display: flex; flex-direction: column; text-align: center; cursor: pointer; }
+.wall .tag.meeting { visibility: hidden; }
 .tag-band { display: block; background: var(--c); color: var(--bf); padding: 7cqmin 0 4cqmin; }
 .tag-band b { display: block; font: 900 clamp(11px, 11cqmin, 22px)/1 var(--display); text-transform: uppercase; }
 .tag-band i { display: block; font: 500 clamp(10px, 5.5cqmin, 11px)/1 var(--mono); letter-spacing: 0.08em; font-style: normal; margin-top: 3px; text-transform: uppercase; }
@@ -33,6 +34,22 @@
 .tag-ph.no-photo { border: 2px dashed var(--text-muted); box-shadow: none; }
 .tag-ph.no-photo img { display: none; }
 .tag-role { display: block; font: 500 clamp(10px, 5.6cqmin, 11px)/1.2 var(--mono); text-transform: uppercase; color: rgba(14, 14, 14, 0.6); padding: 0 6% 6cqmin; }
+
+/* The open badge: the box has a wall cell's shape, so the copy lays out as on the wall, only bigger. */
+dialog.sheet.meet { background: rgba(14, 14, 14, 0.45); }
+dialog.sheet.meet::backdrop { background: transparent; }
+dialog.sheet.meet[open] { display: grid; place-items: center; }
+.meet-box { --w: min(600px, calc(100vw - 48px), calc((100dvh - 120px) * 1.25)); width: var(--w); height: calc(var(--w) * 0.8); container-type: size; display: grid; place-items: center; }
+.meet-card { position: relative; width: 90cqw; height: 86cqh; cursor: pointer; }
+.meet .tag { width: 100%; height: 100%; border-width: 1.2cqmin; box-shadow: var(--float); }
+.meet .tag-band b { font-size: 11cqmin; }
+.meet .tag-band i { font-size: 5cqmin; margin-top: 1.2cqmin; }
+.meet .tag-nm { font-size: 10.5cqmin; gap: 3cqmin; }
+.meet .tag-ph { box-shadow: 0 0 0 0.9cqmin var(--ink); }
+.meet .tag-role { font-size: 5cqmin; }
+.meet-x { position: absolute; top: 0; right: 0; z-index: 1; translate: 28% -50%; rotate: 4deg; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px 10px 14px; border: 0; border-radius: 99px; background: var(--ink); color: var(--paper); font: 700 15px/1.2 var(--sans); box-shadow: 0 0 0 3px var(--paper), var(--die); cursor: pointer; transition: background 0.2s, rotate 0.3s var(--ease-spring); }
+@media (hover: hover) { .meet-x:hover { background: var(--cobalt); rotate: -3deg; } }
+html.calm .meet-x { transition: none; rotate: none; }
 
 /* Client stickers (also Telegram and "dive deeper") */
 .wall .client { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--f); background: var(--c); font: inherit; cursor: pointer; margin: 0; }

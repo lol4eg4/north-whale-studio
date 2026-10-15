@@ -1,8 +1,8 @@
 // Open case: dialog, closing paths, focus return, Next, deep links and history, language in the
-// address, the player (sound, still, error + retry) and the copy link fallback.
+// address, the player (watch button, sound, error + retry) and the copy link fallback.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";
-import { launch, open, startServer } from "./helpers.ts";
+import { launch, open, phone, startServer } from "./helpers.ts";
 
 let srv: { url: string; stop(): void };
 let browser: Browser;
@@ -198,44 +198,54 @@ describe("player", () => {
     await context.close();
   });
 
-  test("UNION (case 5) is a picture without a player", async () => {
+  test("Kings Resort & Casino (case 5) has its video and player, in Russian and English", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`);
     await page.waitForSelector("dialog.case[open]");
-    expect(await page.getAttribute("dialog.case .case-pic", "src")).toBe("/media/c5-full.webp");
-    expect(await page.isVisible("dialog.case .case-pic")).toBe(true);
-    expect(await page.isVisible("dialog.case video")).toBe(false);
-    expect(await page.isVisible("dialog.case .player")).toBe(false);
-    expect(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src"))).toBe(null);
+    expect(await page.textContent("dialog.case .case-title")).toBe("Kings Resort & Casino");
+    expect(await page.textContent("dialog.case .case-sub")).toBe("Курорт и казино");
+    expect(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src"))).toBe("/media/c5-full.mp4");
+    expect(await page.isVisible("dialog.case .player")).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
+    const en = await open(browser, `${srv.url}/?lang=en#case-5`);
+    await en.page.waitForSelector("dialog.case[open]");
+    expect(await en.page.textContent("dialog.case .case-sub")).toBe("Resort & casino");
+    expect(en.errors).toEqual([]);
+    await en.context.close();
   });
 
-  test("a silent case plays muted on its own", async () => {
-    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`);
-    await page.waitForFunction(() => {
-      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
-      return !v.paused && v.muted && v.currentTime > 0;
-    }, null, { timeout: 10000 });
-    expect(await page.textContent("dialog.case .go")).toBe("Пауза");
-    expect(errors).toEqual([]);
-    await context.close();
-  });
-
-  test("calm: a silent case does not play on its own", async () => {
-    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`, { reducedMotion: "reduce" });
-    await page.waitForSelector("dialog.case[open]");
-    await page.waitForTimeout(800);
-    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.paused)).toBe(true);
-    expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
-    expect(errors).toEqual([]);
-    await context.close();
-  });
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    test(`a case waits for «Смотреть ролик», then plays from the start; a click on the picture pauses it (${reducedMotion})`, async () => {
+      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`, { reducedMotion });
+      await page.waitForSelector("dialog.case[open]");
+      await page.waitForTimeout(800);
+      const state = () => page.evaluate(() => {
+        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+        return { paused: v.paused, at: v.currentTime, big: !document.querySelector<HTMLElement>("dialog.case .case-big")!.hidden };
+      });
+      expect(await state()).toEqual({ paused: true, at: 0, big: true });
+      expect(await page.textContent("dialog.case .case-big")).toBe("Смотреть ролик");
+      expect(await page.getAttribute("dialog.case video", "poster")).toBe("/media/c1.webp");
+      await page.click("dialog.case .case-big");
+      await page.waitForFunction(() => {
+        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+        return !v.paused && v.currentTime > 0;
+      }, null, { timeout: 10000 });
+      expect((await state()).big).toBe(false);
+      expect(await page.textContent("dialog.case .go")).toBe("Пауза");
+      await page.click("dialog.case video");
+      expect(await state()).toMatchObject({ paused: true, big: true });
+      expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
 
   for (const id of [3, 6, 8]) {
-    test(`case ${id} waits for «Смотреть со звуком», then plays with sound`, async () => {
+    test(`case ${id} waits for «Смотреть ролик», then plays with sound`, async () => {
       const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`);
       await page.waitForSelector("dialog.case[open]");
-      expect(await page.textContent("dialog.case .go")).toBe("Смотреть со звуком");
+      expect(await page.textContent("dialog.case .case-big")).toBe("Смотреть ролик");
       expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.paused)).toBe(true);
       expect(await page.isVisible("dialog.case .mute")).toBe(false);
       await page.click("dialog.case .go");
@@ -250,6 +260,18 @@ describe("player", () => {
       await context.close();
     });
   }
+
+  test("phone: «Смотреть ролик» plays the video in the open case", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`, phone);
+    await page.waitForSelector("dialog.case[open]");
+    await page.tap("dialog.case .case-big");
+    await page.waitForFunction(() => {
+      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+      return !v.paused && v.currentTime > 0;
+    }, null, { timeout: 10000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 });
 
 describe("copy link", () => {

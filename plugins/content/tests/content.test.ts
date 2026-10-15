@@ -43,10 +43,11 @@ describe("cases", () => {
     for (const c of cases) {
       expect(c.client).not.toBe("");
       expect(["xl", "l", "t"]).toContain(c.size);
-      expect(c.media.tile).toBe(`/media/c${c.id}-tile.mp4`);
+      expect(c.media.ringPoster).toBe(`/media/c${c.id}-ring.webp`);
       expect(c.kind === "still" ? c.media.still : c.media.full).toBeTruthy();
     }
-    expect(cases.find((c) => c.id === 5)!.kind).toBe("still");
+    expect(cases.every((c) => c.kind === "video" && c.media.ring === `/media/c${c.id}-ring.mp4`)).toBe(true);
+    expect(cases.find((c) => c.id === 5)!.client).toBe("Kings Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
     expect(cases.find((c) => c.id === 8)!.size).toBe("t");
   });

@@ -18,10 +18,12 @@ export interface Case {
   kind: "video" | "still";
   size: "xl" | "l" | "t";
   sound: boolean;
-  tileStart: number;
-  tileLength: number; // seconds, at most 8
+  poster: number; // second of the still the tile shows (also the phone tile and the open case)
+  ringStart: number; // the round badge's loop: start and length in seconds, at most 8
+  ringLength: number;
   phoneFocus: [number, number]; // centre of the phone crop, 0..1
   ring: [number, number]; // close-up point of the round badge, 0..1
+  crop?: [number, number, number, number]; // x, y, width, height (source pixels) to keep, e.g. without a screen recorder's tooltip
 }
 
 export interface TeamMedia {
@@ -34,6 +36,7 @@ export interface TeamMedia {
 export const cases = config.cases as Case[];
 export const team = config.team as TeamMedia[];
 export const TEAM_SIZE = 320;
+export const RING_SIZE = 320;
 export const outDir = join(import.meta.dir, "..", "site", "media");
 export const TOTAL_LIMIT = 80 * MB;
 export const MUSIC = { file: "music.m4a", limit: 3.5 * MB };
@@ -41,13 +44,13 @@ export const MUSIC = { file: "music.m4a", limit: 3.5 * MB };
 /** Every file the pipeline writes for one case, with its size limit in bytes. */
 export function outputs(c: Case): { file: string; limit: number }[] {
   const n = `c${c.id}`;
-  return [
-    { file: `${n}-tile.mp4`, limit: 2.5 * MB },
-    { file: `${n}-phone.mp4`, limit: 1.2 * MB },
+  const stills = [
     { file: `${n}.webp`, limit: 120 * KB },
     { file: `${n}-phone.webp`, limit: 120 * KB },
-    c.kind === "still" ? { file: `${n}-full.webp`, limit: 300 * KB } : { file: `${n}-full.mp4`, limit: FULL_LIMIT },
+    { file: `${n}-ring.webp`, limit: 30 * KB },
   ];
+  if (c.kind === "still") return [...stills, { file: `${n}-full.webp`, limit: 300 * KB }];
+  return [...stills, { file: `${n}-ring.mp4`, limit: 600 * KB }, { file: `${n}-full.mp4`, limit: FULL_LIMIT }];
 }
 
 /** Every file the pipeline writes for one team member, with its size limit in bytes. */
@@ -116,34 +119,34 @@ function phoneCrop(c: Case, info: Info): string {
   return `crop=${b.w}:${b.h}:${b.x}:${b.y}`;
 }
 
+/** Round badge: a square around the ring point, a little under half of the short side. */
+function ringCrop(c: Case, info: Info, size = RING_SIZE): string {
+  const side = even(Math.min(info.width, info.height) * 0.45);
+  const x = even(Math.min(Math.max(c.ring[0] * info.width - side / 2, 0), info.width - side));
+  const y = even(Math.min(Math.max(c.ring[1] * info.height - side / 2, 0), info.height - side));
+  return `crop=${side}:${side}:${x}:${y},${scaleTo(size, size)}`;
+}
+
+/** The case's own crop of the source, first in every filter, and the size it leaves. */
+const keep = (c: Case) => (c.crop ? `crop=${c.crop[2]}:${c.crop[3]}:${c.crop[0]}:${c.crop[1]},` : "");
+const kept = (c: Case, info: Info): Info => (c.crop ? { ...info, width: c.crop[2], height: c.crop[3] } : info);
+
 // ---- encoders -------------------------------------------------------------
 
 const h264 = ["-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p", "-preset", "slow", "-movflags", "+faststart"];
-const tileWidth = { xl: 1280, l: 960, t: 720 };
 const scaleTo = (w: number | string, h: number | string) => `scale=${w}:${h}:flags=lanczos`;
 const cap30 = (info: Info) => (info.fps > 30 ? "fps=30," : "");
 
-/** Silent loop of the chosen fragment: 1280 (xl) or 960 (l) wide, or the 720x1080 crop (t). */
-async function tileVideo(c: Case, src: string, info: Info, out: string) {
-  const vf =
-    c.size === "t"
-      ? `${cap30(info)}${phoneCrop(c, info)},${scaleTo(720, 1080)}`
-      : `${cap30(info)}${scaleTo(tileWidth[c.size], -2)}`;
-  await run(["-ss", `${c.tileStart}`, "-i", src, "-t", `${Math.min(8, c.tileLength)}`, "-an", "-vf", vf,
-    ...h264, "-crf", "27", "-maxrate", "2.4M", "-bufsize", "4.8M", out]);
+/** The round badge's silent loop: the chosen fragment, square, RING_SIZE. */
+async function ringVideo(c: Case, src: string, info: Info, out: string) {
+  const vf = `${cap30(info)}${keep(c)}${ringCrop(c, kept(c, info))}`;
+  await run(["-ss", `${c.ringStart}`, "-i", src, "-t", `${Math.min(8, c.ringLength)}`, "-an", "-vf", vf,
+    ...h264, "-crf", "26", "-maxrate", "600k", "-bufsize", "1200k", out]);
 }
 
-/** Silent phone loop, at most 6 s. */
-async function phoneVideo(c: Case, src: string, info: Info, out: string) {
-  const [w, h] = phoneSize(c);
-  const vf = `${cap30(info)}${phoneCrop(c, info)},${scaleTo(w, h)}`;
-  await run(["-ss", `${c.tileStart}`, "-i", src, "-t", `${Math.min(6, c.tileLength)}`, "-an", "-vf", vf,
-    ...h264, "-crf", "30", "-maxrate", "1.1M", "-bufsize", "2.2M", out]);
-}
-
-/** The frame at tileStart as webp. */
-async function frame(c: Case, src: string, vf: string, quality: number, out: string) {
-  const seek = c.kind === "video" ? ["-ss", `${c.tileStart}`] : []; // -ss on a lone image drops its only frame
+/** One frame as webp: at `at` seconds of a video, or the image itself (at null). */
+async function frame(src: string, at: number | null, vf: string, quality: number, out: string) {
+  const seek = at === null ? [] : ["-ss", `${at}`]; // -ss on a lone image drops its only frame
   await run([...seek, "-i", src, "-frames:v", "1", "-vf", vf,
     "-c:v", "libwebp", "-quality", `${quality}`, "-compression_level", "6", out]);
 }
@@ -154,56 +157,44 @@ async function frame(c: Case, src: string, vf: string, quality: number, out: str
  * plain CRF 23 can come out bigger than its source: case 3 gave 35 MB).
  */
 async function fullVideo(c: Case, src: string, info: Info, out: string) {
-  const vf = c.size === "t" ? scaleTo(720, -2) : scaleTo("'min(1920,iw)'", -2);
+  const vf = keep(c) + (c.size === "t" ? scaleTo(720, -2) : scaleTo("'min(1920,iw)'", -2));
   const audio = info.audio ? ["-c:a", "aac", "-b:a", "128k", "-ac", "2"] : ["-an"];
   const maxKbps = Math.floor((FULL_LIMIT * 8 * 0.95) / info.duration / 1000) - (info.audio ? 128 : 0);
   await run(["-i", src, "-vf", vf, ...h264, "-crf", "23", "-maxrate", `${maxKbps}k`, "-bufsize", `${2 * maxKbps}k`, ...audio, out]);
 }
 
-const LOOP_SECONDS = 8;
-const LOOP_FPS = 30;
-const LOOP_ZOOM = 0.12; // 12 % push-in at the middle of the loop
-
 /**
- * Slow push-in over a still image, 8 s. The zoom follows a cosine, 1 -> 1.12 -> 1, so the last frame is
- * where the first one starts and the loop does not jump. The image is scaled up 4x first so zoompan
- * (which moves on whole pixels) does not shake.
+ * What the wall shows: the tile's still at `poster` seconds, its phone crop, and the round badge,
+ * a loop of the chosen fragment with its first frame as the still before it plays.
  */
-async function stillLoop(src: string, crop: string, focus: [number, number], [w, h]: [number, number], crf: number, maxrate: string, out: string) {
-  const n = LOOP_SECONDS * LOOP_FPS;
-  const z = `1+${LOOP_ZOOM}*(1-cos(2*PI*on/${n}))/2`;
-  const vf = `${crop}scale=iw*4:ih*4:flags=bicubic,zoompan=z='${z}':x='${focus[0]}*(iw-iw/zoom)':y='${focus[1]}*(ih-ih/zoom)':d=${n}:s=${w}x${h}:fps=${LOOP_FPS}`;
-  await run(["-i", src, "-vf", vf, "-frames:v", `${n}`, "-an", ...h264, "-crf", `${crf}`,
-    "-maxrate", maxrate, "-bufsize", `${2 * Number.parseFloat(maxrate)}M`, out]);
+export async function wallMedia(c: Case, src: string, info: Info) {
+  const n = `c${c.id}`;
+  const k = kept(c, info);
+  const [pw, ph] = phoneSize(c);
+  const tile = c.size === "t" ? `${phoneCrop(c, k)},${scaleTo(720, 1080)}` : scaleTo(1280, -2);
+  const at = (t: number) => (c.kind === "video" ? t : null);
+  await frame(src, at(c.poster), keep(c) + tile, 66, join(outDir, `${n}.webp`));
+  await frame(src, at(c.poster), `${keep(c)}${phoneCrop(c, k)},${scaleTo(pw, ph)}`, 70, join(outDir, `${n}-phone.webp`));
+  // The still is smaller than the loop: it is on the first screen, which has a byte budget.
+  await frame(src, at(c.ringStart), keep(c) + ringCrop(c, k, 240), 60, join(outDir, `${n}-ring.webp`));
+  if (c.kind === "video") await ringVideo(c, src, info, join(outDir, `${n}-ring.mp4`));
 }
 
 async function buildVideoCase(c: Case, src: string, info: Info) {
-  if (c.tileLength > 8) throw new Error(`case ${c.id}: tileLength ${c.tileLength} is over 8 s`);
-  if (c.tileStart + c.tileLength > info.duration + 0.05) {
-    throw new Error(`case ${c.id}: fragment ${c.tileStart}+${c.tileLength} s is longer than the source (${info.duration} s)`);
+  if (c.ringLength > 8) throw new Error(`case ${c.id}: ringLength ${c.ringLength} is over 8 s`);
+  if (c.ringStart + c.ringLength > info.duration + 0.05) {
+    throw new Error(`case ${c.id}: fragment ${c.ringStart}+${c.ringLength} s is longer than the source (${info.duration} s)`);
   }
+  if (c.poster > info.duration) throw new Error(`case ${c.id}: poster ${c.poster} s is past the end (${info.duration} s)`);
   if (c.sound !== info.audio) throw new Error(`case ${c.id}: media.json sound=${c.sound} but the source ${info.audio ? "has" : "has no"} audio`);
-  const n = `c${c.id}`;
-  const [pw, ph] = phoneSize(c);
-  const poster = c.size === "t" ? `${phoneCrop(c, info)},${scaleTo(720, 1080)}` : scaleTo(1280, -2);
-  await tileVideo(c, src, info, join(outDir, `${n}-tile.mp4`));
-  await phoneVideo(c, src, info, join(outDir, `${n}-phone.mp4`));
-  await frame(c, src, poster, 70, join(outDir, `${n}.webp`));
-  await frame(c, src, `${phoneCrop(c, info)},${scaleTo(pw, ph)}`, 70, join(outDir, `${n}-phone.webp`));
-  await fullVideo(c, src, info, join(outDir, `${n}-full.mp4`));
+  await wallMedia(c, src, info);
+  await fullVideo(c, src, info, join(outDir, `c${c.id}-full.mp4`));
 }
 
 async function buildStillCase(c: Case, src: string, info: Info) {
   if (c.sound) throw new Error(`case ${c.id}: a still image has no sound`);
-  const n = `c${c.id}`;
-  const [pw, ph] = phoneSize(c);
-  const tile: [number, number] = [tileWidth[c.size], even((tileWidth[c.size] * info.height) / info.width)];
-  const phoneCropped = `${phoneCrop(c, info)},`;
-  await stillLoop(src, "", c.ring, tile, 27, "2.4M", join(outDir, `${n}-tile.mp4`));
-  await stillLoop(src, phoneCropped, [0.5, 0.5], [pw, ph], 30, "1.1M", join(outDir, `${n}-phone.mp4`));
-  await frame(c, src, scaleTo(1280, -2), 70, join(outDir, `${n}.webp`));
-  await frame(c, src, `${phoneCropped}${scaleTo(pw, ph)}`, 70, join(outDir, `${n}-phone.webp`));
-  await frame(c, src, scaleTo(1280, -2), 85, join(outDir, `${n}-full.webp`));
+  await wallMedia(c, src, info);
+  await frame(src, null, keep(c) + scaleTo(1280, -2), 85, join(outDir, `c${c.id}-full.webp`));
 }
 
 // ---- team badges ----------------------------------------------------------

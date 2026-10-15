@@ -1,10 +1,9 @@
 // The open case's own player.
-//   silent video: autoplays muted and looped (not in calm or paused), play/pause, seek, time, full screen
-//   video with sound: poster + «Смотреть со звуком»; that click starts it with sound, then the same
-//     controls plus a mute toggle
-//   still picture (UNION): no player
+//   video: the poster and a big «Смотреть ролик» in the middle; that click plays it from the start,
+//     with sound where it has some. Then play/pause (also a click on the picture), seek, time, full
+//     screen, and a mute toggle for a video with sound. Paused or over: the big button again.
+//   still picture: no player
 //   error: poster + «Повторить», which reloads the source
-import type { Motion } from "../../platform/motion.ts";
 import { h, icon } from "../../platform/ui/parts.ts";
 import type { CaseItem } from "../content/api.ts";
 
@@ -16,13 +15,15 @@ const clock = (s: number) => {
   return `${m}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 };
 
-export function createPlayer(text: (key: string) => string, motion: Motion) {
+export function createPlayer(text: (key: string) => string) {
   const video = h("video", { class: "case-video", playsinline: true, preload: "metadata", disablepictureinpicture: true, controlslist: "nodownload noplaybackrate" });
   const picture = h("img", { class: "case-pic", alt: "", draggable: "false" });
   const errText = h("span");
   const retry = h("button", { type: "button", class: "btn case-retry" }, icon("retry", 18), h("span"));
   const errBox = h("div", { class: "case-err", role: "alert" }, errText, retry);
-  const frame = h("div", { class: "case-frame" }, picture, video, errBox);
+  const bigText = h("span");
+  const big = h("button", { type: "button", class: "case-big" }, h("span", { class: "case-big-ico" }, icon("play", 26)), bigText);
+  const frame = h("div", { class: "case-frame" }, picture, video, big, errBox);
 
   const goIcon = h("span", { class: "go-ico" });
   const goText = h("span");
@@ -36,18 +37,20 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
 
   let item: CaseItem | null = null;
   let mode: Mode = "still";
-  let started = false; // sound videos start only on the visitor's click
+  let started = false; // a video starts only on the visitor's click
   let failed = false;
 
   const render = () => {
     el.classList.toggle("still", mode === "still");
     el.classList.toggle("err", failed);
     bar.hidden = mode === "still";
-    const waiting = mode === "sound" && !started;
-    const playing = !video.paused && !video.ended && !waiting;
+    const playing = started && !video.paused && !video.ended;
+    el.classList.toggle("playing", playing);
+    big.hidden = mode === "still" || playing;
+    bigText.textContent = text("case.watch");
     goIcon.replaceChildren(icon(playing ? "pause" : "play", 14));
-    goText.textContent = text(waiting ? "case.watchSound" : playing ? "case.pause" : "case.play");
-    go.classList.toggle("wait", waiting);
+    goText.textContent = text(playing ? "case.pause" : "case.play");
+    go.classList.toggle("wait", !started);
     mute.hidden = !(mode === "sound" && started);
     mute.replaceChildren(icon(video.muted ? "muted" : "soundOn", 20));
     mute.setAttribute("aria-label", text(video.muted ? "case.unmute" : "case.mute"));
@@ -67,26 +70,28 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
   const play = () => {
     video.play().then(render, () => render()); // refused: the poster and the play button stay
   };
-  const autoplay = () => mode === "silent" && !motion.calm && !motion.paused && !document.hidden;
 
   const load = () => {
     if (!item?.media.full) return;
     failed = false;
     video.src = item.media.full;
     video.load();
-    if (autoplay() || (mode === "sound" && started)) play();
+    if (started) play();
     render();
   };
 
-  go.addEventListener("click", () => {
-    if (mode === "sound" && !started) {
+  const toggle = () => {
+    if (!started) {
       started = true;
       video.muted = false;
       play();
     } else if (video.paused || video.ended) play();
     else video.pause();
     render();
-  });
+  };
+  go.addEventListener("click", toggle);
+  big.addEventListener("click", toggle);
+  video.addEventListener("click", toggle);
   mute.addEventListener("click", () => {
     video.muted = !video.muted;
     render();
@@ -117,8 +122,6 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
     render();
   });
   document.addEventListener("visibilitychange", () => document.hidden && video.pause());
-  // Pause stops case loops too; un-pausing leaves them for the visitor to start.
-  motion.onChange(() => motion.paused && mode === "silent" && video.pause());
 
   return {
     el,
@@ -132,8 +135,7 @@ export function createPlayer(text: (key: string) => string, motion: Motion) {
       picture.src = mode === "still" ? c.media.still ?? c.media.poster : c.media.poster;
       if (mode !== "still") {
         video.poster = c.media.poster;
-        video.muted = mode === "silent";
-        video.loop = mode === "silent";
+        video.muted = false;
         load();
       }
       tick();
