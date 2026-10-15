@@ -438,6 +438,26 @@ describe("team badges", () => {
     await context.close();
   });
 
+  test("every badge shows its whole role, from 320 to 1440 px, RU and EN (tablets in portrait too)", async () => {
+    const context = await browser.newContext({ locale: "ru-RU" });
+    const page = await context.newPage();
+    const cut: string[] = [];
+    for (const width of [320, 390, 701, 744, 768, 834, 870, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const lang of ["ru", "en"]) {
+        await page.goto(`${full.url}/?lang=${lang}`, { waitUntil: "load" });
+        await page.evaluate(() => document.fonts.ready);
+        const over = await page.evaluate(() =>
+          [...document.querySelectorAll(".wall .tag")].map((t) => t.querySelector(".tag-role")!.getBoundingClientRect().bottom - t.getBoundingClientRect().bottom),
+        );
+        // Capitals sit on the baseline: 2 px of the line box below the edge cut nothing.
+        over.forEach((o, i) => o > 2 && cut.push(`${width} ${lang} badge ${i}: ${o.toFixed(1)} px`));
+      }
+    }
+    expect(cut).toEqual([]);
+    await context.close();
+  });
+
   test("every team picture and Maria's loop answer and load; the badge pictures have an empty alt", async () => {
     for (const url of [...PHOTOS, "/media/team-3.mp4"]) expect((await fetch(`${full.url}${url}`)).status, url).toBe(200);
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);

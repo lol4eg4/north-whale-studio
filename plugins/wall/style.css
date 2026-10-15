@@ -34,6 +34,9 @@
 .tag-ph.no-photo { border: 2px dashed var(--text-muted); box-shadow: none; }
 .tag-ph.no-photo img { display: none; }
 .tag-role { display: block; font: 500 clamp(10px, 5.6cqmin, 11px)/1.2 var(--mono); text-transform: uppercase; color: rgba(14, 14, 14, 0.6); padding: 0 6% 6cqmin; }
+/* Small badges (tablets in portrait): a long role («Проджект-менеджер») keeps to one line. */
+@container (max-width: 140px) { .wall .tag-role { padding: 0 1% 6cqmin; letter-spacing: -0.04em; } }
+@container (max-width: 120px) { .wall .tag-role { font-size: 9px; } }
 
 /* The open badge: the box has a wall cell's shape, so the copy lays out as on the wall, only bigger. */
 dialog.sheet.meet { background: rgba(14, 14, 14, 0.45); }
