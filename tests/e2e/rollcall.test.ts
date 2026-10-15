@@ -42,4 +42,19 @@ describe("roll call", () => {
       await context.close();
     });
   }
+
+  test("right after load the badges come with their photos: the roll call does not wait for the 2 s", async () => {
+    const { context, page, errors } = await open(browser, `${server.url}/?lang=ru`);
+    await page.locator("#team .team-block").click();
+    const at = await page.evaluate(() => ({
+      sinceLoad: performance.now() - (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming).loadEventEnd,
+      photos: [...document.querySelectorAll(".wall .tag-ph img")].map((img) => img.getAttribute("src")),
+    }));
+    expect(at.sinceLoad).toBeLessThan(2000);
+    expect(at.photos).toEqual(["/media/team-1.webp", "/media/team-2.webp", "/media/team-3.webp", "/media/team-4.webp"]);
+    await page.waitForSelector(".wall.rollcall", { timeout: 10000 });
+    await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].every((img) => img.complete && img.naturalWidth > 0));
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 });
