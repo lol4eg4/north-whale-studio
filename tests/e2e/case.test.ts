@@ -223,7 +223,7 @@ describe("player", () => {
   test("a case page: meta, highlights, cards, results and outside links; a case with no page keeps its placeholders", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=en#case-3`);
     await page.waitForSelector("dialog.case[open]");
-    expect(await page.$$eval("dialog.case .case-meta dt", (els) => els.map((e) => e.textContent))).toEqual(["Client", "Category", "Services"]);
+    expect(await page.$$eval("dialog.case .case-meta dt", (els) => els.map((e) => e.textContent))).toEqual(["Client", "Category"]);
     expect(await page.textContent("dialog.case .case-how mark")).toBe("pure in-flight chaos");
     expect(await page.$$eval("dialog.case .case-tag", (els) => els.map((e) => e.textContent))).toEqual(["One launch", "Our role", "The results"]);
     expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["100M+", "322%", "100×", "500K+"]);

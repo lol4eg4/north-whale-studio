@@ -52,6 +52,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         kind: c.kind as CaseItem["kind"],
         sound: c.sound,
         vertical: c.vertical,
+        color: c.color,
         media: {
           poster: media(`/media/c${c.id}.webp`),
           posterPhone: media(`/media/c${c.id}-phone.webp`),

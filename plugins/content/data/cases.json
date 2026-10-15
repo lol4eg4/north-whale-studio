@@ -13,7 +13,8 @@
   "size": "xl",
   "kind": "video",
   "sound": false,
-  "vertical": false
+  "vertical": false,
+  "color": "ink"
  },
  {
   "id": 2,
@@ -26,7 +27,8 @@
   "size": "l",
   "kind": "video",
   "sound": false,
-  "vertical": false
+  "vertical": false,
+  "color": "mint"
  },
  {
   "id": 3,
@@ -42,7 +44,8 @@
   "size": "xl",
   "kind": "video",
   "sound": true,
-  "vertical": false
+  "vertical": false,
+  "color": "buoy"
  },
  {
   "id": 4,
@@ -55,7 +58,8 @@
   "size": "xl",
   "kind": "video",
   "sound": false,
-  "vertical": false
+  "vertical": false,
+  "color": "jellyfish"
  },
  {
   "id": 5,
@@ -71,7 +75,8 @@
   "size": "xl",
   "kind": "video",
   "sound": false,
-  "vertical": false
+  "vertical": false,
+  "color": "signal"
  },
  {
   "id": 6,
@@ -87,7 +92,8 @@
   "size": "xl",
   "kind": "video",
   "sound": true,
-  "vertical": false
+  "vertical": false,
+  "color": "lemon"
  },
  {
   "id": 7,
@@ -103,7 +109,8 @@
   "size": "l",
   "kind": "video",
   "sound": false,
-  "vertical": false
+  "vertical": false,
+  "color": "tape"
  },
  {
   "id": 8,
@@ -119,6 +126,7 @@
   "size": "t",
   "kind": "video",
   "sound": true,
-  "vertical": true
+  "vertical": true,
+  "color": "cobalt"
  }
 ]

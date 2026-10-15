@@ -1,7 +1,7 @@
 // Open case: a native modal dialog over the wall, kept in step with the address (history.ts).
 //
 //   [ media frame + player ][ North Whale Studio · Кейс 03 из 08     [× Назад к стене Esc] ]
-//   [                      ][ eyebrow / title / client · category · services / lead       ]
+//   [                      ][ eyebrow / title / client · category / lead                  ]
 //   [                      ][ how we did it, cards: one batch, our role, results; links    ]
 //   [                      ][ [Дальше: <next case> →] [Написать нам] Скопировать ссылку    ]
 // A case with no page in data/pages.*.json shows its client, what · result and story placeholders.
@@ -16,6 +16,8 @@ import { createPlayer } from "./player.ts";
 import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
+// Each case has its own colour, as each case page of the reference does; these take light text.
+const dark = new Set(["ink", "cobalt", "signal"]);
 // A rise with no figure ("↑"): the display font has no arrow, so it is the site's own, turned up.
 const up = () => {
   const el = icon("arrowRight", 48);
@@ -69,7 +71,7 @@ export default function init(host: Host) {
     story,
     h("div", { class: "case-actions" }, next, talk, copy, field),
   );
-  const panel = h("div", { class: "case-in on-cobalt" }, player.el, body);
+  const panel = h("div", { class: "case-in" }, player.el, body);
   dlg.el.append(panel);
 
   let openId: number | null = null;
@@ -86,7 +88,6 @@ export default function init(host: Host) {
       [
         ["case.client", p.client],
         ["case.category", p.category],
-        ["case.services", p.services],
       ] as const
     ).map(([key, value]) => h("div", {}, h("dt", { class: "mono" }, text(key)), h("dd", {}, value)))),
     h("p", { class: "case-lead" }, ...marked(p.lead)),
@@ -115,6 +116,9 @@ export default function init(host: Host) {
     const all = content().cases();
     const i = all.findIndex((x) => x.id === c.id);
     counter.textContent = content().format("case.counter", { n: two(i + 1), total: two(all.length) });
+    panel.dataset.bg = c.color;
+    panel.style.setProperty("--case-bg", `var(--${c.color})`);
+    panel.classList.toggle("on-ink", dark.has(c.color));
     eyebrow.textContent = c.page?.eyebrow ?? "";
     eyebrow.hidden = !c.page;
     titleEl.textContent = c.page?.title ?? c.client;

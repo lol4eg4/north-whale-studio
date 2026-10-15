@@ -13,6 +13,7 @@ export interface CaseItem {
   kind: "video" | "still";
   sound: boolean;
   vertical: boolean;
+  color: string; // token name: the open case's own colour
   media: {
     poster: string; // the tile's still
     posterPhone: string; // used at <= 700 px
@@ -32,7 +33,6 @@ export interface CasePage {
   title: string;
   client: string;
   category: string;
-  services: string;
   lead: string;
   media: string; // label on the video
   how: { title: string; kicker: string; text: string[] };

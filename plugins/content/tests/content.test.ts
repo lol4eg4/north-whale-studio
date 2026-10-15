@@ -50,6 +50,8 @@ describe("cases", () => {
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
     expect(cases.find((c) => c.id === 8)!.size).toBe("t");
+    for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape"]).toContain(c.color);
+    expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
   test("screen readers hear number, client and what the file name says", () => {
@@ -70,7 +72,7 @@ describe("cases", () => {
       expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
       const p = c.page;
       if (!p) continue;
-      for (const v of [p.eyebrow, p.title, p.client, p.category, p.services, p.lead, p.media, p.how.title, p.how.kicker, p.role.deliverables]) expect(v.trim()).not.toBe("");
+      for (const v of [p.eyebrow, p.title, p.client, p.category, p.lead, p.media, p.how.title, p.how.kicker, p.role.deliverables]) expect(v.trim()).not.toBe("");
       const texts = [p.lead, ...p.how.text, p.card?.copy ?? "", p.role.deliverables];
       for (const t of texts) expect(t.split("==").length % 2, t).toBe(1);
       for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
