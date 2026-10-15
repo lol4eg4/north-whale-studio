@@ -33,7 +33,7 @@ The studio's one-page site: a wall of live cases, a case window, services, a man
 - [docs/explanation-site-design.md](docs/explanation-site-design.md): why the site is built this way.
 - [docs/product/system-architecture.md](docs/product/system-architecture.md): the blocks, their layers, APIs and events. Also [scope](docs/product/scope.md) and [user stories](docs/product/user-stories.md).
 - [docs/designs/](docs/designs/): the brief, the build plan, the user stories and the visual check report.
-- [DESIGN.md](DESIGN.md): the design system. [docs/credits.md](docs/credits.md): the music and its licence. [TODOS.md](TODOS.md): deferred work. [CHANGELOG.md](CHANGELOG.md): what shipped.
+- [DESIGN.md](DESIGN.md): the design system. [docs/credits.md](docs/credits.md): the music and its licence, where each logo came from. [TODOS.md](TODOS.md): deferred work. [CHANGELOG.md](CHANGELOG.md): what shipped.
 
 ## Staging and the bug widget
 
