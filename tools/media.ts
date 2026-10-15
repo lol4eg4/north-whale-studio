@@ -18,7 +18,7 @@ export interface Case {
   kind: "video" | "still";
   size: "xl" | "l" | "t";
   sound: boolean;
-  poster: number; // second of the still the tile shows (also the phone tile and the open case)
+  poster: number | string; // the tile's still (also the phone tile and the open case): a second of the video, or a picture file next to the source
   ringStart: number; // the round badge's loop: start and length in seconds, at most 8
   ringLength: number;
   phoneFocus: [number, number]; // centre of the phone crop, 0..1
@@ -164,36 +164,41 @@ async function fullVideo(c: Case, src: string, info: Info, out: string) {
 }
 
 /**
- * What the wall shows: the tile's still at `poster` seconds, its phone crop, and the round badge,
- * a loop of the chosen fragment with its first frame as the still before it plays.
+ * What the wall shows: the tile's still (the frame at `poster` seconds, or the picture `poster`
+ * names), its phone crop, and the round badge, a loop of the chosen fragment with its first frame
+ * as the still before it plays.
  */
-export async function wallMedia(c: Case, src: string, info: Info) {
+export async function wallMedia(c: Case, src: string, info: Info, srcDir: string) {
   const n = `c${c.id}`;
   const k = kept(c, info);
   const [pw, ph] = phoneSize(c);
-  const tile = c.size === "t" ? `${phoneCrop(c, k)},${scaleTo(720, 1080)}` : scaleTo(1280, -2);
   const at = (t: number) => (c.kind === "video" ? t : null);
-  await frame(src, at(c.poster), keep(c) + tile, 66, join(outDir, `${n}.webp`));
-  await frame(src, at(c.poster), `${keep(c)}${phoneCrop(c, k)},${scaleTo(pw, ph)}`, 70, join(outDir, `${n}-phone.webp`));
+  const picture = typeof c.poster === "string" ? join(srcDir, c.poster) : null;
+  const [still, stillAt, cut, size] = picture ? [picture, null, "", await probe(picture)] : [src, at(c.poster as number), keep(c), k];
+  // A medium tile is 3 columns, about 500 px on a wide screen: 1024 covers it at 2x. The first
+  // screen has a byte budget.
+  const tile = c.size === "t" ? `${phoneCrop(c, size)},${scaleTo(720, 1080)}` : scaleTo(c.size === "l" ? 1024 : 1280, -2);
+  await frame(still, stillAt, cut + tile, 62, join(outDir, `${n}.webp`));
+  await frame(still, stillAt, `${cut}${phoneCrop(c, size)},${scaleTo(pw, ph)}`, 70, join(outDir, `${n}-phone.webp`));
   // The still is smaller than the loop: it is on the first screen, which has a byte budget.
   await frame(src, at(c.ringStart), keep(c) + ringCrop(c, k, 240), 60, join(outDir, `${n}-ring.webp`));
   if (c.kind === "video") await ringVideo(c, src, info, join(outDir, `${n}-ring.mp4`));
 }
 
-async function buildVideoCase(c: Case, src: string, info: Info) {
+async function buildVideoCase(c: Case, src: string, info: Info, srcDir: string) {
   if (c.ringLength > 8) throw new Error(`case ${c.id}: ringLength ${c.ringLength} is over 8 s`);
   if (c.ringStart + c.ringLength > info.duration + 0.05) {
     throw new Error(`case ${c.id}: fragment ${c.ringStart}+${c.ringLength} s is longer than the source (${info.duration} s)`);
   }
-  if (c.poster > info.duration) throw new Error(`case ${c.id}: poster ${c.poster} s is past the end (${info.duration} s)`);
+  if (typeof c.poster === "number" && c.poster > info.duration) throw new Error(`case ${c.id}: poster ${c.poster} s is past the end (${info.duration} s)`);
   if (c.sound !== info.audio) throw new Error(`case ${c.id}: media.json sound=${c.sound} but the source ${info.audio ? "has" : "has no"} audio`);
-  await wallMedia(c, src, info);
+  await wallMedia(c, src, info, srcDir);
   await fullVideo(c, src, info, join(outDir, `c${c.id}-full.mp4`));
 }
 
-async function buildStillCase(c: Case, src: string, info: Info) {
+async function buildStillCase(c: Case, src: string, info: Info, srcDir: string) {
   if (c.sound) throw new Error(`case ${c.id}: a still image has no sound`);
-  await wallMedia(c, src, info);
+  await wallMedia(c, src, info, srcDir);
   await frame(src, null, keep(c) + scaleTo(1280, -2), 85, join(outDir, `c${c.id}-full.webp`));
 }
 
@@ -267,7 +272,7 @@ async function main() {
     const src = join(srcDir, c.src);
     const info = await probe(src);
     if (info.width === 0) throw new Error(`${src} has no video stream`);
-    await (c.kind === "still" ? buildStillCase(c, src, info) : buildVideoCase(c, src, info));
+    await (c.kind === "still" ? buildStillCase(c, src, info, srcDir) : buildVideoCase(c, src, info, srcDir));
     files.push(...outputs(c));
     console.log(`case ${c.id} done in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   }

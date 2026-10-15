@@ -1,7 +1,7 @@
 // Open case: dialog, closing paths, focus return, Next, deep links and history, language in the
-// address, the player (watch button, sound, error + retry) and the copy link fallback.
+// address, the player (plays on open, sound, error + retry) and the copy link fallback.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Browser, Page } from "playwright-core";
+import { chromium, type Browser, type Page } from "playwright-core";
 import { launch, open, phone, startServer } from "./helpers.ts";
 
 let srv: { url: string; stop(): void };
@@ -214,45 +214,50 @@ describe("player", () => {
     await en.context.close();
   });
 
-  for (const reducedMotion of ["no-preference", "reduce"] as const) {
-    test(`a case waits for «Смотреть ролик», then plays from the start; a click on the picture pauses it (${reducedMotion})`, async () => {
-      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`, { reducedMotion });
-      await page.waitForSelector("dialog.case[open]");
-      await page.waitForTimeout(800);
-      const state = () => page.evaluate(() => {
-        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
-        return { paused: v.paused, at: v.currentTime, big: !document.querySelector<HTMLElement>("dialog.case .case-big")!.hidden };
-      });
-      expect(await state()).toEqual({ paused: true, at: 0, big: true });
-      expect(await page.textContent("dialog.case .case-big")).toBe("Смотреть ролик");
-      expect(await page.getAttribute("dialog.case video", "poster")).toBe("/media/c1.webp");
-      await page.click("dialog.case .case-big");
-      await page.waitForFunction(() => {
-        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
-        return !v.paused && v.currentTime > 0;
-      }, null, { timeout: 10000 });
-      expect((await state()).big).toBe(false);
-      expect(await page.textContent("dialog.case .go")).toBe("Пауза");
-      await page.click("dialog.case video");
-      expect(await state()).toMatchObject({ paused: true, big: true });
-      expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
-      expect(errors).toEqual([]);
-      await context.close();
+  test("a case plays as soon as it opens; a click on the picture pauses it, another plays it", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
+    await openTile(page, 1);
+    const state = () => page.evaluate(() => {
+      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+      return { paused: v.paused, loop: v.loop };
     });
-  }
+    await page.waitForFunction(() => {
+      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+      return !v.paused && v.currentTime > 0;
+    }, null, { timeout: 10000 });
+    expect(await state()).toEqual({ paused: false, loop: true });
+    expect(await page.getAttribute("dialog.case video", "poster")).toBe("/media/c1.webp");
+    expect(await page.textContent("dialog.case .go")).toBe("Пауза");
+    await page.click("dialog.case video");
+    expect((await state()).paused).toBe(true);
+    expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
+    await page.click("dialog.case video");
+    await page.waitForFunction(() => !document.querySelector<HTMLVideoElement>("dialog.case video")!.paused, null, { timeout: 5000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("calm: nothing plays on its own; «Смотреть» plays it", async () => {
+    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-1`, { reducedMotion: "reduce" });
+    await page.waitForSelector("dialog.case[open]");
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.paused)).toBe(true);
+    expect(await page.textContent("dialog.case .go")).toBe("Смотреть");
+    await page.click("dialog.case .go");
+    await page.waitForFunction(() => !document.querySelector<HTMLVideoElement>("dialog.case video")!.paused, null, { timeout: 10000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 
   for (const id of [3, 6, 8]) {
-    test(`case ${id} waits for «Смотреть ролик», then plays with sound`, async () => {
-      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`);
-      await page.waitForSelector("dialog.case[open]");
-      expect(await page.textContent("dialog.case .case-big")).toBe("Смотреть ролик");
-      expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.paused)).toBe(true);
-      expect(await page.isVisible("dialog.case .mute")).toBe(false);
-      await page.click("dialog.case .go");
+    test(`case ${id} opened from its tile plays at once with sound, once through; the sound button mutes it`, async () => {
+      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
+      await openTile(page, id);
       await page.waitForFunction(() => {
         const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
         return !v.paused && !v.muted && v.currentTime > 0;
       }, null, { timeout: 10000 });
+      expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.loop)).toBe(false);
       expect(await page.isVisible("dialog.case .mute")).toBe(true);
       await page.click("dialog.case .mute");
       expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.muted)).toBe(true);
@@ -261,10 +266,22 @@ describe("player", () => {
     });
   }
 
-  test("phone: «Смотреть ролик» plays the video in the open case", async () => {
+  test("a browser that allows no sound before a click: the case plays muted, the sound button turns sound on", async () => {
+    const strict = await chromium.launch({ args: ["--autoplay-policy=user-gesture-required"] });
+    const { context, page, errors } = await open(strict, `${srv.url}/?lang=ru#case-3`);
+    await page.waitForFunction(() => {
+      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+      return !v.paused && v.muted;
+    }, null, { timeout: 10000 });
+    await page.click("dialog.case .mute");
+    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>("dialog.case video")!.muted)).toBe(false);
+    expect(errors).toEqual([]);
+    await context.close();
+    await strict.close();
+  });
+
+  test("phone: the case plays in the open case", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`, phone);
-    await page.waitForSelector("dialog.case[open]");
-    await page.tap("dialog.case .case-big");
     await page.waitForFunction(() => {
       const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
       return !v.paused && v.currentTime > 0;

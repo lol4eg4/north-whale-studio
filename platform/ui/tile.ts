@@ -15,8 +15,8 @@ export interface TileText {
 export interface TileArt {
   poster: string;
   posterPhone: string; // used at <= 700 px
-  ringPoster: string; // the badge's still until its loop plays
-  eager?: boolean; // first tiles: load the posters at once, the rest wait for loadPoster()
+  ringPoster: string; // the badge's still until its loop plays, loaded by loadRing()
+  eager?: boolean; // first tiles: load the poster at once, the rest wait for loadPoster()
 }
 
 export interface CaseTile {
@@ -24,6 +24,7 @@ export interface CaseTile {
   video: HTMLVideoElement; // the round badge's loop
   set(text: TileText): void;
   loadPoster(): void;
+  loadRing(): void;
 }
 
 export function caseTile(text: TileText, art: TileArt): CaseTile {
@@ -69,6 +70,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
       if (poster.hasAttribute("src")) return;
       source.srcset = art.posterPhone;
       poster.src = art.poster;
+    },
+    loadRing() {
       video.poster = art.ringPoster;
     },
     set(t) {

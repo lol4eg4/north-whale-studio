@@ -123,7 +123,8 @@ export default function init(host: Host) {
           tile.el.addEventListener("click", () => host.use<CaseApi>("case").open(c.id, "tile", tile.el));
           tile.el.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && host.emit("tile-hovered", { id: c.id }));
           if (c.media.ring) videos.add(c.id, tile.el, tile.video, c.media.ring);
-          posterLoads.set(tile.el, tile.loadPoster);
+          // The badge's still waits like the badge photos: the first screen's bytes go to the posters.
+          posterLoads.set(tile.el, () => (tile.loadPoster(), void later.then(tile.loadRing)));
           posters.observe(tile.el);
           host.use<CaseApi>("case").setTile?.(c.id, tile.el);
           refresh.push(() => tile.set(tileText(content().caseById(c.id)!)));

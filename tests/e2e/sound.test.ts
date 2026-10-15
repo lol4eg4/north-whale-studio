@@ -285,8 +285,7 @@ describe("sound", () => {
     await playing(page);
     await page.click('.wall .tile[aria-label^="Кейс 3."]');
     await page.waitForSelector("dialog.case[open]");
-    expect((await music(page))!.stopped).toBe(false); // the video has not started yet
-    await page.click("dialog.case .go");
+    // The video starts on its own, with sound: the click on the tile allows it.
     await page.waitForFunction(() => {
       const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
       return !v.paused && !v.muted && v.currentTime > 0;
