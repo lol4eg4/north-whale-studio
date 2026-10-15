@@ -43,11 +43,20 @@ export function createMeet(motion: Motion, closeText: () => string, cursorText: 
     copy.removeAttribute("data-cursor");
     copy.tabIndex = -1;
     copy.querySelector("img")?.setAttribute("src", photo);
+    // A badge with a video plays it like the wall does: never in calm or with the pause on, where
+    // the photo shows. The copy has no listeners of its own, so it shows the video once it plays.
     const clip = copy.querySelector("video");
-    if (clip && video) {
-      clip.muted = true;
-      clip.src = video;
-      if (!motion.paused) void clip.play().catch(() => {});
+    if (clip) {
+      const spot = clip.parentElement!;
+      if (video && !motion.calm && !motion.paused) {
+        clip.muted = true;
+        clip.addEventListener("playing", () => spot.classList.add("shown"));
+        clip.src = video;
+        void clip.play().catch(() => {});
+      } else {
+        spot.classList.remove("shown");
+        clip.removeAttribute("src");
+      }
     }
     dlg.el.setAttribute("aria-label", label);
     x.setAttribute("aria-label", closeText());

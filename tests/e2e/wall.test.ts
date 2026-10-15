@@ -349,6 +349,21 @@ describe("wall media", () => {
     await page.mouse.move(1, 1);
     await page.waitForTimeout(700);
     expect(await look()).toEqual(before);
+
+    // The keyboard gets what the mouse gets: Tab onto the tile flies the result out.
+    await tile.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await page.waitForTimeout(700);
+    expect(await tile.evaluate((t) => t === document.activeElement && t.matches(":focus-visible"))).toBe(true);
+    expect((await look()).stat).toBe(1);
+
+    // Kings Resort & Casino has no result figure: no lemon plate, even under the mouse.
+    const kings = page.locator('.wall .tile[aria-label*="Kings"]');
+    await kings.scrollIntoViewIfNeeded();
+    await kings.hover({ position: { x: 100, y: 100 } });
+    await page.waitForTimeout(700);
+    expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-more")!).display)).toBe("none");
     expect(errors).toEqual([]);
     await context.close();
     await mouse.close();
@@ -585,6 +600,70 @@ describe("team badges", () => {
     expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(false);
     expect(errors).toEqual([]);
     await context.close();
+  });
+
+  test("a click outside the open badge sends it back, and focus returns to the badge", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    await page.click(".wall .tag >> nth=0");
+    await page.waitForSelector("dialog.meet[open]");
+    await page.mouse.click(20, 20);
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Познакомиться: Погорелов, Арт-директор");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("dragging a badge moves it and does not open it", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await toBadge(page, 0);
+    const b = (await page.locator(".wall .tag").first().boundingBox())!;
+    const [x, y] = [b.x + b.width / 2, b.y + b.height / 2];
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 30, y + 10, { steps: 5 });
+    await page.mouse.move(x + 60, y + 20, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => !!document.querySelector("dialog.meet[open]"))).toBe(false);
+    expect((await page.locator(".wall .tag").first().boundingBox())!.x - b.x).toBeGreaterThan(30);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("Maria's open badge plays her video; with the pause on and in calm it stays still and shows her photo", async () => {
+    const clip = (page: Page) =>
+      page.evaluate(() => {
+        const v = document.querySelector<HTMLVideoElement>(".meet-card video")!;
+        return { paused: v.paused, src: v.getAttribute("src"), shown: v.parentElement!.classList.contains("shown") };
+      });
+    const openMaria = async (page: Page) => {
+      await toBadge(page, MARIA);
+      await page.click(`.wall .tag >> nth=${MARIA}`);
+      await page.waitForSelector("dialog.meet[open]");
+    };
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await openMaria(page);
+    await page.waitForFunction(() => {
+      const v = document.querySelector<HTMLVideoElement>(".meet-card video");
+      return !!v && !v.paused && v.parentElement!.classList.contains("shown");
+    }, null, { timeout: 10000 });
+    expect(plain((await clip(page)).src)).toBe("/media/team-3.mp4");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector("dialog.meet:not([open])", { state: "attached", timeout: 3000 });
+    await page.click(".pause-btn");
+    await openMaria(page);
+    await page.waitForTimeout(500);
+    expect(await clip(page)).toEqual({ paused: true, src: null, shown: false });
+    expect(errors).toEqual([]);
+    await context.close();
+
+    const calm = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
+    await openMaria(calm.page);
+    await calm.page.waitForTimeout(500);
+    expect(await clip(calm.page)).toEqual({ paused: true, src: null, shown: false });
+    expect(calm.errors).toEqual([]);
+    await calm.context.close();
   });
 
   test("roll call: the team block and all four badges move to the top of the wall and each badge hops", async () => {
