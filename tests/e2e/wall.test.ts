@@ -210,6 +210,16 @@ describe("wall media", () => {
     await page.waitForFunction((n) => (window as unknown as { __failedLoops: Set<EventTarget> }).__failedLoops.size >= n, sure, { timeout: 15000 });
     // Sources attach about 2 s after load, so the first ask is not earlier.
     expect(asked.length).toBeGreaterThanOrEqual(sure);
+    // The wall loads 3 loops at a time: as those fail, the next tile in reach asks for its own.
+    // Check once every loop asked has failed and nothing new was asked for a second.
+    const failed = () => page.evaluate(() => (window as unknown as { __failedLoops: Set<EventTarget> }).__failedLoops.size);
+    for (let quiet = 0, seen = -1, waited = 0; quiet < 10; waited += 100) {
+      expect(waited, "the loop requests settle within 15 s").toBeLessThan(15000);
+      await page.waitForTimeout(100);
+      const settled = asked.length === seen && (await failed()) >= new Set(asked).size;
+      quiet = settled ? quiet + 1 : 0;
+      seen = asked.length;
+    }
 
     const state = () =>
       page.evaluate(() =>
