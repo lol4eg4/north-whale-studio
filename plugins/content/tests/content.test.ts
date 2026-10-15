@@ -86,6 +86,7 @@ describe("cases", () => {
       for (const p of c.press) {
         expect(Bun.file(`${import.meta.dir}/../../../site${p.logo}`).size, p.logo).toBeGreaterThan(0);
         expect(p.ratio).toBeGreaterThan(1);
+        expect(p.scale).toBeGreaterThan(0);
         expect(p.title.trim()).not.toBe("");
         expect(p.url).toMatch(/^https:\/\//);
       }

@@ -32,6 +32,7 @@ export interface Press {
   name: string;
   logo: string; // the publication's logo, drawn in one colour through a CSS mask
   ratio: number; // logo width / height
+  scale: number; // a logo with small letters (a script wordmark) draws taller
   title: string; // the article's own headline, in its own language
   url: string;
 }

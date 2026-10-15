@@ -21,31 +21,35 @@
   "press": [
    {
     "name": "Rolling Stone UK",
-    "logo": "/media/press-rolling-stone-uk.webp",
-    "ratio": 5.18,
+    "logo": "/media/press-rolling-stone-uk.svg",
+    "ratio": 3.49,
     "title": "Berlin Waldorf Astoria review: A fitting home for rock n’ roll royalty",
-    "url": "https://www.rollingstone.co.uk/travel/berlin-waldorf-astoria-review-a-fitting-home-for-rock-n-roll-royalty-50228/"
+    "url": "https://www.rollingstone.co.uk/travel/berlin-waldorf-astoria-review-a-fitting-home-for-rock-n-roll-royalty-50228/",
+    "scale": 1.4
    },
    {
     "name": "Forbes Travel Guide",
     "logo": "/media/press-forbes-travel-guide.svg",
     "ratio": 3.48,
     "title": "Waldorf Astoria Berlin",
-    "url": "https://www.forbestravelguide.com/hotels/berlin-germany/waldorf-astoria-berlin"
+    "url": "https://www.forbestravelguide.com/hotels/berlin-germany/waldorf-astoria-berlin",
+    "scale": 1
    },
    {
     "name": "Condé Nast Traveler",
     "logo": "/media/press-conde-nast-traveler.svg",
     "ratio": 2.65,
     "title": "Waldorf Astoria Berlin, Germany — Hotel Review",
-    "url": "https://www.cntraveler.com/hotels/berlin/waldorf-astoria-berlin"
+    "url": "https://www.cntraveler.com/hotels/berlin/waldorf-astoria-berlin",
+    "scale": 1
    },
    {
     "name": "Business Traveller",
     "logo": "/media/press-business-traveller.svg",
     "ratio": 6.55,
     "title": "Hotel check: Waldorf Astoria Berlin",
-    "url": "https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/"
+    "url": "https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/",
+    "scale": 1
    }
   ]
  },

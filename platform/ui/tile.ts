@@ -10,7 +10,7 @@ export interface TileText {
   kicker: string; // what the studio did, or "watch the case"
   title: string; // client
   result: string | null;
-  seen: { label: string; marks: { name: string; logo: string; ratio: number }[] } | null; // "As seen in" and logos
+  seen: { label: string; marks: { name: string; logo: string; ratio: number; scale: number }[] } | null; // "As seen in" and logos
 }
 
 export interface TileArt {
@@ -29,10 +29,11 @@ export interface CaseTile {
 }
 
 // A publication's logo in one colour (currentColor), the way the reference draws them.
-export function logoMark(m: { name: string; logo: string; ratio: number }): HTMLSpanElement {
+export function logoMark(m: { name: string; logo: string; ratio: number; scale: number }): HTMLSpanElement {
   const el = h("span", { class: "logo-mark", role: "img", "aria-label": m.name });
   el.style.setProperty("--logo", `url("${m.logo}")`);
   el.style.setProperty("--ar", String(m.ratio));
+  el.style.setProperty("--s", String(m.scale));
   return el;
 }
 
