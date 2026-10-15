@@ -21,6 +21,7 @@ Deferred on purpose. Each item names what it waits for.
 - Keyboard dragging: pieces move only by mouse and touch. A move mode (focus a piece, arrows, Enter) would match the slingshot's keys. Impact: medium, accessibility.
 - Spacing tokens: DESIGN.md names a 4/8/16/24/32/48 px scale; component CSS still uses some one-off values. Impact: polish.
 - Plan B polaroid (finale): it turns site sound on and off but has no `aria-pressed`, unlike the sound button; the sound API has no state to read. Impact: polish, accessibility (2026-10-15).
+- Roll call on a 1024x768 screen: the badges stand in two rows under the team block, and the sound and pause pill (bottom left) covers Maria's role for the 3 s of the roll call. Repro: 1024x768, «Команда» in the menu. Severity low, visual (testing, 2026-10-15).
 
 ## Not planned
 
