@@ -1,0 +1,13 @@
+/* Custom cursor (T§4.11, T§2.12): fixed on top of everything, never catches the pointer. */
+.cursor { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.2s; will-change: translate; }
+.cursor.on { opacity: 1; }
+.c-logo { position: absolute; left: 0; top: 0; width: 40px; translate: -50% -50%; transition: scale 0.3s var(--ease-spring), rotate 0.3s var(--ease-spring); }
+.c-logo img { width: 100%; height: auto; transform-origin: 50% 90%; transition: transform 0.16s ease; }
+.c-tag { position: absolute; left: 9px; top: 8px; padding: 7px 11px 6px 15px; border-radius: 99px; background: var(--c, var(--ink)); color: var(--tc, var(--paper)); box-shadow: 0 0 0 2px #fff; font: 500 11px/1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; scale: 0; transform-origin: 0 0; transition: scale 0.3s var(--ease-spring), background 0.2s; }
+.cursor.word .c-logo { scale: 1.1; }
+.cursor.word .c-tag { scale: 1; }
+.cursor.link .c-logo { scale: 1.28; rotate: -10deg; }
+.cursor.down .c-logo img { transform: scale(1.14, 0.8); }
+.cursor.word.down .c-tag { scale: 0.92; }
+html.has-cursor, html.has-cursor * { cursor: none !important; }
+html.calm .cursor, html.calm .c-logo, html.calm .c-tag { transition: none; }

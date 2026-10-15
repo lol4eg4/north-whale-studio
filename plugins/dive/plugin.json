@@ -1,0 +1,28 @@
+{
+  "name": "dive",
+  "layer": 2,
+  "provides": [],
+  "uses": [
+    "content",
+    "case"
+  ],
+  "events": {
+    "emits": [
+      "wall-shuffled",
+      "wall-tidied"
+    ],
+    "listens": [
+      "language-changed",
+      "case-opened",
+      "case-closed",
+      "piece-dropped",
+      "whale-hit"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": [
+      "wall-dive"
+    ]
+  }
+}

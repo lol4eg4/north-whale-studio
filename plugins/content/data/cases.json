@@ -1,0 +1,156 @@
+[
+ {
+  "id": 1,
+  "client": {
+   "ru": "Waldorf Astoria Berlin",
+   "en": "Waldorf Astoria Berlin"
+  },
+  "what": {
+   "ru": "Полный цикл продакшена",
+   "en": "Full-cycle production"
+  },
+  "result": null,
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "ring": [
+   0.52,
+   0.55
+  ]
+ },
+ {
+  "id": 2,
+  "client": {
+   "ru": "AG1",
+   "en": "AG1"
+  },
+  "what": null,
+  "result": null,
+  "size": "l",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "ring": [
+   0.54,
+   0.44
+  ]
+ },
+ {
+  "id": 3,
+  "client": {
+   "ru": "Dear Passengers",
+   "en": "Dear Passengers"
+  },
+  "what": null,
+  "result": {
+   "ru": "50 млн+ просмотров на YouTube",
+   "en": "50M+ views on YouTube"
+  },
+  "size": "xl",
+  "kind": "video",
+  "sound": true,
+  "vertical": false,
+  "ring": [
+   0.45,
+   0.4
+  ]
+ },
+ {
+  "id": 4,
+  "client": {
+   "ru": "Mabrook",
+   "en": "Mabrook"
+  },
+  "what": null,
+  "result": null,
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "ring": [
+   0.5,
+   0.45
+  ]
+ },
+ {
+  "id": 5,
+  "client": {
+   "ru": "UNION",
+   "en": "UNION"
+  },
+  "what": {
+   "ru": "Стоматология",
+   "en": "Dental clinic"
+  },
+  "result": null,
+  "size": "xl",
+  "kind": "still",
+  "sound": false,
+  "vertical": false,
+  "ring": [
+   0.74,
+   0.4
+  ]
+ },
+ {
+  "id": 6,
+  "client": {
+   "ru": "Сергей Ибадов",
+   "en": "Sergey Ibadov"
+  },
+  "what": {
+   "ru": "Агент по недвижимости",
+   "en": "Real estate agent"
+  },
+  "result": null,
+  "size": "xl",
+  "kind": "video",
+  "sound": true,
+  "vertical": false,
+  "ring": [
+   0.5,
+   0.38
+  ]
+ },
+ {
+  "id": 7,
+  "client": {
+   "ru": "Антикрус",
+   "en": "Antikrus"
+  },
+  "what": {
+   "ru": "Аукционный дом",
+   "en": "Auction house"
+  },
+  "result": null,
+  "size": "l",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "ring": [
+   0.38,
+   0.65
+  ]
+ },
+ {
+  "id": 8,
+  "client": {
+   "ru": "DeckForge",
+   "en": "DeckForge"
+  },
+  "what": {
+   "ru": "Игровой трейлер",
+   "en": "Game trailer"
+  },
+  "result": null,
+  "size": "t",
+  "kind": "video",
+  "sound": true,
+  "vertical": true,
+  "ring": [
+   0.5,
+   0.42
+  ]
+ }
+]

@@ -1,0 +1,27 @@
+{
+  "name": "wall",
+  "layer": 1,
+  "provides": [],
+  "uses": [
+    "content",
+    "case",
+    "service"
+  ],
+  "events": {
+    "emits": [
+      "tile-hovered"
+    ],
+    "listens": [
+      "language-changed",
+      "case-opened",
+      "case-closed"
+    ]
+  },
+  "slots": {
+    "owns": [
+      "wall-dive",
+      "wall-hint"
+    ],
+    "fills": []
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "visits",
+  "layer": 3,
+  "provides": [],
+  "uses": [],
+  "events": {
+    "emits": [],
+    "listens": [
+      "case-opened"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

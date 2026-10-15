@@ -1,0 +1,23 @@
+{
+  "name": "case",
+  "layer": 1,
+  "provides": [
+    "case"
+  ],
+  "uses": [
+    "content"
+  ],
+  "events": {
+    "emits": [
+      "case-opened",
+      "case-closed"
+    ],
+    "listens": [
+      "language-changed"
+    ]
+  },
+  "slots": {
+    "owns": [],
+    "fills": []
+  }
+}

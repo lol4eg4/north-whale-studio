@@ -1,0 +1,104 @@
+/* Wall (mock .work / .wall, T§3). Cells are size containers; the first child is the piece. */
+.work { position: relative; z-index: 2; padding-bottom: clamp(60px, 8vw, 120px); }
+.work-head { margin: 0 max(var(--g), (100% - 1680px) / 2 + var(--g)); padding: 10px 0 14px; border-top: 2px solid var(--ink); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
+.work-title { margin: 0; }
+.work-head .note { position: static; font-size: clamp(16px, 1.5vw, 22px); margin-right: 60px; }
+.work-hint { color: rgba(14, 14, 14, 0.6); }
+.work-hint p { margin: 0; }
+
+.wall { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: row dense; gap: var(--gap); padding: 0 var(--g); max-width: 1680px; margin: 0 auto; isolation: isolate; }
+.wall > .cell { position: relative; container-type: size; display: grid; place-items: center; transition: opacity 0.6s; }
+.wall > .sz-xl { grid-column: span 4; grid-row: span 3; }
+.wall > .sz-l { grid-column: span 3; grid-row: span 3; }
+.wall > .sz-t { grid-column: span 2; grid-row: span 3; }
+.wall > .sz-s { grid-column: span 1; grid-row: span 1; }
+.wall > .sz-s2 { grid-column: span 2; grid-row: span 1; }
+.wall > .sw { grid-column: span 2; }
+.wall > .sw .svc { padding: 4% 4.5%; } /* percent of the width: half of .svc's, so the same in px */
+.wall > .sz-fam { grid-column: span 3; grid-row: span 2; }
+.wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
+.wall > .t6 { display: none; }
+
+/* Team name badge */
+.wall .tag { width: 90cqw; height: 86cqh; border-radius: var(--rounded-sticker); overflow: hidden; background: var(--paper); display: flex; flex-direction: column; text-align: center; }
+.tag-band { display: block; background: var(--c); color: var(--bf); padding: 7cqmin 0 4cqmin; }
+.tag-band b { display: block; font: 900 clamp(11px, 11cqmin, 22px)/1 var(--display); text-transform: uppercase; }
+.tag-band i { display: block; font: 500 clamp(10px, 5.5cqmin, 11px)/1 var(--mono); letter-spacing: 0.08em; font-style: normal; margin-top: 3px; text-transform: uppercase; }
+.tag-nm { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 clamp(12px, 10.5cqmin, 24px)/1 var(--marker); color: var(--ink); }
+.tag-ph { position: relative; flex: none; width: 24cqmin; aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px var(--ink); }
+.tag-ph img, .tag-ph video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tag-ph video { opacity: 0; }
+.tag-ph.shown video { opacity: 1; }
+/* A photo that did not load leaves the placeholder spot (DESIGN.md, «Заглушка»). */
+.tag-ph.no-photo { border: 2px dashed var(--text-muted); box-shadow: none; }
+.tag-ph.no-photo img { display: none; }
+.tag-role { display: block; font: 500 clamp(10px, 5.6cqmin, 11px)/1.2 var(--mono); text-transform: uppercase; color: rgba(14, 14, 14, 0.6); padding: 0 6% 6cqmin; }
+
+/* Client stickers (also Telegram and "dive deeper") */
+.wall .client { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--f); background: var(--c); font: inherit; cursor: pointer; margin: 0; }
+.wall .client.sh-pill { width: 94cqw; height: min(56cqh, 46cqw); border-radius: 999px; padding: 0 9%; }
+.wall .client.sh-circle { width: 80cqmin; height: 80cqmin; border-radius: 50%; padding: 8%; }
+.wall .client b { font: 900 clamp(11px, min(10cqmin, 9cqw), 22px)/1 var(--display); letter-spacing: -0.01em; }
+.wall .client .ck { font: 500 clamp(10px, 5cqmin, 11px)/1.2 var(--mono); letter-spacing: 0.16em; opacity: 0.92; margin-top: 6%; text-transform: uppercase; }
+.wall .deeper b { width: min-content; }
+
+/* Services */
+.wall .svc { width: 92cqw; height: 70cqh; border-radius: var(--rounded-sticker); padding: 8% 9%; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left; background: var(--c); color: var(--f); font: inherit; cursor: pointer; margin: 0; }
+.wall .svc .mono { font-size: clamp(10px, 6.5cqmin, 11px); opacity: 0.9; }
+.wall .svc b { font: 700 clamp(13px, 12cqmin, 24px)/1.02 var(--sans); letter-spacing: -0.02em; }
+.wall .svc2 { width: 96cqw; height: 84cqh; border-radius: 12px; padding: 4% 5%; background: var(--ink); color: var(--paper); display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left; font: inherit; cursor: pointer; margin: 0; }
+.wall .svc2 .mono { color: var(--lemon); font-size: 11px; }
+.wall .svc2 b { font: 900 clamp(16px, 20cqh, 34px)/1 var(--display); }
+.svc2-p { font: 600 clamp(12px, 11cqh, 16px)/1.25 var(--sans); max-width: 34ch; }
+
+/* "Напишите нам" starburst: the star spins, the words do not. */
+.wall .hello { width: 88cqmin; height: 88cqmin; position: relative; display: grid; place-items: center; color: var(--ink); filter: drop-shadow(0 0 1px rgba(14, 14, 14, 0.35)) drop-shadow(0 6px 8px rgba(14, 14, 14, 0.18)); transition: rotate 0.45s var(--ease-spring), scale 0.45s var(--ease-spring); }
+.hello-spin { position: absolute; inset: 0; contain: paint; }
+.hello-spin svg { width: 100%; height: 100%; }
+.hello-spin polygon { fill: var(--buoy); stroke: var(--paper); stroke-width: 3.5; stroke-linejoin: round; }
+.hello-t { position: relative; width: min-content; font: 900 clamp(11px, 11cqmin, 22px)/1 var(--display); text-align: center; }
+.work.awake .hello-spin { animation: wall-spin 18s linear infinite; }
+.star-cell.asleep .hello-spin, html.paused .hello-spin { animation-play-state: paused; }
+html.calm .hello-spin { animation: none; }
+@keyframes wall-spin { to { rotate: 360deg; } }
+
+.wall .whale-st { width: 86cqmin; border: 0; box-shadow: none; filter: drop-shadow(0 0 1px rgba(14, 14, 14, 0.3)) drop-shadow(0 6px 6px rgba(14, 14, 14, 0.18)); }
+.wall .whale-st img { width: 100%; }
+
+/* Blocks: team, and the whale block standing in for "dive" when that plugin is off. */
+.wall .team-block, .wall .whale-block { position: absolute; inset: 0; border-radius: var(--rounded-tile); padding: clamp(14px, 5cqmin, 26px); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+.wall .team-block { background: var(--cobalt); color: var(--paper); cursor: pointer; border: 0; text-align: start; }
+.team-big { margin: 0; font: 600 clamp(16px, 6.2cqmin, 28px)/1.15 var(--sans); }
+.team-big b { display: block; font: 900 clamp(44px, 24cqmin, 120px)/0.9 var(--display); color: var(--lemon); letter-spacing: -0.03em; margin-bottom: 0.12em; }
+.team-more { opacity: 0.9; }
+.wall .whale-block { background: var(--buoy); align-items: center; justify-content: center; }
+.whale-disc { width: 62cqmin; aspect-ratio: 1; border-radius: 50%; background: var(--cobalt); box-shadow: 0 0 0 5px var(--ink), 0 0 0 11px var(--paper); display: grid; place-items: center; overflow: hidden; }
+.whale-disc img { width: 86%; rotate: -8deg; }
+
+/* Roll call: everything but the team dims while the badges hop. */
+.wall.rollcall > .cell:not(#team):not(.tag-cell) { opacity: 0.22; transition: opacity 0.5s; }
+
+@media (hover: hover) {
+  .wall .hello:not(.lifted):hover { rotate: calc(var(--r, 0deg) - 8deg); scale: 1.08; }
+  .wall .client:not(.lifted):hover, .wall .svc:not(.lifted):hover, .wall .svc2:not(.lifted):hover { scale: 1.04; }
+  .wall .team-block:hover .team-more { opacity: 1; }
+}
+html.calm .wall .hello { transition: none; }
+
+@media (max-width: 1100px) {
+  .wall > .t6 { display: grid; }
+  .wall > .sz-fam { grid-row: span 3; }
+}
+@media (max-width: 700px) {
+  .work-head .note { display: none; }
+  .wall > .sz-xl { grid-column: span 2; grid-row: span 3; }
+  .wall > .sz-l { grid-column: span 2; grid-row: span 2; }
+  .wall > .sz-t { grid-column: span 1; grid-row: span 2; }
+  .wall > .sz-fam { grid-column: span 2; grid-row: span 2; }
+  .wall > .sw { grid-column: span 1; }
+  .wall > .sw .svc { padding: 8% 9%; }
+  .wall > .d-only, .wall > .t6 { display: none; }
+}
+@media (pointer: coarse) {
+  .wall .client, .wall .svc, .wall .svc2, .wall .hello { min-height: 44px; min-width: 44px; }
+}

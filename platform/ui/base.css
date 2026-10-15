@@ -1,0 +1,37 @@
+/* Base: reset, type, focus, moving pieces. Colours and sizes only from tokens.css. */
+*, *::before, *::after { box-sizing: border-box; }
+/* Browser chrome from the palette (DESIGN.md). */
+html { scroll-behavior: smooth; scroll-padding-top: 84px; scrollbar-color: var(--ink) var(--paper); caret-color: var(--cobalt); accent-color: var(--cobalt); }
+html.calm { scroll-behavior: auto; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); overflow-x: clip; }
+body { font: 500 17px/1.45 var(--sans); -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; }
+::selection { background: var(--lemon); color: var(--ink); }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg, video, canvas { display: block; max-width: 100%; }
+h1, h2, h3, p { margin: 0; }
+.mono { font: 500 12px/1.3 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
+.mono-s { font: 500 10px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+:focus { outline: none; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.on-cobalt :focus-visible, .on-ink :focus-visible { outline-color: var(--lemon); }
+
+/* Pieces: tilt with --r (never `rotate`), Motion writes --dx/--dy/--spin. */
+.piece {
+  rotate: var(--r, 0deg);
+  translate: var(--dx, 0px) var(--dy, 0px);
+  transform: rotate(var(--spin, 0deg));
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+  transition: scale 0.25s, rotate 0.2s;
+}
+.piece.lifted { scale: 1.05; rotate: calc(var(--r, 0deg) + 3deg); filter: drop-shadow(0 14px 14px rgba(14, 14, 14, 0.22)); z-index: 50; }
+/* A tile is a plain rounded box playing video: box-shadow spares re-blurring every frame. */
+.tile.piece.lifted { filter: none; box-shadow: 0 14px 28px rgba(14, 14, 14, 0.22); }
+html.calm .piece { transition: none; }
+html.calm .piece.lifted { rotate: var(--r, 0deg); }

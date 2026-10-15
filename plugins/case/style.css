@@ -1,0 +1,80 @@
+/* Open case (mock #case, album 04 and 03). Cobalt panel: media left, body right. */
+dialog.sheet.case { padding: 28px; }
+.case-in { height: 100%; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: var(--cobalt); color: var(--paper); border-radius: 10px; overflow: hidden; }
+
+/* Media */
+.case-art { position: relative; display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--ink); }
+.case-frame { position: relative; flex: 1; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: 28px 28px 16px; }
+.case-frame > video, .case-frame > img { grid-area: 1 / 1; width: 100%; height: 100%; max-width: none; object-fit: contain; border-radius: 4px; }
+.case-frame:fullscreen { padding: 0; background: var(--ink); }
+.case-frame:fullscreen > video { border-radius: 0; }
+.case-pic { display: none; }
+.case-art.still .case-pic, .case-art.err .case-pic { display: block; }
+.case-art.still .case-video, .case-art.err .case-video { display: none; }
+.case-err { display: none; position: absolute; left: 50%; bottom: 32px; translate: -50% 0; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 32px); background: var(--paper); color: var(--ink); border-radius: 99px; padding: 6px 6px 6px 16px; font: 600 15px/1.3 var(--sans); box-shadow: var(--die); }
+.case-art.err .case-err { display: flex; }
+.case-err :focus-visible { outline-color: var(--cobalt); }
+.btn.case-retry { padding: 6px 14px; font-size: 15px; }
+.case-art.err .player { visibility: hidden; }
+
+.player { display: flex; align-items: center; gap: 14px; padding: 0 28px 24px; color: var(--paper); }
+.player[hidden] { display: none; }
+.go { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 11px 18px 11px 14px; border: 0; border-radius: 99px; background: var(--lemon); color: var(--ink); font: 700 15px/1.2 var(--sans); white-space: nowrap; transition: scale 0.25s var(--ease-spring); }
+.go-ico { display: grid; place-items: center; }
+.seek { flex: 1; min-width: 40px; height: 24px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+@media (pointer: coarse) { .seek { height: 44px; } }
+.seek::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(var(--lemon), var(--lemon)) 0 / var(--p, 0%) 100% no-repeat, rgba(255, 255, 255, 0.28); }
+.seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--lemon); border: 0; }
+.seek::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.28); }
+.seek::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--lemon); }
+.seek::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--lemon); border: 0; }
+.time { color: rgba(255, 255, 255, 0.82); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.case-round { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.55); background: transparent; color: var(--paper); }
+.case-round[hidden] { display: none; }
+@media (hover: hover) {
+  .go:hover { scale: 1.04; }
+  .case-round:hover { background: var(--paper); color: var(--ink); }
+}
+
+/* Body */
+.case-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 34px 38px; display: flex; flex-direction: column; gap: 18px; }
+.case-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.case-top .mono { color: rgba(255, 255, 255, 0.85); }
+.case-top .cw { font: 900 13px var(--display); letter-spacing: 0; text-transform: none; color: var(--paper); }
+.btn.case-x { flex: none; gap: 8px; padding: 9px 12px 9px 14px; color: var(--ink); }
+.case-x kbd { font: 500 11px/1.3 var(--mono); border: 1.5px solid rgba(14, 14, 14, 0.35); border-radius: 5px; padding: 1px 5px; }
+.case-title { font: 900 clamp(40px, 5vw, 84px)/0.92 var(--display); letter-spacing: -0.02em; margin: 0; overflow-wrap: anywhere; }
+.case-sub { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font: 600 clamp(18px, 1.7vw, 24px)/1.2 var(--sans); }
+.case-sub[hidden] { display: none; }
+.case-result { background: var(--lemon); color: var(--ink); padding: 3px 8px; border-radius: 4px; }
+.case-story { display: flex; flex-direction: column; gap: 18px; }
+.case-story .ph-box { font-size: 16px; }
+.case-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: auto; }
+.btn.case-talk { white-space: normal; }
+.link-copy { min-height: 44px; padding: 12px 4px; border: 0; background: none; color: var(--paper); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 0.18em; }
+.case-link { flex: 1 1 100%; min-height: 44px; padding: 8px 12px; border: 2px solid var(--paper); border-radius: 10px; background: var(--paper); color: var(--ink); font: 500 14px var(--mono); }
+.case-link[hidden] { display: none; }
+
+/* Tablet and phone (Brief "Телефон и планшет"): full screen, media on top, text below, the close
+   cross always in view. */
+@media (max-width: 1100px) {
+  dialog.sheet.case { padding: 0; }
+  /* Media at most 44 % of the screen: a wide video takes its own height, a tall one the full 44 %. */
+  .case-in { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); border-radius: 0; }
+  .case-art { max-height: 44dvh; overflow: hidden; }
+  .case-frame { flex: none; padding: 0; aspect-ratio: 16 / 9; max-height: calc(44dvh - 66px); }
+  .case-art.tall .case-frame { aspect-ratio: auto; height: calc(44dvh - 66px); }
+  .case-frame > video, .case-frame > img { border-radius: 0; }
+  .player { padding: 10px 16px 12px; gap: 10px; }
+  .case-body { padding: 26px 32px 32px; }
+  .case-top { padding-right: 56px; }
+  .btn.case-x { position: fixed; top: 10px; right: 10px; z-index: 3; width: 48px; height: 48px; padding: 0; justify-content: center; border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5); }
+  .case-x-t, .case-x kbd { display: none; }
+}
+@media (max-width: 700px) {
+  .go { font-size: 14px; padding: 9px 14px 9px 11px; }
+  .time { display: none; }
+  .case-body { padding: 22px 16px 28px; }
+  .case-top { padding-right: 0; }
+  .btn.case-talk { width: 100%; }
+}

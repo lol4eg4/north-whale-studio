@@ -1,0 +1,23 @@
+/* Case tile (DESIGN.md "case tile"): fills its wall cell, which is a size container. */
+.tile { position: absolute; inset: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: var(--rounded-tile); overflow: hidden; background: var(--ink); color: var(--ink); font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tile picture { display: contents; }
+.tile-poster, .tile-video { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; transition: scale 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s; }
+.tile-video { opacity: 0; pointer-events: none; }
+.tile.shown .tile-video { opacity: 1; }
+.tile.no-poster .tile-poster { visibility: hidden; }
+.tile-no { position: absolute; top: 10px; left: 10px; background: var(--paper); padding: 4px 8px 3px; border-radius: 99px; font: 500 11px/1.3 var(--mono); }
+.tile-ring { --ring: clamp(58px, 30cqmin, 150px); position: absolute; top: 10px; right: 10px; width: var(--ring); height: var(--ring); border-radius: 50%; border: 3px solid var(--paper); box-shadow: var(--die); rotate: 6deg; background: var(--ink); transition: rotate 0.45s var(--ease-spring), scale 0.45s var(--ease-spring); }
+.plate { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); background: var(--paper); padding: 9px 13px 10px; border-radius: var(--rounded-plate); rotate: -1.2deg; box-shadow: 0 0 0 1px rgba(14, 14, 14, 0.08); transition: rotate 0.4s var(--ease-spring); }
+.plate-k { display: block; font: 500 10.5px/1.3 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: rgba(14, 14, 14, 0.65); }
+.plate-t { display: block; font: 900 clamp(17px, 7.2cqmin, 42px)/0.95 var(--display); letter-spacing: -0.01em; margin-top: 3px; }
+.plate-stat { display: inline-block; margin-top: 8px; background: var(--lemon); padding: 3px 7px; border-radius: 4px; font: 600 clamp(12px, 3.4cqmin, 15px)/1.25 var(--sans); }
+.plate-stat[hidden] { display: none; }
+@media (hover: hover) {
+  .tile:hover .tile-poster, .tile:hover .tile-video { scale: 1.07; }
+  .tile:hover .tile-ring { rotate: -5deg; scale: 1.14; }
+  .tile:hover .plate { rotate: 0.6deg; }
+}
+.tile:focus-visible .tile-poster, .tile:focus-visible .tile-video { scale: 1.07; }
+.tile:focus-visible .tile-ring { rotate: -5deg; scale: 1.14; }
+.tile:focus-visible .plate { rotate: 0.6deg; }
+html.calm .tile-poster, html.calm .tile-video, html.calm .tile-ring, html.calm .plate { transition: none; }

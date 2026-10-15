@@ -1,0 +1,22 @@
+{
+ "email": "hello@northwhale.studio",
+ "messengers": [
+  {
+   "name": "Telegram",
+   "handle": "@romansmirn0v",
+   "url": "https://t.me/romansmirn0v"
+  },
+  {
+   "name": "WhatsApp",
+   "handle": "+7 000 000-00-00"
+  }
+ ],
+ "socials": [
+  {
+   "name": "Behance"
+  },
+  {
+   "name": "VK"
+  }
+ ]
+}

@@ -1,0 +1,66 @@
+/* Finale: the whale in a slingshot (mock .ss, T§2.8, T§5). z: canvas 0 < copy, plan B, hint 1 < grab 2 < count 3. */
+.finale {
+  --ss-frame: var(--ink); /* album 07: ink fork, so the cobalt whale stands out */
+  --ss-band: var(--buoy);
+  --ss-pocket: var(--ink);
+  --ss-ground: var(--mint);
+  position: relative;
+  height: clamp(600px, calc(100svh - 114px), 720px);
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 var(--g);
+  overflow: hidden;
+  background: var(--paper);
+}
+.ss-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.ss-copy { position: relative; z-index: 1; padding-top: clamp(40px, 5vw, 80px); max-width: 820px; }
+.ss-kicker { display: inline-block; background: var(--lemon); padding: 5px 9px 4px; border-radius: 99px; --r: -2deg; }
+.finale h2 { font: 900 clamp(34px, 5.4vw, 84px)/1.15 var(--display); letter-spacing: -0.02em; margin: 14px 0 0; max-width: 15ch; }
+.ss-stk { display: inline-block; background: var(--jellyfish); padding: 0.02em 0.2em 0.08em; border-radius: 0.2em; line-height: 1.12; box-shadow: 0 0 0 0.07em #fff, var(--die); }
+.ss-sub { font-weight: 500; max-width: 36ch; margin-top: 18px; }
+.ss-out { margin-top: 6px; font-size: 18px; }
+
+/* The hit area is a plain box (rounded corners would cut off the whale's nose and tail); the focus ring is the oval round its body. */
+.ss-grab { position: absolute; left: 0; top: 0; z-index: 2; padding: 0; border: 0; background: transparent; touch-action: none; cursor: grab; }
+.ss-grab::after { content: ""; position: absolute; left: 50%; bottom: var(--ring-b, 0px); width: var(--ring-w, 100%); height: var(--ring-h, 100%); translate: -50% 0; border-radius: 45%; pointer-events: none; }
+.ss-grab:active { cursor: grabbing; }
+.ss-grab:focus-visible { outline: none; }
+.ss-grab:focus-visible::after { outline: 3px dashed var(--focus); outline-offset: 6px; }
+
+.ss-hint { position: absolute; left: 0; top: 0; z-index: 1; background: var(--lemon); border-radius: 99px; padding: 7px 12px 6px; rotate: -5deg; white-space: nowrap; box-shadow: 0 0 0 3px #fff, var(--die); pointer-events: none; animation: ss-nudge 1.8s cubic-bezier(0.3, 1.6, 0.5, 1) infinite; transition: opacity 0.3s; }
+.finale.ss-launched .ss-hint { opacity: 0; }
+html.paused .ss-hint { animation: none; }
+@keyframes ss-nudge {
+  30% { translate: -6px -3px; }
+  60%, 100% { translate: 0 0; }
+}
+
+/* Plan B: a polaroid sticker that makes the whale sing. */
+.ss-snap { position: absolute; left: 0; top: 0; z-index: 1; display: block; width: clamp(120px, 12vw, 170px); padding: 10px 10px 14px; border: 0; background: #fff; color: var(--ink); text-align: center; font: 700 clamp(14px, 1.2vw, 17px)/1.1 var(--marker); box-shadow: 0 0 0 1px rgba(14, 14, 14, 0.13), 0 14px 24px -12px rgba(14, 14, 14, 0.55); --r: 5deg; }
+.ss-pic { display: grid; place-items: center; height: clamp(80px, 8.3vw, 120px); margin-bottom: 10px; background: var(--cobalt); }
+.ss-pic img { width: 80%; height: auto; }
+.ss-cap { display: block; }
+@media (hover: hover) { .ss-snap:hover { --r: 1deg; scale: 1.04; } }
+
+.ss-count { position: absolute; left: 216px; bottom: 14px; z-index: 3; margin: 0; }
+
+/* The whale's flight over the page. */
+/* Sized like innerWidth x innerHeight, which the backing store uses (dvh follows a phone's toolbar). */
+.ss-sky { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 80; pointer-events: none; }
+.ss-sky[hidden] { display: none; }
+.ss-flash { position: fixed; inset: 0; z-index: 85; background: var(--lemon); opacity: 0; pointer-events: none; }
+
+/* Score sticker (T§4.5): under the top bar, five seconds. */
+.ss-score { position: fixed; left: var(--g); top: 84px; z-index: 90; display: grid; justify-items: center; gap: 2px; min-width: 96px; padding: 8px 14px 9px; border: 3px solid #fff; border-radius: 14px; background: var(--lemon); color: var(--ink); box-shadow: var(--die); rotate: -4deg; pointer-events: none; transition: opacity 0.4s, translate 0.4s; }
+.ss-score b { font: 900 30px/1 var(--display); font-variant-numeric: tabular-nums; }
+.ss-score.out { opacity: 0; translate: 0 -12px; }
+
+@media (max-width: 700px) {
+  .finale { height: clamp(640px, calc(100svh - 64px), 820px); }
+  .ss-snap { width: 120px; font-size: 14px; }
+  .ss-pic { height: 80px; }
+  .ss-count { left: auto; right: 16px; bottom: 116px; }
+  .ss-score { top: 72px; }
+}
+html.calm .ss-hint { animation: none; }
+html.calm .ss-score { transition: none; }

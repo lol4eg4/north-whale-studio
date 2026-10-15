@@ -1,0 +1,55 @@
+[
+ {
+  "id": 1,
+  "name": {
+   "ru": "Погорелов",
+   "en": "Pogorelov"
+  },
+  "role": {
+   "ru": "Арт-директор",
+   "en": "Art Director"
+  },
+  "color": "cobalt",
+  "photo": "/media/team-1.webp"
+ },
+ {
+  "id": 2,
+  "name": {
+   "ru": "ШАН",
+   "en": "SHAN"
+  },
+  "role": {
+   "ru": "Проджект-менеджер",
+   "en": "Project Manager"
+  },
+  "color": "ink",
+  "photo": "/media/team-2.webp"
+ },
+ {
+  "id": 3,
+  "name": {
+   "ru": "Мария",
+   "en": "Maria"
+  },
+  "role": {
+   "ru": "Хэд-дизайнер",
+   "en": "Head Designer"
+  },
+  "color": "mint",
+  "photo": "/media/team-3.webp",
+  "video": "/media/team-3.mp4"
+ },
+ {
+  "id": 4,
+  "name": {
+   "ru": "Джексон",
+   "en": "Jackson"
+  },
+  "role": {
+   "ru": "Бренд-менеджер",
+   "en": "Brand Manager"
+  },
+  "color": "buoy",
+  "photo": "/media/team-4.webp"
+ }
+]

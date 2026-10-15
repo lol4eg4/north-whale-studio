@@ -1,0 +1,83 @@
+/* Dive and tidy (mock .dock/.gut/.tidy/.dive, T§2.9, T§4.3, T§4.4). Plugin CSS loads before
+   base.css, so rules that meet .piece are scoped under .dock (or doubled) to win. */
+.dive-dock { display: contents; }
+.dive-dock.away > * { visibility: hidden; }
+
+/* Round «Рандомный кейс»: lemon disc, ink core, ring text on a canvas that turns. */
+.dock .dive-btn { position: relative; width: 156px; height: 156px; border: 0; border-radius: 50%; padding: 0; background: var(--lemon); box-shadow: var(--float); display: grid; place-items: center; transition: scale 0.3s cubic-bezier(0.3, 1.7, 0.5, 1), rotate 0.2s; }
+.dive-ring { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; animation: dive-spin 16s linear 2s infinite; }
+html.paused .dive-ring { animation-play-state: paused; }
+html.calm .dive-ring { animation: none; }
+@keyframes dive-spin { to { rotate: 360deg; } }
+.dive-core { position: relative; width: 104px; height: 104px; border-radius: 50%; background: var(--ink); color: var(--lemon); display: grid; place-content: center; text-align: center; font: 900 17px/0.95 var(--display); rotate: -8deg; transition: rotate 0.5s cubic-bezier(0.3, 1.7, 0.5, 1); }
+.dive-core span { display: block; }
+.dive-core svg { display: none; }
+@media (hover: hover) {
+  .dock .dive-btn:not(.lifted):hover { scale: 1.06; }
+  .dive-btn:hover .dive-core { rotate: -16deg; }
+}
+.dock .dive-btn:not(.lifted):active { scale: 0.9; }
+html.dive-rolling .dive-core { animation: dive-jitter 0.12s steps(2) infinite; }
+@keyframes dive-jitter { 50% { rotate: -2deg; scale: 1.04; } }
+
+/* «Прибраться»: white pill, broom, mess badge (lemon when there is a mess). */
+.dock .tidy-btn { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 12px; border: 2px solid var(--ink); border-radius: 99px; background: var(--paper); color: var(--ink); font: 600 14px var(--sans); white-space: nowrap; box-shadow: 0 0 0 3px #fff; transition: background 0.2s, rotate 0.3s, scale 0.25s; }
+.dock .tidy-btn.messy { background: var(--lemon); }
+.tidy-ico { display: grid; }
+.tidy-ico svg { transition: rotate 0.25s; transform-origin: 80% 15%; }
+.tidy-n { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; margin-left: 2px; border-radius: 99px; background: var(--ink); color: var(--paper); font: 500 12px var(--mono); font-variant-numeric: tabular-nums; }
+.tidy-n[hidden] { display: none; }
+@media (hover: hover) {
+  .dock .tidy-btn:not(.lifted):hover { background: var(--mint); --r: -3deg; }
+  .tidy-btn:hover .tidy-ico svg { rotate: -14deg; }
+}
+.tidy-btn.sweep .tidy-ico svg { animation: tidy-sweep 0.7s ease-in-out; }
+@keyframes tidy-sweep { 20% { rotate: -22deg; } 45% { rotate: 16deg; } 70% { rotate: -12deg; } }
+html.calm .tidy-btn.sweep .tidy-ico svg { animation: none; }
+
+/* Speech bubble above the dock: the roulette talks here. */
+.dive-bubble { position: absolute; right: 6px; bottom: calc(100% + 10px); max-width: min(70vw, 320px); background: var(--ink); color: var(--paper); font: 700 15px/1.25 var(--sans); padding: 6px 12px; border-radius: 12px 12px 4px 12px; box-shadow: 0 0 0 3px #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.dive-bubble[hidden] { display: none; }
+
+/* Roulette on the wall cells. */
+.dive-dim { opacity: 0.3; transition: opacity 0.14s, scale 0.14s; }
+.dive-dim.dive-lit { opacity: 1; scale: 1.04; z-index: 60 !important; }
+.dive-lit > :first-child { outline: 5px solid var(--ink); outline-offset: 4px; }
+html.calm .dive-dim { transition: none; }
+html.calm :is(.dive-btn, .dive-core) { transition: none; }
+html.calm .dive-btn:hover .dive-core { rotate: -8deg; }
+
+/* Phone slot reel over the picked tile. */
+.dive-slot { position: absolute; z-index: 5; overflow: hidden; border-radius: var(--rounded-tile); background: var(--ink); pointer-events: none; }
+.dive-slot-card { position: absolute; inset: 0; }
+.dive-slot-card img { width: 100%; height: 100%; object-fit: cover; }
+.dive-slot-plate { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); background: var(--paper); padding: 9px 13px 10px; border-radius: var(--rounded-plate); rotate: -1.2deg; }
+.dive-slot-plate .mono { display: block; font-size: 10.5px; color: var(--text-muted); }
+.dive-slot-plate b { display: block; margin-top: 3px; font: 900 22px/0.95 var(--display); letter-spacing: -0.01em; }
+
+/* The dive block on the wall (mock .dive). */
+.dive-card { position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; width: 100%; height: 100%; border: 0; border-radius: var(--rounded-tile); padding: clamp(14px, 5cqmin, 26px); background: var(--buoy); color: var(--ink); overflow: hidden; text-align: left; }
+.dive-card-kick { position: relative; z-index: 2; background: var(--paper); padding: 5px 9px 4px; border-radius: 99px; rotate: -2deg; }
+.dive-card-title { position: relative; z-index: 2; font: 900 clamp(22px, min(13cqmin, 7.4cqi), 84px)/0.9 var(--display); letter-spacing: -0.02em; max-width: 9ch; }
+.dive-card-sub { position: relative; z-index: 2; }
+.dive-card-disc { position: absolute; right: 6%; top: 30%; width: 46cqmin; aspect-ratio: 1; border-radius: 50%; background: var(--cobalt); box-shadow: 0 0 0 5px var(--ink), 0 0 0 11px #fff; display: grid; place-items: center; overflow: hidden; transition: rotate 0.45s var(--ease-spring), scale 0.45s var(--ease-spring); }
+.dive-card-disc img { width: 86%; rotate: -8deg; pointer-events: none; }
+@media (hover: hover) { .dive-card:hover .dive-card-disc { rotate: -10deg; scale: 1.05; } }
+html.calm .dive-card-disc { transition: none; }
+
+@media (max-width: 1100px) and (min-width: 701px) {
+  .dock .dive-btn { width: 128px; height: 128px; }
+  .dive-core { width: 86px; height: 86px; font-size: 15px; }
+}
+/* Phone: bottom bar, dive in the centre, tidy round on the right. */
+@media (max-width: 700px) {
+  .dock .dive-btn { position: absolute; width: 84px; height: 84px; left: 50%; margin-left: -36px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .dive-core { width: 56px; height: 56px; }
+  .dive-core span { display: none; }
+  .dive-core svg { display: block; }
+  .dock .tidy-btn { width: 52px; height: 52px; padding: 0; justify-content: center; border-radius: 50%; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(14, 14, 14, 0.18); }
+  .tidy-t { display: none; }
+  .tidy-ico svg { width: 24px; height: 24px; }
+  .tidy-n { position: absolute; top: -8px; right: -8px; margin: 0; }
+  .dive-bubble { right: auto; left: 50%; translate: -50% 0; bottom: calc(104px + env(safe-area-inset-bottom)); border-radius: 12px; }
+}

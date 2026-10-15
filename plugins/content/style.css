@@ -1,0 +1,6 @@
+/* RU / EN switch */
+.lang { display: flex; font: 500 12px/1 var(--mono); border: 2px solid var(--ink); border-radius: 99px; overflow: hidden; background: var(--paper); }
+.lang button { border: 0; background: transparent; padding: 7px 9px; letter-spacing: 0.04em; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+@media (hover: hover) { .lang button[aria-pressed="false"]:hover { background: var(--lemon); } }
+@media (pointer: coarse) { .lang button { min-width: 44px; min-height: 44px; } }
