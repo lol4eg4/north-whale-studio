@@ -114,6 +114,7 @@ html.calm .case-clip { rotate: none; transition: none; }
 .case-in[data-bg="lemon"] :is(.case-lead, .case-how) mark { --hl: var(--paper); }
 .case-in[data-bg="lemon"] .case-results { background: var(--paper); }
 .case-in[data-bg="lemon"] .case-results .case-tag { background: var(--lemon); }
+.case-in[data-bg="lemon"] .case-result { background: var(--paper); }
 html.calm .case-card, html.calm .case-tag, html.calm .case-hand { rotate: none; }
 
 .case-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: auto; padding-top: 8px; }
