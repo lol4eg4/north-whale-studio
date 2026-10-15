@@ -29,6 +29,8 @@ html.calm .foot .fl { transition: none; }
 @media (pointer: coarse) {
   .foot .foot-nav a, .foot .foot-row > a.foot-tg { display: inline-flex; align-items: center; min-height: 44px; }
   .foot-nav a::before, a.foot-tg::before { inset: 30% -4px 22%; }
+  /* A short word (TEAM) still gets a tap area 44 px wide; the row does not move. */
+  .foot-nav a::after { content: ""; position: absolute; inset: 0 min(0px, 50% - 22px); }
 }
 @media (max-width: 700px) {
   .foot-row { padding-right: 0; flex-direction: column; align-items: flex-start; }
