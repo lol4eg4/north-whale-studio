@@ -1,8 +1,8 @@
 // Wall: dense packing without holes, no sideways scroll, the first tile in view,
 // lazy loops (nothing before 2 s, only near the screen, at most 3 loading), posters that stay
-// when a loop fails, no console errors.
+// when a loop fails, the four team badges (names, roles, photos, Maria's loop, roll call), no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Browser } from "playwright-core";
+import type { Browser, Page } from "playwright-core";
 import { launch, open, phone, startServer, wallHoles } from "./helpers.ts";
 
 const HOLE_WIDTHS = [1440, 1280, 1100, 1024, 768, 390, 320];
@@ -298,6 +298,185 @@ describe("wall media", () => {
     await page.keyboard.press("Escape");
     await page.waitForSelector("dialog.case:not([open])", { state: "attached" });
     await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
+    await context.close();
+  });
+});
+
+// The CEO's four, in order. ШАН / SHAN stays in capitals.
+const CREW = {
+  ru: [["Погорелов", "Арт-директор"], ["ШАН", "Проджект-менеджер"], ["Мария", "Хэд-дизайнер"], ["Джексон", "Бренд-менеджер"]],
+  en: [["Pogorelov", "Art Director"], ["SHAN", "Project Manager"], ["Maria", "Head Designer"], ["Jackson", "Brand Manager"]],
+};
+const PHOTOS = [1, 2, 3, 4].map((n) => `/media/team-${n}.webp`);
+
+const badges = (page: Page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll(".wall .tag")].map((t) => [
+      t.querySelector(".tag-nm > :not(.tag-ph)")!.textContent,
+      t.querySelector(".tag-role")!.textContent,
+    ]),
+  );
+// Scroll the page through once, so everything near the wall gets its turn to load.
+const sweep = async (page: Page) => {
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y <= height; y += 500) {
+    await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
+    await page.waitForTimeout(120);
+  }
+};
+// Scroll the page so that badge n (0 to 3, the CEO's order) sits at 40 % of the screen height.
+const toBadge = (page: Page, n: number) =>
+  page.evaluate((i) => {
+    const r = document.querySelectorAll(".wall .tag")[i].getBoundingClientRect();
+    scrollTo({ top: scrollY + r.top - innerHeight * 0.4, behavior: "instant" });
+  }, n);
+const MARIA = 2;
+const video = (page: Page) =>
+  page.evaluate(() => {
+    const v = document.querySelector<HTMLVideoElement>(".wall .tag video")!;
+    return { paused: v.paused, muted: v.muted, loop: v.loop, inline: v.playsInline, src: v.getAttribute("src"), ready: v.readyState, width: v.videoWidth };
+  });
+const waitPlaying = (page: Page) =>
+  page.waitForFunction(() => {
+    const v = document.querySelector<HTMLVideoElement>(".wall .tag video")!;
+    return !v.paused && v.readyState >= 2;
+  }, null, { timeout: 10000 });
+
+describe("team badges", () => {
+  test("four badges with the right names and roles in Russian, then in English after the switch", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    expect(await badges(page)).toEqual(CREW.ru);
+    await page.click('.nav-lang button[lang="en"]');
+    expect(await badges(page)).toEqual(CREW.en);
+    await page.click('.nav-lang button[lang="ru"]');
+    expect(await badges(page)).toEqual(CREW.ru);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("every team picture and Maria's loop answer and load; the badge pictures have an empty alt", async () => {
+    for (const url of [...PHOTOS, "/media/team-3.mp4"]) expect((await fetch(`${full.url}${url}`)).status, url).toBe(200);
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await sweep(page);
+    await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].every((i) => i.complete && i.naturalWidth > 0), null, { timeout: 10000 });
+    const imgs = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")].map((i) => ({ src: i.getAttribute("src"), alt: i.getAttribute("alt"), w: i.naturalWidth, shown: getComputedStyle(i).display !== "none", round: getComputedStyle(i.parentElement!).borderRadius })),
+    );
+    expect(imgs.map((i) => i.src)).toEqual(PHOTOS);
+    for (const i of imgs) {
+      expect(i.alt).toBe("");
+      expect(i.w).toBe(320);
+      expect(i.shown).toBe(true);
+      expect(i.round).toBe("50%");
+    }
+    expect(await page.locator(".wall .tag-ph.no-photo").count()).toBe(0);
+    // Maria's loop loads and plays once her badge is on screen.
+    await toBadge(page, MARIA);
+    await waitPlaying(page);
+    expect((await video(page)).width).toBe(320);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("photos load near the screen and not before 2 s: on a phone the last badge waits until it is near", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, phone);
+    await page.waitForTimeout(1000);
+    const early = await page.evaluate(() => [...document.querySelectorAll(".wall .tag-ph img")].map((i) => i.getAttribute("src")));
+    expect(early, "no badge photo within 1 s of load").toEqual([null, null, null, null]);
+    await page.waitForTimeout(1800);
+    const src = () => page.evaluate(() => [...document.querySelectorAll(".wall .tag-ph img")].map((i) => i.getAttribute("src")));
+    const first = await src();
+    expect(first[0]).toBe(PHOTOS[0]);
+    expect(first[3], "the last badge is far below the first screen").toBeNull();
+    await toBadge(page, 3);
+    await page.waitForFunction(() => document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")[3].naturalWidth > 0, null, { timeout: 5000 });
+    expect((await src())[3]).toBe(PHOTOS[3]);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("Maria's loop is muted, inline and looped, plays on screen and stops off screen and when the pause button is on", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    expect(await page.locator(".wall .tag video").count()).toBe(1);
+    expect(await page.locator(".wall .tag-ph video").getAttribute("aria-hidden")).toBe("true");
+    await toBadge(page, MARIA);
+    await waitPlaying(page);
+    expect(await video(page)).toMatchObject({ paused: false, muted: true, loop: true, inline: true, src: "/media/team-3.mp4" });
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag video")!).opacity)).toBe("1");
+
+    await page.click(".pause-btn");
+    await page.waitForFunction(() => document.querySelector<HTMLVideoElement>(".wall .tag video")!.paused, null, { timeout: 3000 });
+    await page.waitForTimeout(300);
+    expect((await video(page)).paused).toBe(true);
+    await page.click(".pause-btn");
+    await waitPlaying(page);
+
+    // Off screen: scroll to the end of the page, far from the badge.
+    await page.evaluate(() => scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+    await page.waitForFunction(() => document.querySelector<HTMLVideoElement>(".wall .tag video")!.paused, null, { timeout: 3000 });
+    await toBadge(page, MARIA);
+    await waitPlaying(page);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("calm: Maria's loop is never loaded; her poster still shows", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+    const page = await context.newPage();
+    const loops: string[] = [];
+    page.on("request", (r) => r.url().endsWith("/media/team-3.mp4") && loops.push(r.url()));
+    await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
+    await sweep(page);
+    await toBadge(page, MARIA);
+    await page.waitForTimeout(3000);
+    expect(loops).toEqual([]);
+    expect(await video(page)).toMatchObject({ paused: true, src: null });
+    const still = await page.evaluate(() => {
+      const spot = document.querySelector(".wall .tag-ph:has(video)")!;
+      const img = spot.querySelector("img")!;
+      return { poster: img.getAttribute("src"), drawn: img.complete && img.naturalWidth > 0, videoHidden: getComputedStyle(spot.querySelector("video")!).opacity === "0" };
+    });
+    expect(still).toEqual({ poster: "/media/team-3.webp", drawn: true, videoHidden: true });
+    await context.close();
+  });
+
+  test("a picture that does not load leaves the placeholder spot, not a broken image", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    await page.route("**/media/team-1.webp", (route) => route.abort());
+    await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
+    await sweep(page);
+    await page.waitForSelector(".wall .tag-ph.no-photo", { timeout: 5000 });
+    expect(await page.locator(".wall .tag-ph.no-photo").count()).toBe(1);
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector(".wall .tag-ph.no-photo")!).borderStyle)).toBe("dashed");
+    await context.close();
+  });
+
+  test("roll call: the team block and all four badges move to the top of the wall and each badge hops", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await page.click("#team .team-block");
+    await page.waitForSelector(".wall.rollcall", { timeout: 10000 });
+    const order = await page.evaluate(() => [...document.querySelectorAll(".wall > .cell")].slice(0, 5).map((c) => (c.id === "team" ? "team" : c.classList.contains("tag-cell") ? "tag" : "other")));
+    expect(order).toEqual(["team", "tag", "tag", "tag", "tag"]);
+    // Each badge hops once: a scripted animation (not a transition) runs on its piece.
+    const hopped = await page.evaluate(
+      () =>
+        new Promise<number>((done) => {
+          const seen = new Set<Element>();
+          const pieces = [...document.querySelectorAll(".wall .tag-cell > .tag")];
+          const t0 = performance.now();
+          const tick = () => {
+            for (const p of pieces) if (p.getAnimations().some((a) => !(a instanceof CSSTransition))) seen.add(p);
+            if (seen.size === pieces.length || performance.now() - t0 > 2500) done(seen.size);
+            else requestAnimationFrame(tick);
+          };
+          tick();
+        }),
+    );
+    expect(hopped).toBe(4);
+    // The wall is back to normal after a moment.
+    await page.waitForFunction(() => !document.querySelector(".wall.rollcall"), null, { timeout: 6000 });
+    expect(errors).toEqual([]);
     await context.close();
   });
 });

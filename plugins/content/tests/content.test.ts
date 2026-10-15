@@ -70,6 +70,33 @@ describe("studio data", () => {
     expect(s.clients().every((c) => ids.includes(c.caseId))).toBe(true);
     expect(s.services().map((x) => x.title).slice(0, 2)).toEqual(["Сайты под ключ", "Упаковка бизнеса"]);
     expect(s.services()[0].main).toBe(true);
-    expect(s.team()).toHaveLength(6);
+  });
+});
+
+describe("team", () => {
+  // From the studio's CEO, in this order. ШАН / SHAN stays in capitals.
+  const crew: [string, string, string, string, string][] = [
+    ["Погорелов", "Pogorelov", "Арт-директор", "Art Director", "cobalt"],
+    ["ШАН", "SHAN", "Проджект-менеджер", "Project Manager", "ink"],
+    ["Мария", "Maria", "Хэд-дизайнер", "Head Designer", "mint"],
+    ["Джексон", "Jackson", "Бренд-менеджер", "Brand Manager", "buoy"],
+  ];
+
+  test("four members in the CEO's order with names and roles in both languages", () => {
+    for (const lang of ["ru", "en"] as const) {
+      const team = store(lang).team();
+      expect(team.map((m) => m.id)).toEqual([1, 2, 3, 4]);
+      expect(team.map((m) => m.name)).toEqual(crew.map((c) => c[lang === "ru" ? 0 : 1]));
+      expect(team.map((m) => m.role)).toEqual(crew.map((c) => c[lang === "ru" ? 2 : 3]));
+      expect(team.map((m) => m.color)).toEqual(crew.map((c) => c[4]));
+    }
+  });
+
+  test("every member has a photo, only Maria has a video, and the files exist", () => {
+    const team = store("ru").team();
+    expect(team.map((m) => m.photo)).toEqual([1, 2, 3, 4].map((n) => `/media/team-${n}.webp`));
+    expect(team.map((m) => m.video)).toEqual([null, null, "/media/team-3.mp4", null]);
+    const files = readdirSync(`${import.meta.dir}/../../../site/media`);
+    for (const m of team) for (const url of [m.photo, m.video]) if (url) expect(files, url).toContain(url.replace("/media/", ""));
   });
 });

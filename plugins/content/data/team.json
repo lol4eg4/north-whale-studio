@@ -2,73 +2,54 @@
  {
   "id": 1,
   "name": {
-   "ru": "Имя",
-   "en": "Name"
+   "ru": "Погорелов",
+   "en": "Pogorelov"
   },
   "role": {
-   "ru": "должность",
-   "en": "role"
+   "ru": "Арт-директор",
+   "en": "Art Director"
   },
-  "color": "cobalt"
+  "color": "cobalt",
+  "photo": "/media/team-1.webp"
  },
  {
   "id": 2,
   "name": {
-   "ru": "Имя",
-   "en": "Name"
+   "ru": "ШАН",
+   "en": "SHAN"
   },
   "role": {
-   "ru": "должность",
-   "en": "role"
+   "ru": "Проджект-менеджер",
+   "en": "Project Manager"
   },
-  "color": "ink"
+  "color": "ink",
+  "photo": "/media/team-2.webp"
  },
  {
   "id": 3,
   "name": {
-   "ru": "Имя",
-   "en": "Name"
+   "ru": "Мария",
+   "en": "Maria"
   },
   "role": {
-   "ru": "должность",
-   "en": "role"
+   "ru": "Хэд-дизайнер",
+   "en": "Head Designer"
   },
-  "color": "mint"
+  "color": "mint",
+  "photo": "/media/team-3.webp",
+  "video": "/media/team-3.mp4"
  },
  {
   "id": 4,
   "name": {
-   "ru": "Имя",
-   "en": "Name"
+   "ru": "Джексон",
+   "en": "Jackson"
   },
   "role": {
-   "ru": "должность",
-   "en": "role"
+   "ru": "Бренд-менеджер",
+   "en": "Brand Manager"
   },
-  "color": "buoy"
- },
- {
-  "id": 5,
-  "name": {
-   "ru": "Имя",
-   "en": "Name"
-  },
-  "role": {
-   "ru": "должность",
-   "en": "role"
-  },
-  "color": "signal"
- },
- {
-  "id": 6,
-  "name": {
-   "ru": "Имя",
-   "en": "Name"
-  },
-  "role": {
-   "ru": "должность",
-   "en": "role"
-  },
-  "color": "jellyfish"
+  "color": "buoy",
+  "photo": "/media/team-4.webp"
  }
 ]

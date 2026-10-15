@@ -18,6 +18,7 @@ import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
 const DARK = ["cobalt", "ink", "signal"];
+const TAG_VIDEO = 100; // badge loops take ids from here, so they never meet a case id in videos.ts
 
 export default function init(host: Host) {
   const { motion } = host;
@@ -57,7 +58,7 @@ export default function init(host: Host) {
   });
   host.on("case-opened", () => ((caseOpen = true), videos.update()));
   host.on("case-closed", () => ((caseOpen = false), videos.update()));
-  // Posters load within one screen of the viewport, like the loops; the first tile's at once.
+  // Posters and badge photos load within one screen of the viewport, like the loops; the first tile's at once.
   const posterLoads = new Map<Element, () => void>();
   const posters = new IntersectionObserver(
     (list) => {
@@ -69,6 +70,14 @@ export default function init(host: Host) {
     },
     { rootMargin: "100% 0px" },
   );
+
+  // Badge photos are small and sit below the first poster: near the screen, and not before 2 s
+  // after load, so the first screen's bytes go to the case posters.
+  const later = new Promise<void>((go) => {
+    const arm = () => setTimeout(go, 2000);
+    if (document.readyState === "complete") arm();
+    else addEventListener("load", arm, { once: true });
+  });
 
   const refresh: (() => void)[] = [];
 
@@ -122,6 +131,29 @@ export default function init(host: Host) {
           const name = h("span");
           const role = h("span", { class: "tag-role" });
           const el = stickerEl("div", "tag", r, { "aria-hidden": "true" });
+          // The photo sits in the round spot; a member with a video gets it on top, played by videos.ts.
+          const photo = h("img", { alt: "", draggable: "false", decoding: "async" });
+          const spot = h("span", { class: "tag-ph" }, photo);
+          photo.addEventListener("error", () => spot.classList.add("no-photo"));
+          posterLoads.set(el, () => void later.then(() => photo.setAttribute("src", m.photo)));
+          posters.observe(el);
+          if (m.video) {
+            const video = h("video", {
+              muted: true,
+              loop: true,
+              playsinline: true,
+              preload: "none",
+              disablepictureinpicture: true,
+              draggable: "false",
+              "aria-hidden": "true",
+              tabindex: "-1",
+            });
+            video.muted = true; // the attribute alone does not mute in every browser
+            video.addEventListener("playing", () => spot.classList.add("shown"));
+            video.addEventListener("emptied", () => spot.classList.remove("shown"));
+            spot.append(video);
+            videos.add(TAG_VIDEO + m.id, el, video, { wide: m.video, phone: m.video }, () => {});
+          }
           el.append(
             h(
               "span",
@@ -129,7 +161,7 @@ export default function init(host: Host) {
               t.bind(h("b"), "tag.hello"),
               t.bind(h("i"), "tag.name"),
             ),
-            h("span", { class: "tag-nm" }, h("span", { class: "tag-ph" }), name),
+            h("span", { class: "tag-nm" }, spot, name),
             role,
           );
           const set = () => {
@@ -175,7 +207,7 @@ export default function init(host: Host) {
           refresh.push(set);
           t.bind(el, "cursor.open", "data-cursor");
           el.addEventListener("click", () => host.use<ServiceApi>("service").open(id, el));
-          const c = cell(main ? "sz-s2" : "sz-s", el, "sticker");
+          const c = cell(main ? "sz-s2" : slot.wide ? "sz-s sw" : "sz-s", el, "sticker");
           if (main) c.id = "services";
           return c;
         }

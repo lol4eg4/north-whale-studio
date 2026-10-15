@@ -13,6 +13,7 @@
 .wall > .sz-t { grid-column: span 2; grid-row: span 3; }
 .wall > .sz-s { grid-column: span 1; grid-row: span 1; }
 .wall > .sz-s2 { grid-column: span 2; grid-row: span 1; }
+.wall > .sw { grid-column: span 2; }
 .wall > .sz-fam { grid-column: span 3; grid-row: span 2; }
 .wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
 .wall > .t6 { display: none; }
@@ -22,8 +23,14 @@
 .tag-band { display: block; background: var(--c); color: var(--bf); padding: 7cqmin 0 4cqmin; }
 .tag-band b { display: block; font: 900 clamp(11px, 11cqmin, 22px)/1 var(--display); text-transform: uppercase; }
 .tag-band i { display: block; font: 500 clamp(10px, 5.5cqmin, 11px)/1 var(--mono); letter-spacing: 0.08em; font-style: normal; margin-top: 3px; text-transform: uppercase; }
-.tag-nm { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 clamp(12px, 10.5cqmin, 24px)/1 var(--marker); color: rgba(14, 14, 14, 0.6); }
-.tag-ph { width: 24cqmin; aspect-ratio: 1; border-radius: 50%; border: 2px dashed rgba(14, 14, 14, 0.35); }
+.tag-nm { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: 700 clamp(12px, 10.5cqmin, 24px)/1 var(--marker); color: var(--ink); }
+.tag-ph { position: relative; flex: none; width: 24cqmin; aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px var(--ink); }
+.tag-ph img, .tag-ph video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tag-ph video { opacity: 0; }
+.tag-ph.shown video { opacity: 1; }
+/* A photo that did not load leaves the placeholder spot (DESIGN.md, «Заглушка»). */
+.tag-ph.no-photo { border: 2px dashed rgba(14, 14, 14, 0.35); box-shadow: none; }
+.tag-ph.no-photo img { display: none; }
 .tag-role { display: block; font: 500 clamp(10px, 5.6cqmin, 11px)/1.2 var(--mono); text-transform: uppercase; color: rgba(14, 14, 14, 0.6); padding: 0 6% 6cqmin; }
 
 /* Client stickers (also Telegram and "dive deeper") */
@@ -87,6 +94,7 @@ html.calm .wall .hello { transition: none; }
   .wall > .sz-l { grid-column: span 2; grid-row: span 2; }
   .wall > .sz-t { grid-column: span 1; grid-row: span 2; }
   .wall > .sz-fam { grid-column: span 2; grid-row: span 2; }
+  .wall > .sw { grid-column: span 1; }
   .wall > .d-only, .wall > .t6 { display: none; }
 }
 @media (pointer: coarse) {

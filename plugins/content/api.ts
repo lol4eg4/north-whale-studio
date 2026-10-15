@@ -39,6 +39,8 @@ export interface Member {
   name: string;
   role: string;
   color: string; // token name
+  photo: string; // square picture; the poster still when there is a video
+  video: string | null; // short silent loop instead of the photo
 }
 
 export interface Client {

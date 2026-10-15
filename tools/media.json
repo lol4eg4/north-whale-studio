@@ -9,11 +9,10 @@
     { "id": 7, "src": "case7.mp4", "kind": "video", "size": "l", "sound": false, "tileStart": 0, "tileLength": 7.25, "phoneFocus": [0.4, 0.5], "ring": [0.38, 0.65] },
     { "id": 8, "src": "case8.mp4", "kind": "video", "size": "t", "sound": true, "tileStart": 6, "tileLength": 7, "phoneFocus": [0.5, 0.578], "ring": [0.5, 0.42] }
   ],
-  "whaleSong": {
-    "url": "https://upload.wikimedia.org/wikipedia/commons/6/67/Humpback_whale_moo.ogg",
-    "page": "https://commons.wikimedia.org/wiki/File:Humpback_whale_moo.ogg",
-    "licence": "Public domain (Commons template PD-USGov-NPS; LicenseShortName \"Public domain\"). Recorded by the US National Park Service near the mouth of Glacier Bay, Alaska, Sep 2001.",
-    "start": 0,
-    "length": 28
-  }
+  "team": [
+    { "id": 1, "src": "pogorelov.jpg" },
+    { "id": 2, "src": "shan.jpg", "crop": [125, 10, 500] },
+    { "id": 3, "src": "maria.mp4", "video": true },
+    { "id": 4, "src": "jackson.jpg" }
+  ]
 }

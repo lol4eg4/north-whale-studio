@@ -66,7 +66,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
 
   const services = (): Service[] =>
     servicesData.map((s) => ({ id: s.id, main: s.main, title: local(s.title), phrase: local(s.phrase), includes: s.includes.map(local) }));
-  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color }));
+  const team = (): Member[] => teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: m.photo, video: m.video ?? null }));
   const clients = (): Client[] =>
     clientsData.map((c) => ({ caseId: c.caseId, name: local(c.name), shape: c.shape as Client["shape"], bg: c.bg, fg: c.fg, phone: c.phone }));
   const contacts = (): Contacts => contactsData;

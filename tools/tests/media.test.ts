@@ -3,8 +3,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import config from "../media.json";
-import { cases, outDir, outputs, probe, SONG, TOTAL_LIMIT } from "../media.ts";
+import { cases, outDir, MUSIC, outputs, probe, TOTAL_LIMIT } from "../media.ts";
 import { readdir, stat } from "node:fs/promises";
 
 const path = (file: string) => join(outDir, file);
@@ -26,20 +25,15 @@ describe("media files", () => {
     });
   }
 
-  test("whale song exists, is within its limit and is 20-30 s", async () => {
-    const bytes = await size(SONG.file);
+  test("music exists, is within its limit and is an audio-only loop of 30-120 s", async () => {
+    const bytes = await size(MUSIC.file);
     expect(bytes).toBeGreaterThan(1000);
-    expect(bytes).toBeLessThanOrEqual(SONG.limit);
-    const info = await probe(path(SONG.file));
-    expect(info.duration).toBeGreaterThanOrEqual(20);
-    expect(info.duration).toBeLessThanOrEqual(30);
-  });
-
-  test("whale song source is recorded as public domain", () => {
-    const { url, page, licence } = config.whaleSong;
-    expect(url).toStartWith("https://");
-    expect(page).toStartWith("https://commons.wikimedia.org/wiki/File:");
-    expect(licence).toMatch(/public domain/i);
+    expect(bytes).toBeLessThanOrEqual(MUSIC.limit);
+    const info = await probe(path(MUSIC.file));
+    expect(info.duration).toBeGreaterThanOrEqual(30);
+    expect(info.duration).toBeLessThanOrEqual(120);
+    expect(info.audio).toBe(true);
+    expect(info.width).toBe(0);
   });
 
   test("site/media is within the total budget", async () => {
@@ -93,7 +87,7 @@ describe("faststart", () => {
   const files = [
     ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-full.mp4`] : [])),
     ...cases.flatMap((c) => [`c${c.id}-tile.mp4`, `c${c.id}-phone.mp4`]),
-    SONG.file,
+    MUSIC.file,
   ];
   for (const file of files) {
     test(`${file}: moov comes before mdat`, async () => {

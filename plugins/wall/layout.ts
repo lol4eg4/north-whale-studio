@@ -1,12 +1,14 @@
 // The wall's cells in DOM order (the mock's W). The order is what lets dense packing leave
 // no holes at 8, 6 and 2 columns: small stickers fill the columns beside every big tile.
+// Four team badges, so two service stickers are wide (2 cells) on tablet and desktop to take
+// the room the two missing badges left.
 export type Slot =
   | { k: "tile"; id: number }
   | { k: "dive" }
   | { k: "tag"; i: number } // team badge, index into team()
   | { k: "client"; i: number } // index into clients()
   | { k: "tick" }
-  | { k: "svc"; id: number }
+  | { k: "svc"; id: number; wide?: boolean } // wide: 2 cells across on tablet and desktop, one on phones
   | { k: "svc2"; id: number } // the main service, wide
   | { k: "star" }
   | { k: "team" }
@@ -23,14 +25,13 @@ export const W: Slot[] = [
   { k: "tile", id: 2 },
   { k: "tick" },
   { k: "tile", id: 3 },
-  { k: "svc", id: 2 },
+  { k: "svc", id: 2, wide: true },
   { k: "star" },
-  { k: "tag", i: 2 },
   { k: "svc2", id: 1 },
   { k: "client", i: 1 },
   { k: "tile", id: 4 },
+  { k: "tag", i: 2 },
   { k: "tag", i: 3 },
-  { k: "tag", i: 4 },
   { k: "svc", id: 3 },
   { k: "svc", id: 4 },
   { k: "client", i: 2 },
@@ -44,8 +45,7 @@ export const W: Slot[] = [
   { k: "tile", id: 8 },
   { k: "team" },
   { k: "client", i: 7 },
-  { k: "svc", id: 5 },
-  { k: "tag", i: 5 },
+  { k: "svc", id: 5, wide: true },
   { k: "whale" },
   { k: "telegram" },
   { k: "deeper" },

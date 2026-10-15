@@ -1,10 +1,11 @@
-// Builds site/media from the case sources and the whale song, then checks the size budget.
-// Run: bun tools/media.ts [--src tmp/cases-src] [--only 3]
-// Settings per case and the whale song source live in tools/media.json.
+// Builds site/media from the case sources and the team photos, then checks the size budget.
+// Run: bun tools/media.ts [--src tmp/cases-src] [--only 3] [--team [--team-src tmp/team-src]]
+// --team builds only the team badges. Settings per case and per team member live in tools/media.json.
+// site/media/music.m4a is not built here (see docs/credits.md); the budget table only checks it.
 
 import ffmpegPath from "ffmpeg-static";
 import { mkdir, readdir, stat } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import config from "./media.json";
 
 const KB = 1000;
@@ -23,10 +24,19 @@ export interface Case {
   ring: [number, number]; // close-up point of the round badge, 0..1
 }
 
+export interface TeamMedia {
+  id: number;
+  src: string;
+  video?: boolean; // a short loop: team-N.mp4 plus its first frame as the poster team-N.webp
+  crop?: [number, number, number]; // x, y and side (source pixels) of the square to cut from a wide photo
+}
+
 export const cases = config.cases as Case[];
+export const team = config.team as TeamMedia[];
+export const TEAM_SIZE = 320;
 export const outDir = join(import.meta.dir, "..", "site", "media");
 export const TOTAL_LIMIT = 80 * MB;
-export const SONG = { file: "whale-song.m4a", limit: 300 * KB };
+export const MUSIC = { file: "music.m4a", limit: 3.5 * MB };
 
 /** Every file the pipeline writes for one case, with its size limit in bytes. */
 export function outputs(c: Case): { file: string; limit: number }[] {
@@ -38,6 +48,12 @@ export function outputs(c: Case): { file: string; limit: number }[] {
     { file: `${n}-phone.webp`, limit: 120 * KB },
     c.kind === "still" ? { file: `${n}-full.webp`, limit: 300 * KB } : { file: `${n}-full.mp4`, limit: FULL_LIMIT },
   ];
+}
+
+/** Every file the pipeline writes for one team member, with its size limit in bytes. */
+export function teamOutputs(m: TeamMedia): { file: string; limit: number }[] {
+  const out = [{ file: `team-${m.id}.webp`, limit: 40 * KB }];
+  return m.video ? [...out, { file: `team-${m.id}.mp4`, limit: 250 * KB }] : out;
 }
 
 if (!ffmpegPath) throw new Error("ffmpeg-static has no binary for this platform");
@@ -190,39 +206,24 @@ async function buildStillCase(c: Case, src: string, info: Info) {
   await frame(c, src, scaleTo(1280, -2), 85, join(outDir, `${n}-full.webp`));
 }
 
-// ---- whale song -----------------------------------------------------------
+// ---- team badges ----------------------------------------------------------
 
-const UA = { "User-Agent": "north-whale-studio-media/1.0 (https://github.com/lol4eg4/north-whale-studio)" };
+const teamScale = scaleTo(TEAM_SIZE, TEAM_SIZE);
 
-/** Downloads the recording into tools/.cache/whale-song/ once, after Commons confirms it is public domain. */
-async function downloadSong(): Promise<string> {
-  const { url, page } = config.whaleSong;
-  const dir = join(import.meta.dir, ".cache", "whale-song");
-  const file = join(dir, basename(new URL(url).pathname));
-  if (await Bun.file(file).exists()) return file;
-
-  const title = decodeURIComponent(page.split("/wiki/")[1] ?? "");
-  const api = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url|extmetadata&format=json&formatversion=2`;
-  const meta = await (await fetch(api, { headers: UA })).json();
-  const licence: string = meta.query?.pages?.[0]?.imageinfo?.[0]?.extmetadata?.LicenseShortName?.value ?? "";
-  if (!/public domain/i.test(licence)) throw new Error(`${page}: Commons licence is "${licence}", not public domain`);
-
-  const res = await fetch(url, { headers: UA });
-  if (!res.ok) throw new Error(`download ${url}: HTTP ${res.status}`);
-  await mkdir(dir, { recursive: true });
-  await Bun.write(join(import.meta.dir, ".cache", ".gitignore"), "*\n");
-  await Bun.write(file, res);
-  return file;
-}
-
-async function buildSong() {
-  const { start, length } = config.whaleSong;
-  const src = await downloadSong();
+/**
+ * Square webp of a member (the poster for a video member: its first frame), plus for a video
+ * member a silent loop. The source clip does not end where it starts (the head has moved), so the
+ * loop plays forward and then back, without repeating the two end frames: no jump at the seam.
+ */
+async function buildTeamMember(m: TeamMedia, src: string) {
+  const crop = m.crop ? `crop=${m.crop[2]}:${m.crop[2]}:${m.crop[0]}:${m.crop[1]},` : "";
+  const webp = ["-frames:v", "1", "-c:v", "libwebp", "-quality", "80", "-compression_level", "6"];
+  await run(["-i", src, "-vf", `${crop}${teamScale}`, ...webp, join(outDir, `team-${m.id}.webp`)]);
+  if (!m.video) return;
   const info = await probe(src);
-  if (start + length > info.duration + 0.05) throw new Error(`whale song: ${start}+${length} s is longer than the recording (${info.duration} s)`);
-  await run(["-ss", `${start}`, "-i", src, "-t", `${length}`, "-vn",
-    "-af", `afade=t=in:st=0:d=1,afade=t=out:st=${length - 1}:d=1`,
-    "-ac", "1", "-c:a", "aac", "-b:a", "64k", "-movflags", "+faststart", join(outDir, SONG.file)]);
+  const last = Math.round(info.duration * info.fps) - 1; // index of the last frame
+  const graph = `[0:v]${teamScale},split[a][b];[b]reverse,trim=start_frame=1:end_frame=${last},setpts=PTS-STARTPTS[r];[a][r]concat=n=2:v=1:a=0[v]`;
+  await run(["-i", src, "-filter_complex", graph, "-map", "[v]", "-an", ...h264, "-crf", "23", join(outDir, `team-${m.id}.mp4`)]);
 }
 
 // ---- budget table ---------------------------------------------------------
@@ -262,9 +263,11 @@ async function main() {
   const argv = process.argv.slice(2);
   const flag = (name: string) => argv[argv.indexOf(name) + 1];
   const srcDir = argv.includes("--src") ? resolve(flag("--src")) : join(import.meta.dir, "..", "tmp", "cases-src");
+  const teamSrc = argv.includes("--team-src") ? resolve(flag("--team-src")) : join(import.meta.dir, "..", "tmp", "team-src");
+  const teamOnly = argv.includes("--team");
   const only = argv.includes("--only") ? Number(flag("--only")) : null;
-  const chosen = cases.filter((c) => only === null || c.id === only);
-  if (chosen.length === 0) throw new Error(`no case with id ${only}`);
+  const chosen = teamOnly ? [] : cases.filter((c) => only === null || c.id === only);
+  if (!teamOnly && chosen.length === 0) throw new Error(`no case with id ${only}`);
 
   await mkdir(outDir, { recursive: true });
   const files: { file: string; limit: number }[] = [];
@@ -278,10 +281,13 @@ async function main() {
     console.log(`case ${c.id} done in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   }
   if (only === null) {
-    await buildSong();
-    files.push({ file: SONG.file, limit: SONG.limit });
-    console.log("whale song done");
+    for (const m of team) {
+      await buildTeamMember(m, join(teamSrc, m.src));
+      files.push(...teamOutputs(m));
+    }
+    console.log("team done");
   }
+  if (only === null && !teamOnly) files.push(MUSIC);
   console.log();
   if (!(await report(files))) process.exit(1);
 }
