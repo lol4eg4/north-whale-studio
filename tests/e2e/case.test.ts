@@ -232,10 +232,18 @@ describe("player", () => {
     expect(await link.getAttribute("href")).toBe("https://www.youtube.com/watch?v=bH9zvvhGitY");
     expect(await link.getAttribute("target")).toBe("_blank");
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
-    // Waldorf's link opens the hotel's page in the visitor's language.
+    // Waldorf's link opens the hotel's page in the visitor's language; its press clippings open the articles.
     await page.evaluate(() => (location.hash = "#case-1"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Berlin Deco");
     expect(await page.getAttribute("dialog.case .case-out a", "href")).toBe("https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/");
+    expect(await page.textContent("dialog.case .case-sub")).toBe("Full-cycle production");
+    expect(await page.$$eval("dialog.case .case-clip", (els) => els.map((e) => [e.querySelector(".logo-mark")!.getAttribute("aria-label"), e.getAttribute("target")]))).toEqual([
+      ["Rolling Stone UK", "_blank"],
+      ["Forbes Travel Guide", "_blank"],
+      ["Condé Nast Traveler", "_blank"],
+      ["Business Traveller", "_blank"],
+    ]);
+    expect(await page.textContent("dialog.case .case-clip .mono")).toBe("Read it →");
     await page.evaluate(() => (location.hash = "#case-2"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(3);

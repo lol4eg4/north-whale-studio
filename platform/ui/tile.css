@@ -12,6 +12,15 @@
 .plate { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); background: var(--paper); padding: 9px 13px 10px; border-radius: var(--rounded-plate); rotate: -1.2deg; box-shadow: 0 0 0 1px rgba(14, 14, 14, 0.08); transition: rotate 0.4s var(--ease-spring); }
 .plate-k { display: block; font: 500 10.5px/1.3 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: rgba(14, 14, 14, 0.65); }
 .plate-t { display: block; font: 900 clamp(17px, 7.2cqmin, 42px)/0.95 var(--display); letter-spacing: -0.01em; margin-top: 3px; }
+/* "As seen in": the publications' logos in ink under the client (as on the reference's tiles);
+   a small tile has no room for them. */
+.plate-seen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(14, 14, 14, 0.15); }
+.plate-seen[hidden] { display: none; }
+.plate-seen .mono { font-style: normal; font-size: 9.5px; color: rgba(14, 14, 14, 0.65); }
+.plate-seen .logo-mark { --lh: clamp(10px, 3cqmin, 15px); }
+.plate-seen:not(.on) .logo-mark { -webkit-mask-image: none; mask-image: none; background: transparent; }
+@container (max-width: 340px) { .plate-seen { display: none; } }
+.logo-mark { display: inline-block; flex: none; height: var(--lh, 14px); aspect-ratio: var(--ar); background: currentColor; -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; }
 /* The result: a lemon plate that flies out of the plate on hover (always out on touch screens). */
 .plate-more { display: grid; grid-template-rows: 0fr; margin-top: 0; transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin-top 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .plate-more[hidden] { display: none; }

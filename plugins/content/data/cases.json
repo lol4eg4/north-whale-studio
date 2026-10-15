@@ -6,15 +6,48 @@
    "en": "Waldorf Astoria Berlin"
   },
   "what": {
+   "ru": "Брендинг, сайт, продакшн",
+   "en": "Branding, Website, Production"
+  },
+  "result": {
    "ru": "Полный цикл продакшена",
    "en": "Full-cycle production"
   },
-  "result": null,
   "size": "xl",
   "kind": "video",
   "sound": false,
   "vertical": false,
-  "color": "ink"
+  "color": "ink",
+  "press": [
+   {
+    "name": "Rolling Stone UK",
+    "logo": "/media/press-rolling-stone-uk.webp",
+    "ratio": 5.18,
+    "title": "Berlin Waldorf Astoria review: A fitting home for rock n’ roll royalty",
+    "url": "https://www.rollingstone.co.uk/travel/berlin-waldorf-astoria-review-a-fitting-home-for-rock-n-roll-royalty-50228/"
+   },
+   {
+    "name": "Forbes Travel Guide",
+    "logo": "/media/press-forbes-travel-guide.svg",
+    "ratio": 3.48,
+    "title": "Waldorf Astoria Berlin",
+    "url": "https://www.forbestravelguide.com/hotels/berlin-germany/waldorf-astoria-berlin"
+   },
+   {
+    "name": "Condé Nast Traveler",
+    "logo": "/media/press-conde-nast-traveler.svg",
+    "ratio": 2.65,
+    "title": "Waldorf Astoria Berlin, Germany — Hotel Review",
+    "url": "https://www.cntraveler.com/hotels/berlin/waldorf-astoria-berlin"
+   },
+   {
+    "name": "Business Traveller",
+    "logo": "/media/press-business-traveller.svg",
+    "ratio": 6.55,
+    "title": "Hotel check: Waldorf Astoria Berlin",
+    "url": "https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/"
+   }
+  ]
  },
  {
   "id": 2,
@@ -28,7 +61,8 @@
   "kind": "video",
   "sound": false,
   "vertical": false,
-  "color": "mint"
+  "color": "mint",
+  "press": []
  },
  {
   "id": 3,
@@ -45,7 +79,8 @@
   "kind": "video",
   "sound": true,
   "vertical": false,
-  "color": "buoy"
+  "color": "buoy",
+  "press": []
  },
  {
   "id": 4,
@@ -59,7 +94,8 @@
   "kind": "video",
   "sound": false,
   "vertical": false,
-  "color": "jellyfish"
+  "color": "jellyfish",
+  "press": []
  },
  {
   "id": 5,
@@ -76,7 +112,8 @@
   "kind": "video",
   "sound": false,
   "vertical": false,
-  "color": "signal"
+  "color": "royal",
+  "press": []
  },
  {
   "id": 6,
@@ -93,7 +130,8 @@
   "kind": "video",
   "sound": true,
   "vertical": false,
-  "color": "lemon"
+  "color": "lemon",
+  "press": []
  },
  {
   "id": 7,
@@ -110,7 +148,8 @@
   "kind": "video",
   "sound": false,
   "vertical": false,
-  "color": "tape"
+  "color": "tape",
+  "press": []
  },
  {
   "id": 8,
@@ -127,6 +166,7 @@
   "kind": "video",
   "sound": true,
   "vertical": true,
-  "color": "cobalt"
+  "color": "cobalt",
+  "press": []
  }
 ]

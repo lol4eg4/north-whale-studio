@@ -14,6 +14,7 @@ export interface CaseItem {
   sound: boolean;
   vertical: boolean;
   color: string; // token name: the open case's own colour
+  press: Press[]; // publications that wrote about the client: "As seen in" on the tile, cards in the case
   media: {
     poster: string; // the tile's still
     posterPhone: string; // used at <= 700 px
@@ -25,6 +26,14 @@ export interface CaseItem {
   story: { task: string; did: string; result: string }; // placeholders, for a case with no page yet
   page: CasePage | null; // the studio's own case text (data/pages.*.json)
   sr: string; // what a screen reader says for the tile
+}
+
+export interface Press {
+  name: string;
+  logo: string; // the publication's logo, drawn in one colour through a CSS mask
+  ratio: number; // logo width / height
+  title: string; // the article's own headline, in its own language
+  url: string;
 }
 
 // One case told the way the reference tells it. Text may mark ==highlights==.

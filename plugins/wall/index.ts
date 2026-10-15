@@ -112,6 +112,7 @@ export default function init(host: Host) {
       kicker: c.what ?? api.text("wall.watch"),
       title: c.client,
       result: c.result,
+      seen: c.press.length ? { label: api.text("case.seenIn"), marks: c.press } : null,
     });
 
     const build = (slot: Slot, r: number): HTMLElement => {

@@ -50,13 +50,13 @@ describe("cases", () => {
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
     expect(cases.find((c) => c.id === 8)!.size).toBe("t");
-    for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape"]).toContain(c.color);
+    for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape", "royal"]).toContain(c.color);
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
   test("screen readers hear number, client and what the file name says", () => {
     expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ просмотров");
-    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Full-cycle production");
+    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1");
     expect(store("ru").caseById(9)).toBeUndefined();
   });
@@ -78,6 +78,17 @@ describe("cases", () => {
       for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
     }
     expect(store("en").caseById(3)!.page!.links[0].url).toBe(store("ru").caseById(3)!.page!.links[0].url);
+  });
+
+  test("press: Waldorf's four publications, each with a logo on disk, a ratio, a headline and a link", () => {
+    expect(cases.find((c) => c.id === 1)!.press.map((p) => p.name)).toEqual(["Rolling Stone UK", "Forbes Travel Guide", "Condé Nast Traveler", "Business Traveller"]);
+    for (const c of cases)
+      for (const p of c.press) {
+        expect(Bun.file(`${import.meta.dir}/../../../site${p.logo}`).size, p.logo).toBeGreaterThan(0);
+        expect(p.ratio).toBeGreaterThan(1);
+        expect(p.title.trim()).not.toBe("");
+        expect(p.url).toMatch(/^https:\/\//);
+      }
   });
 
   test("the media files a case names exist once the media pipeline ran", () => {

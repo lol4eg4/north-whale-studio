@@ -10,12 +10,13 @@ export interface TileText {
   kicker: string; // what the studio did, or "watch the case"
   title: string; // client
   result: string | null;
+  seen: { label: string; marks: { name: string; logo: string; ratio: number }[] } | null; // "As seen in" and logos
 }
 
 export interface TileArt {
   poster: string;
   posterPhone: string; // used at <= 700 px
-  ringPoster: string; // the badge's still until its loop plays, loaded by loadRing()
+  ringPoster: string; // the badge's still until its loop plays, loaded by loadRing() with the press logos
   eager?: boolean; // first tiles: load the poster at once, the rest wait for loadPoster()
 }
 
@@ -25,6 +26,14 @@ export interface CaseTile {
   set(text: TileText): void;
   loadPoster(): void;
   loadRing(): void;
+}
+
+// A publication's logo in one colour (currentColor), the way the reference draws them.
+export function logoMark(m: { name: string; logo: string; ratio: number }): HTMLSpanElement {
+  const el = h("span", { class: "logo-mark", role: "img", "aria-label": m.name });
+  el.style.setProperty("--logo", `url("${m.logo}")`);
+  el.style.setProperty("--ar", String(m.ratio));
+  return el;
 }
 
 export function caseTile(text: TileText, art: TileArt): CaseTile {
@@ -54,7 +63,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const title = h("span", { class: "plate-t" });
   const stat = h("span", { class: "plate-stat" });
   const more = h("span", { class: "plate-more" }, stat);
-  const plate = h("span", { class: "plate" }, kicker, title, more);
+  const seen = h("span", { class: "plate-seen" });
+  const plate = h("span", { class: "plate" }, kicker, title, more, seen);
   // The paper's corner: a small tab that curls up when the tile is hovered.
   const peel = h("span", { class: "tile-peel", "aria-hidden": "true" });
   const el = h("button", { type: "button", class: "tile" }, picture, ring, number, plate, peel);
@@ -73,6 +83,7 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
     },
     loadRing() {
       video.poster = art.ringPoster;
+      seen.classList.add("on"); // the logos load with the badge, after the first screen's posters
     },
     set(t) {
       el.setAttribute("aria-label", t.label);
@@ -81,6 +92,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
       title.textContent = t.title;
       stat.textContent = t.result ?? "";
       more.hidden = !t.result;
+      seen.replaceChildren(...(t.seen ? [h("i", { class: "mono" }, t.seen.label), ...t.seen.marks.map((m) => logoMark(m))] : []));
+      seen.hidden = !t.seen;
     },
   };
   api.set(text);

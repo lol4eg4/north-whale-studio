@@ -9,6 +9,7 @@ import type { CaseFrom } from "../../platform/events.ts";
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { button, goTo, h, icon, overlay, placeholderBox, toast } from "../../platform/ui/parts.ts";
+import { logoMark } from "../../platform/ui/tile.ts";
 import type { CaseItem, CasePage, ContentApi } from "../content/api.ts";
 import type { CaseApi } from "./api.ts";
 import { onLoad, onNavigate, onNext, onOpen, onRequestClose, type Act } from "./history.ts";
@@ -17,7 +18,7 @@ import "./style.css";
 
 const two = (n: number) => String(n).padStart(2, "0");
 // Each case has its own colour, as each case page of the reference does; these take light text.
-const dark = new Set(["ink", "cobalt", "signal"]);
+const dark = new Set(["ink", "cobalt", "signal", "royal"]);
 // A rise with no figure ("↑"): the display font has no arrow, so it is the site's own, turned up.
 const up = () => {
   const el = icon("arrowRight", 48);
@@ -83,7 +84,7 @@ export default function init(host: Host) {
   const tiles = new Map<number, HTMLElement>();
   const ctx = () => ({ open: openId, closing, ids: ids() });
 
-  const page = (p: CasePage) => [
+  const page = (c: CaseItem, p: CasePage) => [
     h("dl", { class: "case-meta" }, ...(
       [
         ["case.client", p.client],
@@ -109,6 +110,13 @@ export default function init(host: Host) {
         h("ul", {}, ...p.results.items.map((r) => h("li", {}, h("b", {}, r.value === "↑" ? up() : r.value), h("span", {}, r.label)))),
         p.results.note && h("p", {}, p.results.note),
       ),
+    c.press.length > 0 &&
+      h(
+        "section",
+        { class: "case-press" },
+        h("h3", { class: "mono" }, text("case.press")),
+        h("div", { class: "case-clips" }, ...c.press.map((m) => h("a", { class: "case-clip", href: m.url, target: "_blank", rel: "noopener" }, logoMark(m), h("span", { class: "case-clip-t" }, m.title), h("span", { class: "mono" }, `${text("case.read")} →`)))),
+      ),
     p.links.length > 0 && h("p", { class: "case-out" }, ...p.links.map((l) => h("a", { href: l.url, target: "_blank", rel: "noopener" }, `${l.label} →`))),
   ].filter((x): x is HTMLElement => !!x);
 
@@ -122,10 +130,12 @@ export default function init(host: Host) {
     eyebrow.textContent = c.page?.eyebrow ?? "";
     eyebrow.hidden = !c.page;
     titleEl.textContent = c.page?.title ?? c.client;
-    sub.replaceChildren(...[c.what && h("span", {}, c.what), c.result && h("span", { class: "case-result" }, c.result)].filter((x): x is HTMLSpanElement => !!x));
-    sub.hidden = !!c.page || (!c.what && !c.result);
+    // A case page has client and category of its own: under its title only the lemon result.
+    const subs = [!c.page && c.what && h("span", {}, c.what), c.result && h("span", { class: "case-result" }, c.result)].filter((x): x is HTMLSpanElement => !!x);
+    sub.replaceChildren(...subs);
+    sub.hidden = !subs.length;
     story.classList.toggle("own", !!c.page);
-    story.replaceChildren(...(c.page ? page(c.page) : [placeholderBox(c.story.task), placeholderBox(c.story.did), placeholderBox(c.story.result)]));
+    story.replaceChildren(...(c.page ? page(c, c.page) : [placeholderBox(c.story.task), placeholderBox(c.story.did), placeholderBox(c.story.result)]));
     mediaTag.textContent = c.page?.media ?? "";
     mediaTag.hidden = !c.page;
     // Next names the next case; the last one leads back to the wall.
