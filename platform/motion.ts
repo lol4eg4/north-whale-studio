@@ -232,7 +232,10 @@ export function createMotion(memory: Memory, win: Window = window): Motion {
     const cells = [...container.children] as HTMLElement[];
     const before = new Map(cells.map((c) => [c, c.getBoundingClientRect()]));
     for (const c of cells) for (const a of c.getAnimations()) a.cancel();
+    // Moving a cell drops the focus inside it to <body>: put it back, a keyboard user keeps their place.
+    const focused = doc.activeElement instanceof HTMLElement && container.contains(doc.activeElement) ? doc.activeElement : null;
     mutate();
+    if (focused && doc.activeElement !== focused) focused.focus({ preventScroll: true });
     for (const c of cells) c.style.zIndex = "";
     if (reduce.matches) return Promise.resolve();
     const done: Promise<unknown>[] = [];
