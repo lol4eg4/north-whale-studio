@@ -1,5 +1,5 @@
 {
- "email": "hello@northwhale.studio",
+ "email": "contact@alfacatalyst.com",
  "messengers": [
   {
    "name": "Telegram",
@@ -8,7 +8,8 @@
   },
   {
    "name": "WhatsApp",
-   "handle": "+7 000 000-00-00"
+   "handle": "+7 952 203-03-62",
+   "url": "https://wa.me/79522030362"
   }
  ],
  "socials": [

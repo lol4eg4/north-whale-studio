@@ -358,12 +358,13 @@ describe("wall media", () => {
     expect(await tile.evaluate((t) => t === document.activeElement && t.matches(":focus-visible"))).toBe(true);
     expect((await look()).stat).toBe(1);
 
-    // King’s Resort & Casino has no result figure: no lemon plate, even under the mouse.
+    // Every case has its result now; King’s Resort & Casino's flies out too.
     const kings = page.locator('.wall .tile[aria-label*="King’s"]');
     await kings.scrollIntoViewIfNeeded();
     await kings.hover({ position: { x: 100, y: 100 } });
     await page.waitForTimeout(700);
-    expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-more")!).display)).toBe("none");
+    expect(await kings.evaluate((t) => t.querySelector(".plate-stat")!.textContent)).toBe("Упаковка бренда и Live ивенты");
+    expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-stat")!).opacity)).toBe("1");
     expect(errors).toEqual([]);
     await context.close();
     await mouse.close();
@@ -495,6 +496,25 @@ describe("team badges", () => {
     await toBadge(page, 3);
     await page.waitForFunction(() => document.querySelectorAll<HTMLImageElement>(".wall .tag-ph img")[3].naturalWidth > 0, null, { timeout: 5000 });
     expect(plain((await src())[3])).toBe(PHOTOS[3]);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("the clients' sheet: ten logos in ink under «Наши клиенты», drawn only near the screen and after 2 s", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    expect(await page.textContent(".wall .brand-sheet h3")).toBe("Наши клиенты");
+    const names = await page.$$eval(".wall .brand-sheet .logo-mark", (els) => els.map((e) => e.getAttribute("aria-label")));
+    expect(names).toEqual(["Mercedes-Benz", "Lavazza", "Burger King", "Danone", "Efes", "Skillbox", "Skyeng", "Skillfactory", "GeekBrains", "VK"]);
+    expect(await page.$$eval(".wall .brand-sheet.on", (els) => els.length), "no logos within the first 2 s").toBe(0);
+    await page.locator(".wall .brand-sheet").scrollIntoViewIfNeeded();
+    await page.waitForSelector(".wall .brand-sheet.on", { timeout: 5000 });
+    const marks = await page.$$eval(".wall .brand-sheet .logo-mark", (els) => els.map((e) => getComputedStyle(e).maskImage || getComputedStyle(e).webkitMaskImage));
+    for (const m of marks) expect(m).toMatch(/url\(/);
+    const ok = await page.evaluate(async () => {
+      const urls = [...document.querySelectorAll<HTMLElement>(".wall .brand-sheet .logo-mark")].map((e) => e.style.getPropertyValue("--logo").slice(5, -2));
+      return Promise.all(urls.map(async (u) => (await fetch(u)).ok));
+    });
+    expect(ok.every(Boolean)).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
   });

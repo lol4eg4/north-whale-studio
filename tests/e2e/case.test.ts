@@ -206,7 +206,7 @@ describe("player", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(await page.textContent("dialog.case .case-title")).toBe("King’s Resort & Casino");
     expect(await page.textContent("dialog.case .case-eyebrow")).toBe("King’s Resort · Розвадов");
-    expect(await page.isVisible("dialog.case .case-sub")).toBe(false);
+    expect(await page.textContent("dialog.case .case-sub")).toBe("Упаковка бренда и Live ивенты");
     expect(await page.textContent("dialog.case .case-meta dd")).toBe("King’s Resort & Casino");
     expect(plain(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src")))).toBe("/media/c5-full.mp4");
     expect(await page.isVisible("dialog.case .player")).toBe(true);

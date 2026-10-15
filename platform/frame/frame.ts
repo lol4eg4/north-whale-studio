@@ -24,7 +24,7 @@ export const SECTIONS: [string, string][] = [
 export function mountFrame(motion: Motion): Partial<Record<RegionName, HTMLElement>> {
   const body = document.body;
 
-  const name = h("a", { class: "logo", href: "#top", "data-t-cursor": "cursor.hi" }, h("span", {}, "North Whale Studio"));
+  const name = h("a", { class: "logo", href: "#top", "data-t-cursor": "cursor.hi" }, h("span", {}, "North Whale Studio", h("sup", { "aria-hidden": "true" }, "©")));
   const links = h(
     "nav",
     { class: "links", "data-t-label": "nav.sections" },
@@ -61,7 +61,7 @@ export function mountFrame(motion: Motion): Partial<Record<RegionName, HTMLEleme
   const menu = h(
     "dialog",
     { class: "sheet menu", id: "menu", "data-t-label": "nav.menu" },
-    h("div", { class: "menu-top" }, h("span", { class: "logo" }, "North Whale Studio"), menuClose),
+    h("div", { class: "menu-top" }, h("span", { class: "logo" }, h("span", {}, "North Whale Studio", h("sup", { "aria-hidden": "true" }, "©"))), menuClose),
     h("nav", { class: "menu-links" }, ...SECTIONS.map(([href, key]) => h("a", { href, "data-t": key }))),
     menuLang,
     menuFoot,

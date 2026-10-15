@@ -97,5 +97,6 @@ export interface ContentApi {
   services(): Service[];
   team(): Member[];
   clients(): Client[];
+  brands(): Logo[]; // the studio's clients beyond the cases: the sheet of logos on the wall
   contacts(): Contacts;
 }

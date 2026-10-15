@@ -6,7 +6,7 @@
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
 import { h, icon, isTouch, note } from "../../platform/ui/parts.ts";
-import { caseTile } from "../../platform/ui/tile.ts";
+import { caseTile, logoMark } from "../../platform/ui/tile.ts";
 import { ticker } from "../../platform/ui/ticker.ts";
 import type { CaseApi } from "../case/api.ts";
 import type { CaseItem, ContentApi } from "../content/api.ts";
@@ -255,6 +255,14 @@ export default function init(host: Host) {
           el.append(t.bind(h("b"), "sticker.deeper"));
           t.bind(el, "cursor.dive", "data-cursor");
           return cell("sz-s t6", el, "sticker");
+        }
+        case "sheet": {
+          // The logos load near the screen and after the first 2 s, like the badge photos.
+          const el = h("div", { class: "brand-sheet" }, t.bind(h("h3", { class: "mono" }), "wall.brands"), h("p", { class: "brand-sheet-logos" }, ...api.brands().map((b) => logoMark(b))));
+          t.bind(el, "cursor.drag", "data-cursor");
+          posterLoads.set(el, () => void later.then(() => el.classList.add("on")));
+          posters.observe(el);
+          return cell("sz-sheet", el, "block");
         }
         case "tick": {
           const words = () => content().text("ticker.words").split("|");

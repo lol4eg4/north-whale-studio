@@ -4,6 +4,9 @@
    above all of these; the toast and the cursor move into an open dialog. */
 .nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 20px; padding: 14px var(--g); background: var(--paper); }
 .logo { font: 900 clamp(20px, 1.9vw, 28px)/1 var(--display); letter-spacing: -0.01em; margin-right: auto; display: flex; align-items: center; gap: 10px; min-height: 44px; white-space: nowrap; text-transform: uppercase; transform-origin: 0 70%; }
+/* The studio name as the reference draws its own: yellow letters, an ink outline and a hard ink shadow. */
+.logo > span { color: var(--sun); -webkit-text-stroke: 0.09em var(--ink); paint-order: stroke fill; text-shadow: 0.07em 0.07em 0 var(--ink); }
+.logo sup { font-size: 0.42em; vertical-align: 0.95em; margin-left: 0.08em; -webkit-text-stroke-width: 0.16em; }
 .links { display: flex; gap: 4px; }
 .links a { padding: 8px 12px; border-radius: 99px; font-weight: 600; transition: background 0.2s, rotate 0.35s var(--ease-spring), scale 0.35s var(--ease-spring); }
 .cases-pill { border: 2px solid var(--ink); padding: 6px 16px 6px 6px; font-size: 15px; min-height: 44px; }

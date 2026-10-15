@@ -58,7 +58,7 @@ describe("cases", () => {
     expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ органических просмотров");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. 200% средняя окупаемость рекламы");
-    expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook");
+    expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook. Редизайн сайта");
     expect(store("ru").caseById(9)).toBeUndefined();
   });
 
@@ -118,6 +118,16 @@ describe("cases", () => {
 });
 
 describe("studio data", () => {
+  test("the clients' sheet: the owner's brands in order (Like Center waits for its logo), each logo on disk", () => {
+    const brands = store("ru").brands();
+    expect(brands.map((b) => b.name)).toEqual(["Mercedes-Benz", "Lavazza", "Burger King", "Danone", "Efes", "Skillbox", "Skyeng", "Skillfactory", "GeekBrains", "VK"]);
+    for (const b of brands) {
+      expect(Bun.file(`${import.meta.dir}/../../../site${b.logo}`).size, b.logo).toBeGreaterThan(0);
+      expect(b.ratio).toBeGreaterThan(0);
+      expect(b.scale).toBeGreaterThan(0);
+    }
+  });
+
   test("clients come from the cases; websites and packaging lead the services", () => {
     const s = store("ru");
     const ids = s.cases().map((c) => c.id);

@@ -1,5 +1,5 @@
-// Contacts: the big «Напишите нам», the email (a mailto: link, never a piece) with the copy
-// button, the messengers and socials: a link where the studio sent an address, a stamped
+// Contacts: the big «Напишите нам», the studio's email (a mailto: link, never a piece) with the
+// copy button, the messengers and socials: a link where the studio sent an address, a stamped
 // placeholder until then.
 //
 //   copy ok        -> label «Скопировано» 2.4 s + toast + email-copied
@@ -55,7 +55,7 @@ export default function init(host: Host) {
       kicker,
       title,
       lede,
-      h("div", { class: "contact-row" }, email, stamped(), copy),
+      h("div", { class: "contact-row" }, email, copy),
       h(
         "div",
         { class: "contact-reach" },
@@ -65,8 +65,8 @@ export default function init(host: Host) {
     ),
   );
 
-  // The menu (<= 1100 px) shows the address too, in mono, with the same stamp.
-  host.region("menu-foot").append(h("p", { class: "menu-mail mono" }, h("a", { href: mailto }, data.email), h("span", { class: "dot", "aria-hidden": "true" }), stamped()));
+  // The menu (<= 1100 px) shows the address too, in mono.
+  host.region("menu-foot").append(h("p", { class: "menu-mail mono" }, h("a", { href: mailto }, data.email)));
 
   // Headline words: one piece each, rebuilt when the language changes.
   let words: number[] = [];

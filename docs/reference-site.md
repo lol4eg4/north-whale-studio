@@ -68,6 +68,7 @@
   - `links` — ссылки наружу: `label`, `url`. Открываются в новой вкладке.
   - `==фраза==` в тексте подсвечивается маркером.
 - `clients.json` — стикеры клиентов на стене: `caseId`, `name`, форма `shape`, цвета `bg` и `fg`, `phone` — виден ли на телефоне.
+- `brands.json` — лист «Наши клиенты» на стене: `name`, `logo` (файл в `site/media/`), `ratio`, `scale`, как у `press`. Логотипы грузятся у экрана и не раньше 2 секунд после загрузки.
 - `services.json` — услуги: `title`, `phrase`, список `includes`; `main` — главная услуга.
 - `team.json` — команда: `name`, `role`, `color`, `photo`; `video` — ролик вместо фото.
 - `contacts.json` — `email`, `messengers` и `socials`. У записи с `url` ссылка, без `url` — печать «заглушка».

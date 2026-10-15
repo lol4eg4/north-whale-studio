@@ -118,7 +118,10 @@
    "en": "Mabrook"
   },
   "what": null,
-  "result": null,
+  "result": {
+   "ru": "Редизайн сайта",
+   "en": "Website redesign"
+  },
   "size": "xl",
   "kind": "video",
   "sound": false,
@@ -137,7 +140,10 @@
    "ru": "Курорт и казино",
    "en": "Resort & casino"
   },
-  "result": null,
+  "result": {
+   "ru": "Упаковка бренда и Live ивенты",
+   "en": "Brand packaging and live events"
+  },
   "size": "xl",
   "kind": "video",
   "sound": false,
@@ -156,7 +162,10 @@
    "ru": "Агент по недвижимости",
    "en": "Real estate agent"
   },
-  "result": null,
+  "result": {
+   "ru": "Упаковка личного бренда",
+   "en": "Personal brand packaging"
+  },
   "size": "xl",
   "kind": "video",
   "sound": true,

@@ -2,8 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { isSticker, starPoints, tilts, W } from "../layout.ts";
 
 describe("wall order", () => {
-  test("32 cells: 8 cases, 8 clients and 4 team badges once each, one dive cell", () => {
-    expect(W.length).toBe(32);
+  test("33 cells: 8 cases, 8 clients and 4 team badges once each, one dive cell, one clients' sheet", () => {
+    expect(W.length).toBe(33);
+    expect(W.filter((s) => s.k === "sheet").length).toBe(1);
     const ids = (k: string) => W.filter((s) => s.k === k).map((s) => ("id" in s ? s.id : "i" in s ? s.i : 0)).sort((a, b) => a - b);
     expect(ids("tile")).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(ids("client")).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);

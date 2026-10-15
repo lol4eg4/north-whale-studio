@@ -14,7 +14,7 @@ afterAll(async () => {
   server?.stop();
 });
 
-const EMAIL = "hello@northwhale.studio";
+const EMAIL = "contact@alfacatalyst.com";
 
 test("copy with clipboard permission: «Скопировано», the toast, the address on the clipboard", async () => {
   const { context, page, errors } = await open(browser, server.url, { permissions: ["clipboard-read", "clipboard-write"] });
@@ -45,7 +45,7 @@ test("clipboard refused: the address is selected and the hint shows", async () =
   await page.goto(server.url, { waitUntil: "load" });
   await page.locator(".contact-copy").scrollIntoViewIfNeeded();
   await page.click(".contact-copy");
-  await page.waitForFunction(() => getSelection()?.toString() === "hello@northwhale.studio", undefined, { timeout: 2000 });
+  await page.waitForFunction(() => getSelection()?.toString() === "contact@alfacatalyst.com", undefined, { timeout: 2000 });
   await page.waitForFunction((t) => document.querySelector(".toast:not([hidden])")?.textContent === t, "Почта выделена: скопируйте её вручную", { timeout: 2000 });
   expect(await page.locator(".contact-copy").textContent()).toBe("Скопировать почту");
   expect(errors).toEqual([]);
@@ -59,11 +59,11 @@ test("no clipboard at all: the address is selected too", async () => {
   await page.goto(server.url, { waitUntil: "load" });
   await page.locator(".contact-copy").scrollIntoViewIfNeeded();
   await page.click(".contact-copy");
-  await page.waitForFunction(() => getSelection()?.toString() === "hello@northwhale.studio", undefined, { timeout: 2000 });
+  await page.waitForFunction(() => getSelection()?.toString() === "contact@alfacatalyst.com", undefined, { timeout: 2000 });
   await context.close();
 });
 
-test("the email is a mailto: link and not a piece; Telegram is a link; the rest are stamped placeholders", async () => {
+test("the email is a mailto: link and not a piece; Telegram and WhatsApp are links; the socials are stamped placeholders", async () => {
   const { context, page } = await open(browser, server.url);
   const email = await page.evaluate(() => {
     const a = document.querySelector<HTMLAnchorElement>("#contacts a.contact-email")!;
@@ -75,9 +75,12 @@ test("the email is a mailto: link and not a piece; Telegram is a link; the rest 
     chips: [...document.querySelectorAll("#contacts .contact-ph")].map((c) => c.textContent),
     stamps: document.querySelectorAll("#contacts .contact-reach .stamp").length,
   }));
-  expect(reach.links).toEqual([["Telegram @romansmirn0v", "https://t.me/romansmirn0v", "_blank", "noopener"]]);
-  expect(reach.chips).toEqual(["WhatsApp +7 000 000-00-00", "Behance", "VK"]);
-  expect(reach.stamps).toBe(2);
+  expect(reach.links).toEqual([
+    ["Telegram @romansmirn0v", "https://t.me/romansmirn0v", "_blank", "noopener"],
+    ["WhatsApp +7 952 203-03-62", "https://wa.me/79522030362", "_blank", "noopener"],
+  ]);
+  expect(reach.chips).toEqual(["Behance", "VK"]);
+  expect(reach.stamps).toBe(1);
   // The footer and the wall sticker lead to the same chat; the footer has no stamp any more.
   const elsewhere = await page.evaluate(() => ({
     foot: document.querySelector(".foot-tg")?.getAttribute("href"),

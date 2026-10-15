@@ -14,6 +14,7 @@ export type Slot =
   | { k: "team" }
   | { k: "whale" }
   | { k: "telegram" }
+  | { k: "sheet" } // the studio's clients as one sheet of logos (the reference's sticker sheet)
   | { k: "deeper" };
 
 export const W: Slot[] = [
@@ -29,6 +30,7 @@ export const W: Slot[] = [
   { k: "star" },
   { k: "svc2", id: 1 },
   { k: "client", i: 1 },
+  { k: "sheet" },
   { k: "tile", id: 4 },
   { k: "tag", i: 2 },
   { k: "tag", i: 3 },
@@ -64,7 +66,7 @@ export function tilts(count: number, seed = 21): number[] {
   return Array.from({ length: count }, () => Math.round((next() - 0.5) * 14 * 10) / 10);
 }
 
-export const isSticker = (s: Slot) => !["tile", "dive", "tick", "team"].includes(s.k);
+export const isSticker = (s: Slot) => !["tile", "dive", "tick", "team", "sheet"].includes(s.k);
 
 // The "Напишите нам" starburst: 28 points alternating radius 47 and 40 around (50,50).
 export function starPoints(): string {

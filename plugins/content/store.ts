@@ -1,7 +1,8 @@
 // The content itself: texts in two languages and the studio's data, read in the chosen language.
 // Pure (no DOM), so it is tested directly.
 import { media } from "../../platform/media.ts";
-import type { CaseItem, CasePage, Client, Contacts, Lang, Member, Service } from "./api.ts";
+import type { CaseItem, CasePage, Client, Contacts, Lang, Logo, Member, Service } from "./api.ts";
+import brandsData from "./data/brands.json";
 import casesData from "./data/cases.json";
 import clientsData from "./data/clients.json";
 import contactsData from "./data/contacts.json";
@@ -77,6 +78,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
     teamData.map((m) => ({ id: m.id, name: local(m.name), role: local(m.role), color: m.color, photo: media(m.photo), video: m.video ? media(m.video) : null }));
   const clients = (): Client[] =>
     clientsData.map((c) => ({ caseId: c.caseId, name: local(c.name), shape: c.shape as Client["shape"], bg: c.bg, fg: c.fg, phone: c.phone }));
+  const brands = (): Logo[] => brandsData.map((b) => ({ ...b, logo: media(b.logo) }));
   const contacts = (): Contacts => contactsData;
 
   return {
@@ -87,6 +89,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
     services,
     team,
     clients,
+    brands,
     contacts,
   };
 }
