@@ -88,6 +88,7 @@ export default function init(host: Host) {
     const tilt = tilts(W.filter(isSticker).length);
     let ti = 0;
     const tagCells: HTMLElement[] = [];
+    const photosNow: (() => void)[] = [];
     let teamCell: HTMLElement | null = null;
     let roll: () => void = () => {};
 
@@ -135,8 +136,10 @@ export default function init(host: Host) {
           const photo = h("img", { alt: "", draggable: "false", decoding: "async" });
           const spot = h("span", { class: "tag-ph" }, photo);
           photo.addEventListener("error", () => spot.classList.add("no-photo"));
-          posterLoads.set(el, () => void later.then(() => photo.setAttribute("src", m.photo)));
+          const show = () => photo.setAttribute("src", m.photo);
+          posterLoads.set(el, () => void later.then(show));
           posters.observe(el);
+          photosNow.push(show);
           if (m.video) {
             const video = h("video", {
               muted: true,
@@ -274,7 +277,12 @@ export default function init(host: Host) {
     const cells = W.map((slot) => build(slot, isSticker(slot) ? tilt[ti++] : 0));
     wall.append(...cells);
     motion.group("wall", wall);
-    roll = createRollCall(motion, wall, teamCell!, tagCells);
+    const rollCall = createRollCall(motion, wall, teamCell!, tagCells);
+    // The roll call brings every badge on screen: their photos do not wait for the 2 s.
+    roll = () => {
+      for (const show of photosNow) show();
+      void rollCall();
+    };
 
     // Links to #team anywhere on the page call the roll instead of jumping.
     document.addEventListener("click", (e) => {
