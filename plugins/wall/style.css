@@ -78,6 +78,8 @@ html.calm .meet-x { transition: none; rotate: none; }
 .wall .svc2 .mono { color: var(--lemon); font-size: 11px; }
 .wall .svc2 b { font: 900 clamp(16px, 20cqh, 34px)/1 var(--display); }
 .svc2-p { font: 600 clamp(12px, 11cqh, 16px)/1.25 var(--sans); max-width: 34ch; }
+/* Under 100 px of height (tablet portrait, 701-800 px) the phrase does not fit under the title: the card says it. */
+@container (max-height: 100px) { .wall .svc2-p { display: none; } }
 
 /* "Напишите нам" starburst: the star spins, the words do not. */
 .wall .hello { width: 88cqmin; height: 88cqmin; position: relative; display: grid; place-items: center; color: var(--ink); filter: drop-shadow(0 0 1px rgba(14, 14, 14, 0.35)) drop-shadow(0 6px 8px rgba(14, 14, 14, 0.18)); transition: rotate 0.45s var(--ease-spring), scale 0.45s var(--ease-spring); }
