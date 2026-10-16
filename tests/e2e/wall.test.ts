@@ -368,6 +368,7 @@ describe("wall media", () => {
         corner: t.querySelector<HTMLElement>(".tile-peel")!.offsetWidth,
       }));
     const before = await look();
+    expect(await tile.evaluate((t) => [...t.querySelectorAll(".plate-stat")].map((s) => s.textContent))).toEqual(["100 млн+ органических просмотров", "500 тыс.+ вишлистов в Steam"]);
     expect(before.stat).toBe(0);
     expect(before.corner).toBeGreaterThan(0);
     await tile.hover({ position: { x: 100, y: 100 } });
@@ -392,7 +393,7 @@ describe("wall media", () => {
     await kings.scrollIntoViewIfNeeded();
     await kings.hover({ position: { x: 100, y: 100 } });
     await page.waitForTimeout(700);
-    expect(await kings.evaluate((t) => t.querySelector(".plate-stat")!.textContent)).toBe("Упаковка бренда и Live ивенты");
+    expect(await kings.evaluate((t) => t.querySelector(".plate-stat")!.textContent)).toBe("Live Content Production");
     expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-stat")!).opacity)).toBe("1");
     expect(errors).toEqual([]);
     await context.close();

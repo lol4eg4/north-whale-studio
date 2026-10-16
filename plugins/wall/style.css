@@ -15,7 +15,7 @@
 .wall > .sz-s2 { grid-column: span 2; grid-row: span 1; }
 .wall > .sw { grid-column: span 2; }
 .wall > .sw .svc { padding: 4% 4.5%; } /* percent of the width: half of .svc's, so the same in px */
-.wall > .sz-fam { grid-column: span 3; grid-row: span 2; }
+.wall > .sz-fam { grid-column: span 3; grid-row: span 3; }
 .wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
 .wall > .sz-sheet { grid-column: span 4; grid-row: span 2; }
 /* The clients' sheet: a white card in an ink frame, logos in ink (the reference's sticker sheet). */
@@ -24,7 +24,6 @@
 .brand-sheet-logos { flex: 1; margin: 0; display: flex; flex-wrap: wrap; align-content: center; align-items: center; gap: 5cqh 4.5cqw; }
 .brand-sheet .logo-mark { --lh: clamp(14px, 9cqh, 30px); max-width: 100%; }
 .brand-sheet:not(.on) .logo-mark { -webkit-mask-image: none; mask-image: none; background: transparent; }
-.wall > .t6 { display: none; }
 
 /* Team name badge: on the wall, and big over the page when opened (meet.ts). */
 :is(.wall, .meet) .tag { width: 90cqw; height: 86cqh; margin: 0; padding: 0; border-radius: var(--rounded-sticker); overflow: hidden; background: var(--paper); color: var(--ink); font: inherit; display: flex; flex-direction: column; text-align: center; cursor: pointer; }
@@ -113,9 +112,11 @@ html.calm .hello-spin { animation: none; }
 }
 html.calm .wall .hello { transition: none; }
 
+/* Desktop's last row: the whale and «Ныряй глубже» take two cells each, so the row closes. */
+@media (min-width: 1101px) {
+  .wall > .d2 { grid-column: span 2; }
+}
 @media (max-width: 1100px) {
-  .wall > .t6 { display: grid; }
-  .wall > .sz-fam { grid-row: span 3; }
   .wall > .sz-sheet { grid-column: span 6; }
   .brand-sheet .logo-mark { --lh: clamp(14px, 13cqh, 36px); }
 }
@@ -129,7 +130,8 @@ html.calm .wall .hello { transition: none; }
   .wall > .sz-sheet { grid-column: span 2; grid-row: span 2; }
   .brand-sheet .logo-mark { --lh: clamp(14px, 8cqh, 30px); }
   .wall > .sw .svc { padding: 8% 9%; }
-  .wall > .d-only, .wall > .t6 { display: none; }
+  .wall > .d-only { display: none; }
+  .wall > .p2 { grid-column: span 2; }
 }
 @media (pointer: coarse) {
   .wall .client, .wall .svc, .wall .svc2, .wall .hello { min-height: 44px; min-width: 44px; }

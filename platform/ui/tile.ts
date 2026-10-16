@@ -9,7 +9,7 @@ export interface TileText {
   number: string; // "№ 03"
   kicker: string; // what the studio did, or "watch the case"
   title: string; // client
-  result: string | null;
+  result: string[]; // the lemon plates
   seen: { label: string; marks: { name: string; logo: string; ratio: number; scale: number }[] } | null; // "As seen in" and logos
 }
 
@@ -62,8 +62,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const number = h("span", { class: "tile-no" });
   const kicker = h("span", { class: "plate-k" });
   const title = h("span", { class: "plate-t" });
-  const stat = h("span", { class: "plate-stat" });
-  const more = h("span", { class: "plate-more" }, stat);
+  const stats = h("span", { class: "plate-stats" });
+  const more = h("span", { class: "plate-more" }, stats);
   const seen = h("span", { class: "plate-seen" });
   const plate = h("span", { class: "plate" }, kicker, title, more, seen);
   // The paper's corner: a small tab that curls up when the tile is hovered.
@@ -91,8 +91,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
       number.textContent = t.number;
       kicker.textContent = t.kicker;
       title.textContent = t.title;
-      stat.textContent = t.result ?? "";
-      more.hidden = !t.result;
+      stats.replaceChildren(...t.result.map((r) => h("span", { class: "plate-stat" }, r)));
+      more.hidden = !t.result.length;
       seen.replaceChildren(...(t.seen ? [h("i", { class: "mono" }, t.seen.label), ...t.seen.marks.map((m) => logoMark(m))] : []));
       seen.hidden = !t.seen;
     },

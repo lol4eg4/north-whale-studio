@@ -54,11 +54,11 @@ describe("cases", () => {
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
-  test("screen readers hear number, client, what, result and the press that wrote about it", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ органических просмотров");
-    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
-    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. 200% средняя окупаемость рекламы");
-    expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook. Редизайн сайта");
+  test("screen readers hear number, client, what, every result and the press that wrote about it", () => {
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
+    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
+    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. Премиум БАДы. 200% средняя окупаемость рекламы");
+    expect(store("en").caseById(4)!.sr).toBe("Case 4. Mabrook. Super app. Website redesign");
     expect(store("ru").caseById(9)).toBeUndefined();
   });
 

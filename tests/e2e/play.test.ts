@@ -112,8 +112,25 @@ test("touch: hold 300 ms then move lifts a sticker; a quick swipe scrolls the pa
   await context.close();
 });
 
+// The dock waits for the first scroll: on the first screen it would cover the wall's corner.
+const pastTop = (page: Page) => page.evaluate(() => scrollTo({ top: 200, behavior: "instant" }));
+const dockShown = (page: Page) => page.evaluate(() => [".dive-btn", ".tidy-btn"].map((s) => getComputedStyle(document.querySelector(s)!).visibility));
+
+test("the dock shows once the page is scrolled and hides again at the very top", async () => {
+  const { context, page, errors } = await open(browser, server.url);
+  expect(await dockShown(page)).toEqual(["hidden", "hidden"]);
+  await pastTop(page);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "visible");
+  expect(await dockShown(page)).toEqual(["visible", "visible"]);
+  await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "hidden");
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
 test("dive opens a random case within 3 s", async () => {
   const { context, page, errors } = await open(browser, server.url);
+  await pastTop(page);
   // Timed inside the page, from the click to the case window opening: the test's own round trips
   // on a loaded host are not the visitor's wait.
   await page.evaluate(() => {
@@ -135,6 +152,7 @@ test("dive opens a random case within 3 s", async () => {
 
 test("Esc during the roll cancels it: no case opens", async () => {
   const { context, page } = await open(browser, server.url);
+  await pastTop(page);
   await page.click(".dive-btn");
   await page.waitForTimeout(800);
   await page.keyboard.press("Escape");
@@ -146,6 +164,7 @@ test("Esc during the roll cancels it: no case opens", async () => {
 
 test("calm: dive opens a case at once, without the roulette", async () => {
   const { context, page, errors } = await open(browser, server.url, { reducedMotion: "reduce" });
+  await pastTop(page);
   const started = Date.now();
   await page.click(".dive-btn");
   await page.waitForFunction(() => !!document.querySelector("dialog.case[open]"), undefined, { timeout: 1000, polling: 20 });

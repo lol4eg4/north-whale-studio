@@ -49,6 +49,16 @@ export default function init(host: Host) {
   motion.add(diveBtn, { kind: "dock" });
   motion.add(tidyBtn, { kind: "dock" });
 
+  // The dock waits for the first scroll: on the first screen it would cover the wall's corner.
+  const atTop = () => {
+    const top = scrollY < 40;
+    if (!top && dock.classList.contains("top") && !motion.calm)
+      for (const el of [diveBtn, tidyBtn]) el.animate([{ opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1 }], { duration: 450, easing: motion.spring.easing });
+    dock.classList.toggle("top", top);
+  };
+  addEventListener("scroll", atTop, { passive: true });
+  atTop();
+
   const live = h("div", { class: "sr-only", role: "status", "aria-live": "polite" });
   host.region("overlay").append(live);
 

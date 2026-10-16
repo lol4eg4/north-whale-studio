@@ -42,7 +42,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
     casesData.map((c) => {
       const client = local(c.client);
       const what = c.what ? local(c.what) : null;
-      const result = c.result ? local(c.result) : null;
+      const result = c.result.map(local);
       const still = c.kind === "still";
       return {
         id: c.id,
@@ -66,7 +66,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         },
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         page: pages[getLang()][c.id] ?? null,
-        sr: [format("case.label", { n: c.id }), client, what, result, c.press.length ? `${text("case.seenIn")}: ${c.press.map((p) => p.name).join(", ")}` : null]
+        sr: [format("case.label", { n: c.id }), client, what, ...result, c.press.length ? `${text("case.seenIn")}: ${c.press.map((p) => p.name).join(", ")}` : null]
           .filter(Boolean)
           .join(". "),
       };

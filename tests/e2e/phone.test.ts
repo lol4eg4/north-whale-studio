@@ -64,6 +64,9 @@ test("iPhone: header, corner and dock controls are at least 44 px", async () => 
 
 test("iPhone: tapping the dive button opens a random case within 3.5 s and leaves no roulette behind", async () => {
   const { context, page, errors } = await open(browser, server.url, iphone);
+  // The dock waits for the first scroll, then pops in.
+  await page.evaluate(() => scrollTo({ top: 200, behavior: "instant" }));
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "visible" && !document.querySelector(".dive-btn")!.getAnimations().length);
   const started = Date.now();
   await page.locator(".dive-btn").tap();
   await page.waitForFunction(() => !!document.querySelector("dialog.case[open]"), undefined, { timeout: 3500, polling: 50 });

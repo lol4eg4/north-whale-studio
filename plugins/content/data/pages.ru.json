@@ -79,6 +79,10 @@
     {
      "value": "42%",
      "label": "ниже CAC в Google Ads"
+    },
+    {
+     "value": "200%",
+     "label": "средняя окупаемость рекламы"
     }
    ],
    "note": null,

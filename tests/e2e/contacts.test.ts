@@ -63,7 +63,7 @@ test("no clipboard at all: the address is selected too", async () => {
   await context.close();
 });
 
-test("the email is a mailto: link and not a piece; Telegram and WhatsApp are links; the socials are stamped placeholders", async () => {
+test("the email is a mailto: link and not a piece; Telegram and WhatsApp are links; no socials until the studio sends them", async () => {
   const { context, page } = await open(browser, server.url);
   const email = await page.evaluate(() => {
     const a = document.querySelector<HTMLAnchorElement>("#contacts a.contact-email")!;
@@ -72,6 +72,7 @@ test("the email is a mailto: link and not a piece; Telegram and WhatsApp are lin
   expect(email).toEqual({ href: `mailto:${EMAIL}`, text: EMAIL, piece: false });
   const reach = await page.evaluate(() => ({
     links: [...document.querySelectorAll<HTMLAnchorElement>("#contacts .contact-reach a")].map((a) => [a.textContent, a.getAttribute("href"), a.target, a.rel]),
+    groups: document.querySelectorAll("#contacts .contact-group").length,
     chips: [...document.querySelectorAll("#contacts .contact-ph")].map((c) => c.textContent),
     stamps: document.querySelectorAll("#contacts .contact-reach .stamp").length,
   }));
@@ -79,8 +80,9 @@ test("the email is a mailto: link and not a piece; Telegram and WhatsApp are lin
     ["Telegram @romansmirn0v", "https://t.me/romansmirn0v", "_blank", "noopener"],
     ["WhatsApp +7 952 203-03-62", "https://wa.me/79522030362", "_blank", "noopener"],
   ]);
-  expect(reach.chips).toEqual(["Behance", "VK"]);
-  expect(reach.stamps).toBe(1);
+  expect(reach.groups).toBe(1);
+  expect(reach.chips).toEqual([]);
+  expect(reach.stamps).toBe(0);
   // The footer and the wall sticker lead to the same chat; the footer has no stamp any more.
   const elsewhere = await page.evaluate(() => ({
     foot: document.querySelector(".foot-tg")?.getAttribute("href"),

@@ -1,11 +1,11 @@
 // Manifesto: how the studio works. Left column sticks above 860 px; starred phrases are
 // highlighter marks that draw in once they scroll into view (at once in calm).
 //
-//   section#manifesto  [pill, h2 words, origin placeholder] [3 big paragraphs, h3, body]
+//   section#manifesto  [pill, h2 words, studio story] [3 big paragraphs, h3, body]
 import type { Host } from "../../platform/host.ts";
 import type { PieceKind } from "../../platform/motion.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, stamp } from "../../platform/ui/parts.ts";
+import { h } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import { parseMarks } from "./marks.ts";
 import "./style.css";
@@ -29,10 +29,7 @@ export default function init(host: Host) {
 
   const pill = piece(t.bind(h("span", { class: "mani-pill mono" }), "mani.kicker"), "sticker");
   const title = h("h2", { class: "mani-h", id: "mani-h" });
-  const origin = piece(
-    h("div", { class: "mani-origin ph-box" }, t.bind(h("span"), "mani.origin"), t.bind(stamp(""), "placeholder.stamp")),
-    "block",
-  );
+  const origin = piece(t.bind(h("p", { class: "mani-origin" }), "mani.origin"), "block");
   const paragraphs = PARAGRAPHS.map(([key, colour]) => ({ key, colour, el: piece(h("p", { class: "mani-big" }), "block") }));
   const why = piece(t.bind(h("h3", { class: "mani-why" }), "mani.whyTitle"), "block");
   const body = piece(t.bind(h("p", { class: "mani-body" }), "mani.whyBody"), "block");

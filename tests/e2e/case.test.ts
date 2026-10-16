@@ -224,7 +224,7 @@ describe("player", () => {
     await page.waitForSelector("dialog.case[open]");
     expect(await page.textContent("dialog.case .case-title")).toBe("King’s Resort & Casino");
     expect(await page.textContent("dialog.case .case-eyebrow")).toBe("King’s Resort · Розвадов");
-    expect(await page.textContent("dialog.case .case-sub")).toBe("Упаковка бренда и Live ивенты");
+    expect(await page.textContent("dialog.case .case-sub")).toBe("Live Content Production");
     expect(await page.textContent("dialog.case .case-meta dd")).toBe("King’s Resort & Casino");
     expect(plain(await page.evaluate(() => document.querySelector("dialog.case video")!.getAttribute("src")))).toBe("/media/c5-full.mp4");
     expect(await page.isVisible("dialog.case .player")).toBe(true);
@@ -249,7 +249,7 @@ describe("player", () => {
     expect(await link.textContent()).toBe("Watch on YouTube →");
     expect(await link.getAttribute("href")).toBe("https://www.youtube.com/watch?v=bH9zvvhGitY");
     expect(await link.getAttribute("target")).toBe("_blank");
-    expect(await page.textContent("dialog.case .case-sub")).toBe("100M+ organic views");
+    expect(await page.$$eval("dialog.case .case-result", (els) => els.map((e) => e.textContent))).toEqual(["100M+ organic views", "500K+ Steam wishlists"]);
     expect(await page.textContent("dialog.case .case-logos .mono")).toBe("Platforms");
     expect(await page.$$eval("dialog.case .case-logos .logo-mark", (els) => els.map((e) => e.getAttribute("aria-label")))).toEqual(["Instagram", "YouTube", "TikTok"]);
     expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
@@ -257,7 +257,7 @@ describe("player", () => {
     await page.evaluate(() => (location.hash = "#case-1"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Waldorf Astoria Berlin");
     expect(await page.getAttribute("dialog.case .case-out a", "href")).toBe("https://www.hilton.com/en/hotels/berwawa-waldorf-astoria-berlin/");
-    expect(await page.textContent("dialog.case .case-sub")).toBe("Full-cycle production");
+    expect(await page.textContent("dialog.case .case-sub")).toBe("Live Content Production");
     expect(await page.$$eval("dialog.case .case-clip", (els) => els.map((e) => [e.querySelector(".logo-mark")!.getAttribute("aria-label"), e.getAttribute("target")]))).toEqual([
       ["Rolling Stone UK", "_blank"],
       ["Forbes Travel Guide", "_blank"],
@@ -270,7 +270,7 @@ describe("player", () => {
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "AG1");
     expect(await page.$$eval("dialog.case .case-how h3", (els) => els.map((e) => e.textContent))).toEqual(["Overview", "The anatomy"]);
     expect(await page.$$eval("dialog.case .case-kicker", (els) => els.map((e) => e.textContent))).toEqual(["Advertorial · Landing page · Website"]);
-    expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["170%", "36%", "42%"]);
+    expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["170%", "36%", "42%", "200%"]);
     expect(await page.$$("dialog.case .case-logos")).toHaveLength(0);
     expect(await page.textContent("dialog.case .case-sub")).toBe("200% average return on ad spend");
     // DeckForge: its partners' logos under the numbers.
