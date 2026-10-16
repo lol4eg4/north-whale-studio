@@ -5,7 +5,7 @@
 //   loops: videos.ts decides which tiles load and play
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, icon, isTouch, note } from "../../platform/ui/parts.ts";
+import { h, icon, isTouch, note, writeIn } from "../../platform/ui/parts.ts";
 import { caseTile, logoMark } from "../../platform/ui/tile.ts";
 import { ticker } from "../../platform/ui/ticker.ts";
 import type { CaseApi } from "../case/api.ts";
@@ -97,6 +97,7 @@ export default function init(host: Host) {
     t.bind(title, "wall.title");
     t.bind(wallNote.querySelector(".note-text")!, "wall.note");
     wallNote.setAttribute("aria-hidden", "true");
+    writeIn(wallNote);
 
     const cell = (cls: string, piece: HTMLElement, kind: "tile" | "sticker" | "block", tag?: number) => {
       const c = h("div", { class: `cell ${cls}` }, piece);

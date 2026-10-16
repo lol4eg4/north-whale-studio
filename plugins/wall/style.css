@@ -2,7 +2,8 @@
 .work { position: relative; z-index: 2; padding-bottom: clamp(60px, 8vw, 120px); }
 .work-head { margin: 0 max(var(--g), (100% - 1680px) / 2 + var(--g)); padding: 10px 0 14px; border-top: 2px solid var(--ink); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
 .work-title { margin: 0; }
-.work-head .note { position: static; font-size: clamp(16px, 1.5vw, 22px); margin-right: 60px; }
+.work-head .note { position: static; font-size: clamp(16px, 1.5vw, 22px); margin-right: 60px; max-width: 12em; rotate: -4deg; text-align: center; }
+.work-head .note.written { animation-delay: 1.2s; } /* after the hero's note */
 .work-hint { color: rgba(14, 14, 14, 0.6); }
 .work-hint p { margin: 0; }
 

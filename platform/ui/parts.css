@@ -34,6 +34,10 @@ html.calm :is(.btn, .pill, .cbtn, .go, .case-round, .tidy-btn, .sc-x):is(:hover,
 .sticker { border: 3px solid #fff; box-shadow: var(--die); }
 .note { font: 700 clamp(17px, 1.9vw, 26px)/1.05 var(--marker); color: var(--cobalt); rotate: -7deg; pointer-events: none; }
 .note svg { display: block; }
+.note.pre { clip-path: inset(-30% 100% -30% -30%); }
+.note.written { animation: note-write 0.9s cubic-bezier(0.5, 0, 0.3, 1) 0.4s both; }
+@keyframes note-write { from { clip-path: inset(-30% 100% -30% -30%); } to { clip-path: inset(-30% -30% -30% -30%); } }
+html.calm .note { clip-path: none; animation: none; }
 mark { color: inherit; background: linear-gradient(var(--hl, var(--lemon)), var(--hl, var(--lemon))) 0 88% / var(--mark, 100%) 45% no-repeat; padding: 0 0.08em; transition: background-size 0.9s cubic-bezier(0.6, 0, 0.2, 1); }
 mark.b { --hl: var(--jellyfish); }
 mark.m { --hl: var(--mint); }
