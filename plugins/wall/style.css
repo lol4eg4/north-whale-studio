@@ -16,14 +16,14 @@
 .wall > .sz-s2 { grid-column: span 2; grid-row: span 1; }
 .wall > .sw { grid-column: span 2; }
 .wall > .sw .svc { padding: 4% 4.5%; } /* percent of the width: half of .svc's, so the same in px */
-.wall > .sz-fam { grid-column: span 3; grid-row: span 3; }
+.wall > .sz-fam { grid-column: span 3; grid-row: span 2; }
 .wall > .sz-tick { grid-column: 1 / -1; grid-row: span 1; }
-.wall > .sz-sheet { grid-column: span 4; grid-row: span 3; }
+.wall > .sz-sheet { grid-column: span 4; grid-row: span 2; }
 /* The clients' sheet: a white card in an ink frame, logos in ink (the reference's sticker sheet). */
 .brand-sheet { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 4cqh; padding: 5cqh 4cqw; border: 2px solid var(--ink); border-radius: var(--rounded-plate); background: var(--paper); color: var(--ink); }
 .brand-sheet h3 { margin: 0; font: 500 clamp(11px, 3.2cqh, 14px)/1.2 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
 .brand-sheet-logos { flex: 1; margin: 0; display: flex; flex-wrap: wrap; align-content: center; align-items: center; gap: 5cqh 4.5cqw; }
-.brand-sheet .logo-mark { --lh: clamp(14px, 9cqh, 38px); max-width: 100%; }
+.brand-sheet .logo-mark { --lh: clamp(14px, 9cqh, 30px); max-width: 100%; }
 .brand-sheet:not(.on) .logo-mark { -webkit-mask-image: none; mask-image: none; background: transparent; }
 
 /* Team name badge: on the wall, and big over the page when opened (meet.ts). */
@@ -114,9 +114,12 @@ html.calm .hello-spin { animation: none; }
 html.calm .wall .hello { transition: none; }
 
 @media (max-width: 1100px) {
-  .wall > .sz-sheet { grid-column: span 2; grid-row: span 3; }
-  .brand-sheet .logo-mark { --lh: clamp(14px, 5.5cqh, 26px); }
-  .wall > .t-full { grid-column: 1 / -1; grid-row: span 4; }
+  .wall > .sz-sheet { grid-column: span 6; grid-row: span 2; }
+  .brand-sheet .logo-mark { --lh: clamp(14px, 13cqh, 36px); }
+  /* Six columns: the team block is a 2x3 strip beside DeckForge, Ибадов pairs with Антикрус. */
+  .wall > .sz-fam { grid-column: span 2; grid-row: span 3; }
+  .wall > .t3 { grid-column: span 3; }
+  .wall > .p2 { grid-column: span 2; }
 }
 @media (max-width: 700px) {
   .work-head .note { display: none; }
@@ -129,7 +132,6 @@ html.calm .wall .hello { transition: none; }
   .brand-sheet .logo-mark { --lh: clamp(14px, 8cqh, 30px); }
   .wall > .sw .svc { padding: 8% 9%; }
   .wall > .d-only { display: none; }
-  .wall > .p2 { grid-column: span 2; }
 }
 @media (pointer: coarse) {
   .wall .client, .wall .svc, .wall .svc2, .wall .hello { min-height: 44px; min-width: 44px; }

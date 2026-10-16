@@ -130,7 +130,7 @@ export default function init(host: Host) {
           posters.observe(tile.el);
           host.use<CaseApi>("case").setTile?.(c.id, tile.el);
           refresh.push(() => tile.set(tileText(content().caseById(c.id)!)));
-          return cell(`sz-${c.size}${slot.full ? " t-full" : ""}`, tile.el, "tile", c.id);
+          return cell(`sz-${c.size}${slot.narrow ? " t3" : ""}`, tile.el, "tile", c.id);
         }
         case "tag": {
           const m = team[slot.i];

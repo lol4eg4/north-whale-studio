@@ -12,9 +12,14 @@ describe("wall order", () => {
     expect(W.filter((s) => s.k === "dive").length).toBe(1);
   });
 
-  test("badges come in team order down the wall; two service stickers are wide to fill the room of the two missing badges", () => {
+  test("badges come in team order down the wall; one service sticker is wide; Ибадов is the tablet's narrow tile", () => {
     expect(W.flatMap((s) => (s.k === "tag" ? [s.i] : []))).toEqual([0, 1, 2, 3]);
-    expect(W.flatMap((s) => (s.k === "svc" && s.wide ? [s.id] : []))).toEqual([2, 5]);
+    expect(W.flatMap((s) => (s.k === "svc" && s.wide ? [s.id] : []))).toEqual([2]);
+    expect(W.flatMap((s) => (s.k === "tile" && s.narrow ? [s.id] : []))).toEqual([6]);
+  });
+
+  test("the wall closes with the team block, the clients' sheet and two clients", () => {
+    expect(W.slice(-4).map((s) => s.k)).toEqual(["team", "sheet", "client", "client"]);
   });
 
   test("sticker tilts are the same on every visit and stay within ±7 deg", () => {
