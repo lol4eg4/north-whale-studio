@@ -132,7 +132,7 @@ export default function init(host: Host) {
     eyebrow.hidden = !c.page;
     titleEl.textContent = c.client;
     // A case page has client and category of its own: under its title only the lemon result.
-    const subs = [!c.page && c.what && h("span", {}, c.what), c.result && h("span", { class: "case-result" }, c.result)].filter((x): x is HTMLSpanElement => !!x);
+    const subs = [!c.page && c.what && h("span", {}, c.what), ...c.result.map((r) => h("span", { class: "case-result" }, r))].filter((x): x is HTMLSpanElement => !!x);
     sub.replaceChildren(...subs);
     sub.hidden = !subs.length;
     story.classList.toggle("own", !!c.page);

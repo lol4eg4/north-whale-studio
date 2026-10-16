@@ -1,7 +1,8 @@
 // Wall: dense packing without holes, no sideways scroll, the first tile in view, still posters
 // with a moving round badge, the hover (result plate, curled corner), lazy loops (nothing before
 // 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
-// team badges (names, roles, photos, Maria's loop, roll call, opening big), no console errors.
+// team badges (names, roles, photos, Maria's loop, roll call, opening big), the studio stickers on
+// every screen, no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
@@ -65,6 +66,57 @@ describe("wall layout", () => {
       expect(r.sw, `scroll width at ${width}`).toBeLessThanOrEqual(r.w);
     }
     expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("the whale, Telegram and «Ныряй глубже» stickers are on the wall at 1440, 768 and 390 px; Dear Passengers' client is FLEXUS", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    for (const width of [1440, 768, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.waitForTimeout(150);
+      const shown = await page.evaluate(() =>
+        [".wall .whale-st", '.wall a.client[href^="https://t.me/"]', ".wall .deeper"].map((s) => {
+          const r = document.querySelector(s)?.getBoundingClientRect();
+          return !!r && r.width > 30 && r.height > 30;
+        }),
+      );
+      expect(shown, `stickers at ${width}`).toEqual([true, true, true]);
+    }
+    expect(await page.$$eval(".wall .client b", (els) => els.map((e) => e.textContent))).toContain("FLEXUS");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("tablet (768 px): Ибадов is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+    const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
+    // Columns and rows a cell takes, from its box and the wall's grid tracks.
+    const span = (sel: string) =>
+      page.evaluate((s) => {
+        const wall = document.querySelector<HTMLElement>(".wall")!;
+        const cs = getComputedStyle(wall);
+        const col = parseFloat(cs.gridTemplateColumns.split(" ")[0]);
+        const row = parseFloat(cs.gridAutoRows);
+        const gap = parseFloat(cs.columnGap);
+        const r = document.querySelector(s)!.getBoundingClientRect();
+        return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
+      }, sel);
+    expect(await span(".wall > .t3")).toEqual([3, 3]);
+    expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
+    // «Привет!» fits the narrow strip: the block clips what overflows.
+    for (const width of [701, 768, 1024, 1100]) {
+      await page.setViewportSize({ width, height: 1024 });
+      await page.waitForTimeout(150);
+      const over = await page.evaluate(() => {
+        const b = document.querySelector(".wall .team-big b")!;
+        const r = document.createRange();
+        r.selectNodeContents(b);
+        return r.getBoundingClientRect().right - b.closest(".team-block")!.getBoundingClientRect().right;
+      });
+      expect(over, `«Привет!» past the block at ${width}`).toBeLessThanOrEqual(0);
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.waitForTimeout(150);
+    expect(await span(".wall > .sz-fam")).toEqual([3, 2]);
     await context.close();
   });
 
@@ -368,6 +420,7 @@ describe("wall media", () => {
         corner: t.querySelector<HTMLElement>(".tile-peel")!.offsetWidth,
       }));
     const before = await look();
+    expect(await tile.evaluate((t) => [...t.querySelectorAll(".plate-stat")].map((s) => s.textContent))).toEqual(["100 млн+ органических просмотров", "500 тыс.+ вишлистов в Steam"]);
     expect(before.stat).toBe(0);
     expect(before.corner).toBeGreaterThan(0);
     await tile.hover({ position: { x: 100, y: 100 } });
@@ -392,7 +445,7 @@ describe("wall media", () => {
     await kings.scrollIntoViewIfNeeded();
     await kings.hover({ position: { x: 100, y: 100 } });
     await page.waitForTimeout(700);
-    expect(await kings.evaluate((t) => t.querySelector(".plate-stat")!.textContent)).toBe("Упаковка бренда и Live ивенты");
+    expect(await kings.evaluate((t) => t.querySelector(".plate-stat")!.textContent)).toBe("Live Content Production");
     expect(await kings.evaluate((t) => getComputedStyle(t.querySelector(".plate-stat")!).opacity)).toBe("1");
     expect(errors).toEqual([]);
     await context.close();

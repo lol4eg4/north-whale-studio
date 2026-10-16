@@ -1,4 +1,5 @@
 // Manifesto, contacts and footer: marks draw in on scroll, the slogan fits the width, English.
+// The blue marker notes (hero, wall) write themselves in when on screen; calm shows them at once.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";
 import { launch, open, startServer } from "./helpers.ts";
@@ -35,6 +36,52 @@ test("manifesto marks wait below the fold and draw in when scrolled to", async (
 test("calm: marks are drawn from the start", async () => {
   const { context, page } = await open(browser, server.url, { reducedMotion: "reduce" });
   expect((await marks(page)).every((m) => !m.pre)).toBe(true);
+  await context.close();
+});
+
+// The two blue marker notes: the hero's and the wall's. Each waits off screen and writes itself in
+// once it is on screen; calm shows both at once.
+const notes = (page: Page) =>
+  page.evaluate(() =>
+    [".hero-note", ".work-head .note"].map((s) => {
+      const n = document.querySelector<HTMLElement>(s)!;
+      return { text: n.querySelector(".note-text")!.textContent, state: n.classList.contains("written") ? "written" : n.classList.contains("pre") ? "pre" : "plain", clip: getComputedStyle(n).clipPath };
+    }),
+  );
+
+test("marker notes: the hero's writes in on the first screen, the wall's waits until scrolled to", async () => {
+  // 600 px high: the wall's note starts below the first screen.
+  const { context, page, errors } = await open(browser, server.url, { viewport: { width: 1440, height: 600 } });
+  await page.waitForFunction(() => document.querySelector(".hero-note")!.classList.contains("written"));
+  const [hero, wall] = await notes(page);
+  expect(hero.text).toBe("Все элементы интерактивны, попробуй!");
+  expect([wall.text, wall.state]).toEqual(["Элементы на стене также можно двигать", "pre"]);
+  await page.evaluate(() => document.querySelector(".work-head")!.scrollIntoView({ behavior: "instant", block: "center" }));
+  await page.waitForFunction(() => document.querySelector(".work-head .note")!.classList.contains("written"));
+  // Scrolled to, it writes at once (0.4 s), not 1.2 s behind the hero's note; once written nothing is clipped.
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector(".work-head .note")!).animationDelay)).toBe("0.4s");
+  await page.waitForFunction(() => document.getAnimations().every((a) => (a as CSSAnimation).animationName !== "note-write" || a.playState === "finished"));
+  expect((await notes(page)).map((n) => n.clip)).toEqual(Array(2).fill("inset(-30%)"));
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
+test("both notes on the first screen: the wall's writes after the hero's", async () => {
+  const { context, page } = await open(browser, server.url);
+  await page.waitForFunction(() => document.querySelectorAll(".note.written").length === 2);
+  expect(await page.evaluate(() => [".hero-note", ".work-head .note"].map((s) => getComputedStyle(document.querySelector(s)!).animationDelay))).toEqual(["0.4s", "1.2s"]);
+  await context.close();
+});
+
+test("marker notes in English", async () => {
+  const { context, page } = await open(browser, `${server.url}/?lang=en`);
+  expect((await notes(page)).map((n) => n.text)).toEqual(["Everything here is interactive, try it!", "You can move the pieces on the wall too"]);
+  await context.close();
+});
+
+test("calm: both marker notes show at once, unclipped", async () => {
+  const { context, page } = await open(browser, server.url, { reducedMotion: "reduce" });
+  expect((await notes(page)).map((n) => n.clip)).toEqual(["none", "none"]);
   await context.close();
 });
 
@@ -76,6 +123,7 @@ const texts = (page: Page) =>
     kicker: document.querySelector(".mani-pill")?.textContent,
     mani: document.querySelector("#mani-h")?.textContent,
     mark: document.querySelector("#manifesto mark")?.textContent,
+    story: document.querySelector(".mani-origin")?.textContent?.slice(0, 33),
     say: document.querySelector("#contacts-h")?.textContent,
     copy: document.querySelector(".contact-copy")?.textContent,
     slogan: document.querySelector(".foot-word")?.getAttribute("aria-label"),
@@ -90,6 +138,7 @@ const EN = {
   kicker: "Manifesto",
   mani: "How we work",
   mark: "Design grows out of meaning,",
+  story: "15+ years in the industry taught ",
   say: "Say hello",
   copy: "Copy email",
   slogan: "Dive deeper",
@@ -110,6 +159,9 @@ test("English texts with ?lang=en", async () => {
 test("switching the language rebuilds headline words and slogan letters as pieces", async () => {
   const { context, page, errors } = await open(browser, server.url);
   expect((await texts(page)).say).toBe("Напишите нам");
+  expect(await page.textContent(".mani-origin")).toBe(
+    "За 15+ лет в индустрии мы поняли одно: хорошая идея чего-то стоит, только когда она работает. Мы умеем выстроить и упаковать бизнес так, чтобы он не просто красиво выглядел, а приносил реальную пользу. North Whale Studio — место, где живёт этот опыт.",
+  );
   await page.click('.nav-lang button[lang="en"]');
   await page.waitForTimeout(200);
   expect(await texts(page)).toEqual(EN);

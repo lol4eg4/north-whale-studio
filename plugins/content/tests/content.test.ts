@@ -49,16 +49,31 @@ describe("cases", () => {
     expect(cases.every((c) => c.kind === "video" && c.media.ring === `/media/c${c.id}-ring.mp4`)).toBe(true);
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
-    expect(cases.find((c) => c.id === 8)!.size).toBe("t");
+    expect(cases.find((c) => c.id === 8)!.size).toBe("xl");
     for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape", "royal"]).toContain(c.color);
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
-  test("screen readers hear number, client, what, result and the press that wrote about it", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. 100 млн+ органических просмотров");
-    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Branding, Website, Production. Full-cycle production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
-    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. 200% средняя окупаемость рекламы");
-    expect(store("ru").caseById(4)!.sr).toBe("Кейс 4. Mabrook. Редизайн сайта");
+  test("every tile has the studio's caption and at least one lemon plate, in both languages; Dear Passengers has two", () => {
+    for (const lang of ["ru", "en"] as const)
+      for (const c of store(lang).cases()) {
+        expect(c.what?.trim(), `case ${c.id} ${lang}`).toBeTruthy();
+        expect(c.result.length, `case ${c.id} ${lang}`).toBeGreaterThan(0);
+        for (const r of c.result) expect(r.trim(), `case ${c.id} ${lang}`).not.toBe("");
+      }
+    expect(store("en").caseById(3)!.result).toEqual(["100M+ organic views", "500K+ Steam wishlists"]);
+    expect(store("ru").caseById(8)!.what).toBe("free 2 play игра");
+  });
+
+  test("Dear Passengers' client sticker names the client, FLEXUS", () => {
+    expect(store("ru").clients().find((c) => c.caseId === 3)!.name).toBe("FLEXUS");
+  });
+
+  test("screen readers hear number, client, what, every result and the press that wrote about it", () => {
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
+    expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
+    expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. Премиум БАДы. 200% средняя окупаемость рекламы");
+    expect(store("en").caseById(4)!.sr).toBe("Case 4. Mabrook. Super app. Website redesign");
     expect(store("ru").caseById(9)).toBeUndefined();
   });
 

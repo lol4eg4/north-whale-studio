@@ -1,6 +1,6 @@
 // Contacts: the big «Напишите нам», the studio's email (a mailto: link, never a piece) with the
 // copy button, the messengers and socials: a link where the studio sent an address, a stamped
-// placeholder until then.
+// placeholder until then. A group with no entries is left out.
 //
 //   copy ok        -> label «Скопировано» 2.4 s + toast + email-copied
 //   copy refused   -> the address is selected + hint toast
@@ -40,6 +40,7 @@ export default function init(host: Host) {
     return t.bind(a, "cursor.write", "data-cursor");
   };
   const group = (labelKey: string, items: { label: string; url?: string }[]) =>
+    items.length > 0 &&
     h(
       "div",
       { class: "contact-group" },

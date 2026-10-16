@@ -152,12 +152,12 @@ async function frame(src: string, at: number | null, vf: string, quality: number
 }
 
 /**
- * Watch-it-all video: up to 1920 wide (720x1280 for the vertical case), AAC when the source has sound.
+ * Watch-it-all video: up to 1920 wide (720 wide for a vertical source), AAC when the source has sound.
  * CRF 23, with the bitrate capped at what the 20 MB limit leaves for this duration (a long clip at
  * plain CRF 23 can come out bigger than its source: case 3 gave 35 MB).
  */
 async function fullVideo(c: Case, src: string, info: Info, out: string) {
-  const vf = keep(c) + (c.size === "t" ? scaleTo(720, -2) : scaleTo("'min(1920,iw)'", -2));
+  const vf = keep(c) + (info.height > info.width ? scaleTo(720, -2) : scaleTo("'min(1920,iw)'", -2));
   const audio = info.audio ? ["-c:a", "aac", "-b:a", "128k", "-ac", "2"] : ["-an"];
   const maxKbps = Math.floor((FULL_LIMIT * 8 * 0.95) / info.duration / 1000) - (info.audio ? 128 : 0);
   await run(["-i", src, "-vf", vf, ...h264, "-crf", "23", "-maxrate", `${maxKbps}k`, "-bufsize", `${2 * maxKbps}k`, ...audio, out]);

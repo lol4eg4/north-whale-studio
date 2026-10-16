@@ -79,6 +79,10 @@
     {
      "value": "42%",
      "label": "lower CAC on Google Ads"
+    },
+    {
+     "value": "200%",
+     "label": "average return on ad spend"
     }
    ],
    "note": null,

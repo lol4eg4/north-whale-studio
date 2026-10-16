@@ -1,6 +1,6 @@
 // Play: drag with the mouse (5 px threshold, a drop never opens a case), touch hold-to-lift
 // versus a plain swipe that scrolls, a lost button-up, «Рандомный кейс» (animated and calm) and
-// «Прибраться».
+// «Прибраться», the dock out at the top once something is moved.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";
 import { launch, open, phone, startServer } from "./helpers.ts";
@@ -112,8 +112,42 @@ test("touch: hold 300 ms then move lifts a sticker; a quick swipe scrolls the pa
   await context.close();
 });
 
+// The dock waits for the first scroll: on the first screen it would cover the wall's corner.
+const pastTop = (page: Page) => page.evaluate(() => scrollTo({ top: 200, behavior: "instant" }));
+const dockShown = (page: Page) => page.evaluate(() => [".dive-btn", ".tidy-btn"].map((s) => getComputedStyle(document.querySelector(s)!).visibility));
+
+test("the dock shows once the page is scrolled and hides again at the very top", async () => {
+  const { context, page, errors } = await open(browser, server.url);
+  expect(await dockShown(page)).toEqual(["hidden", "hidden"]);
+  await pastTop(page);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "visible");
+  expect(await dockShown(page)).toEqual(["visible", "visible"]);
+  await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "hidden");
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
+test("at the very top the dock comes out once a piece is moved, so «Прибраться» is in reach", async () => {
+  const { context, page, errors } = await open(browser, server.url);
+  expect(await dockShown(page)).toEqual(["hidden", "hidden"]);
+  const word = await page.evaluate(() => {
+    const r = document.querySelector(".hero .lede")!.getBoundingClientRect();
+    return { x: r.left + 40, y: r.top + r.height / 2 };
+  });
+  await mouseDrag(page, word, 60, 40);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".tidy-btn")!).visibility === "visible");
+  expect(await page.evaluate(() => scrollY)).toBeLessThan(40);
+  await page.click(".tidy-btn");
+  await page.mouse.click(5, 5); // focus leaves the dock: nothing is moved, so it goes back in
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".tidy-btn")!).visibility === "hidden");
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
 test("dive opens a random case within 3 s", async () => {
   const { context, page, errors } = await open(browser, server.url);
+  await pastTop(page);
   // Timed inside the page, from the click to the case window opening: the test's own round trips
   // on a loaded host are not the visitor's wait.
   await page.evaluate(() => {
@@ -135,6 +169,7 @@ test("dive opens a random case within 3 s", async () => {
 
 test("Esc during the roll cancels it: no case opens", async () => {
   const { context, page } = await open(browser, server.url);
+  await pastTop(page);
   await page.click(".dive-btn");
   await page.waitForTimeout(800);
   await page.keyboard.press("Escape");
@@ -146,6 +181,7 @@ test("Esc during the roll cancels it: no case opens", async () => {
 
 test("calm: dive opens a case at once, without the roulette", async () => {
   const { context, page, errors } = await open(browser, server.url, { reducedMotion: "reduce" });
+  await pastTop(page);
   const started = Date.now();
   await page.click(".dive-btn");
   await page.waitForFunction(() => !!document.querySelector("dialog.case[open]"), undefined, { timeout: 1000, polling: 20 });

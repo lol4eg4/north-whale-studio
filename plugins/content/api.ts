@@ -8,7 +8,7 @@ export interface CaseItem {
   id: number;
   client: string;
   what: string | null; // what the studio did, only when the studio's file name says it
-  result: string | null; // only when the studio's file name says it
+  result: string[]; // the lemon plates: what the case achieved, empty when the studio sent none
   size: TileSize; // wall tile: xl 4x3, l 3x3, t 2x3 (desktop cells)
   kind: "video" | "still";
   sound: boolean;

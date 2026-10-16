@@ -1,7 +1,7 @@
 /* Dive and tidy (mock .dock/.gut/.tidy/.dive, T§2.9, T§4.3, T§4.4). Plugin CSS loads before
    base.css, so rules that meet .piece are scoped under .dock (or doubled) to win. */
 .dive-dock { display: contents; }
-.dive-dock.away > * { visibility: hidden; }
+.dive-dock:is(.away, .top) > * { visibility: hidden; }
 
 /* Round «Рандомный кейс»: lemon disc, ink core, ring text on a canvas that turns. */
 .dock .dive-btn { position: relative; width: 156px; height: 156px; border: 0; border-radius: 50%; padding: 0; background: var(--lemon); box-shadow: var(--float); display: grid; place-items: center; transition: scale 0.3s cubic-bezier(0.3, 1.7, 0.5, 1), rotate 0.2s; }

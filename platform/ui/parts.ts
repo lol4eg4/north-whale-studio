@@ -40,6 +40,25 @@ export function note(text: string, arrow: "left" | "up" | "none" = "left"): HTML
   return el;
 }
 
+// A marker note writes itself in, left to right, the first time it is on screen (.pre / .written
+// in parts.css; calm shows it at once). .late: it came on screen after load, scrolled to, so it
+// waits behind no other note.
+export function writeIn(el: HTMLElement): void {
+  if (!("IntersectionObserver" in window)) return;
+  el.classList.add("pre");
+  let first = true; // the first callback is the state at load
+  const io = new IntersectionObserver((list) => {
+    const e = list.at(-1)!; // entries can come batched: the last one is now
+    const late = !first;
+    first = false;
+    if (!e.isIntersecting) return;
+    io.disconnect();
+    el.classList.replace("pre", "written");
+    el.classList.toggle("late", late);
+  });
+  io.observe(el);
+}
+
 // The red «заглушка» stamp: marks a place waiting for the studio's own data.
 export function stamp(text: string): HTMLSpanElement {
   return h("span", { class: "stamp" }, text);

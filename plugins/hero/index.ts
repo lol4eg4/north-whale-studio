@@ -3,7 +3,7 @@
 // Every word is a piece; under the sticker the same word stays printed as an outline.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, icon, isTouch } from "../../platform/ui/parts.ts";
+import { h, icon, writeIn } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import "./style.css";
 
@@ -70,6 +70,8 @@ export default function init(host: Host) {
   // The note sits beside the sticker, narrower when room is short, or under it (mock placeNote).
   const placeNote = () => {
     if (!slot) return;
+    // Measure from the corner: at the old place a longer text (another language) would wrap.
+    heroNote.style.left = heroNote.style.top = "0px";
     const hr = section.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(section).paddingRight);
     const fit = notePlace(hr, slot.getBoundingClientRect(), pad);
@@ -99,7 +101,7 @@ export default function init(host: Host) {
     t.bind(lede, "hero.lede");
     t.bind(watchText, "hero.watch");
     t.bind(howText, "hero.how");
-    t.bind(noteText, isTouch() ? "hero.noteCoarse" : "hero.noteFine");
+    t.bind(noteText, "hero.note");
     for (const el of [k1, k2, lede]) {
       motion.add(el, { kind: "word" });
       t.bind(el, "cursor.drag", "data-cursor");
@@ -109,6 +111,7 @@ export default function init(host: Host) {
     t.bind(watch, "cursor.open", "data-cursor");
     buildTitle();
     placeNote();
+    writeIn(heroNote);
     document.fonts?.ready.then(placeNote);
     let queued = 0; // one placement per frame, however many resize events come
     addEventListener("resize", () => {

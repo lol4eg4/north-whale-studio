@@ -6,13 +6,15 @@
    "en": "Waldorf Astoria Berlin"
   },
   "what": {
-   "ru": "Брендинг, сайт, продакшн",
-   "en": "Branding, Website, Production"
+   "ru": "Hilton Hotels",
+   "en": "Hilton Hotels"
   },
-  "result": {
-   "ru": "Полный цикл продакшена",
-   "en": "Full-cycle production"
-  },
+  "result": [
+   {
+    "ru": "Live Content Production",
+    "en": "Live Content Production"
+   }
+  ],
   "size": "xl",
   "kind": "video",
   "sound": false,
@@ -60,11 +62,16 @@
    "ru": "AG1",
    "en": "AG1"
   },
-  "what": null,
-  "result": {
-   "ru": "200% средняя окупаемость рекламы",
-   "en": "200% average return on ad spend"
+  "what": {
+   "ru": "Премиум БАДы",
+   "en": "Premium supplements"
   },
+  "result": [
+   {
+    "ru": "200% средняя окупаемость рекламы",
+    "en": "200% average return on ad spend"
+   }
+  ],
   "size": "l",
   "kind": "video",
   "sound": false,
@@ -79,11 +86,20 @@
    "ru": "Dear Passengers",
    "en": "Dear Passengers"
   },
-  "what": null,
-  "result": {
-   "ru": "100 млн+ органических просмотров",
-   "en": "100M+ organic views"
+  "what": {
+   "ru": "first-person, physics-driven cooperative action",
+   "en": "first-person, physics-driven cooperative action"
   },
+  "result": [
+   {
+    "ru": "100 млн+ органических просмотров",
+    "en": "100M+ organic views"
+   },
+   {
+    "ru": "500 тыс.+ вишлистов в Steam",
+    "en": "500K+ Steam wishlists"
+   }
+  ],
   "size": "xl",
   "kind": "video",
   "sound": true,
@@ -117,11 +133,16 @@
    "ru": "Mabrook",
    "en": "Mabrook"
   },
-  "what": null,
-  "result": {
-   "ru": "Редизайн сайта",
-   "en": "Website redesign"
+  "what": {
+   "ru": "Суперприложение",
+   "en": "Super app"
   },
+  "result": [
+   {
+    "ru": "Редизайн сайта",
+    "en": "Website redesign"
+   }
+  ],
   "size": "xl",
   "kind": "video",
   "sound": false,
@@ -137,13 +158,15 @@
    "en": "King’s Resort & Casino"
   },
   "what": {
-   "ru": "Курорт и казино",
-   "en": "Resort & casino"
+   "ru": "Крупнейший покерный рум в Европе",
+   "en": "Europe’s biggest poker room"
   },
-  "result": {
-   "ru": "Упаковка бренда и Live ивенты",
-   "en": "Brand packaging and live events"
-  },
+  "result": [
+   {
+    "ru": "Live Content Production",
+    "en": "Live Content Production"
+   }
+  ],
   "size": "xl",
   "kind": "video",
   "sound": false,
@@ -162,10 +185,12 @@
    "ru": "Агент по недвижимости",
    "en": "Real estate agent"
   },
-  "result": {
-   "ru": "Упаковка личного бренда",
-   "en": "Personal brand packaging"
-  },
+  "result": [
+   {
+    "ru": "Упаковка личного бренда",
+    "en": "Personal brand packaging"
+   }
+  ],
   "size": "xl",
   "kind": "video",
   "sound": true,
@@ -184,10 +209,12 @@
    "ru": "Аукционный дом",
    "en": "Auction house"
   },
-  "result": {
-   "ru": "Полный цикл ребрендинга",
-   "en": "Full-cycle rebranding"
-  },
+  "result": [
+   {
+    "ru": "Полный цикл ребрендинга",
+    "en": "Full-cycle rebranding"
+   }
+  ],
   "size": "l",
   "kind": "video",
   "sound": false,
@@ -203,14 +230,16 @@
    "en": "DeckForge"
   },
   "what": {
-   "ru": "Игровой трейлер",
-   "en": "Game trailer"
+   "ru": "free 2 play игра",
+   "en": "Free-to-play game"
   },
-  "result": {
-   "ru": "100 тыс.+ игроков",
-   "en": "100K+ players"
-  },
-  "size": "t",
+  "result": [
+   {
+    "ru": "Дизайн, ART, креатив и продакшн",
+    "en": "Design, art, creative and production"
+   }
+  ],
+  "size": "xl",
   "kind": "video",
   "sound": true,
   "vertical": true,

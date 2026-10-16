@@ -61,9 +61,10 @@ describe("streams", () => {
     });
   }
 
-  test("the vertical case 8 is 720x1080 as a tile and 720x1280 in full", async () => {
+  test("case 8 is a wide tile from the studio's art and a vertical 720x1280 video in full", async () => {
     const tile = await probe(path("c8.webp"));
-    expect([tile.width, tile.height]).toEqual([720, 1080]);
+    expect(tile.width).toBe(1280);
+    expect(tile.width).toBeGreaterThan(tile.height);
     const full = await probe(path("c8-full.mp4"));
     expect([full.width, full.height]).toEqual([720, 1280]);
   });
