@@ -58,8 +58,9 @@ test("marker notes: the hero's writes in on the first screen, the wall's waits u
   expect([wall.text, wall.state]).toEqual(["Элементы на стене также можно двигать", "pre"]);
   await page.evaluate(() => document.querySelector(".work-head")!.scrollIntoView({ behavior: "instant", block: "center" }));
   await page.waitForFunction(() => document.querySelector(".work-head .note")!.classList.contains("written"));
-  // Written in full once the animation (1.2 s delay + 0.9 s) is over: nothing is clipped.
-  await page.waitForTimeout(2300);
+  // Scrolled to, it writes at once (0.4 s), not 1.2 s behind the hero's note; once written nothing is clipped.
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector(".work-head .note")!).animationDelay)).toBe("0.4s");
+  await page.waitForFunction(() => document.getAnimations().every((a) => (a as CSSAnimation).animationName !== "note-write" || a.playState === "finished"));
   expect((await notes(page)).map((n) => n.clip)).toEqual(Array(2).fill("inset(-30%)"));
   expect(errors).toEqual([]);
   await context.close();

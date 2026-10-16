@@ -87,6 +87,27 @@ describe("wall layout", () => {
     await context.close();
   });
 
+  test("tablet (768 px): Ибадов is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+    const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
+    // Columns and rows a cell takes, from its box and the wall's grid tracks.
+    const span = (sel: string) =>
+      page.evaluate((s) => {
+        const wall = document.querySelector<HTMLElement>(".wall")!;
+        const cs = getComputedStyle(wall);
+        const col = parseFloat(cs.gridTemplateColumns.split(" ")[0]);
+        const row = parseFloat(cs.gridAutoRows);
+        const gap = parseFloat(cs.columnGap);
+        const r = document.querySelector(s)!.getBoundingClientRect();
+        return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
+      }, sel);
+    expect(await span(".wall > .t3")).toEqual([3, 3]);
+    expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.waitForTimeout(150);
+    expect(await span(".wall > .sz-fam")).toEqual([3, 2]);
+    await context.close();
+  });
+
   const firstTileShare = (page: import("playwright-core").Page) =>
     page.evaluate(() => {
       const r = document.querySelector(".wall .tile")!.getBoundingClientRect();
