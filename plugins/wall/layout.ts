@@ -1,9 +1,9 @@
 // The wall's cells in DOM order (the mock's W). The order is what lets dense packing leave
 // no holes at 8, 6 and 2 columns: small stickers fill the columns beside every big tile.
-// Four team badges, so two service stickers are wide (2 cells) on tablet and desktop to take
-// the room the two missing badges left.
+// On desktop it reads in bands of three rows, each one or two big cells and a column or block
+// of stickers; DeckForge and the clients' sheet close it, so nothing hangs under the last band.
 export type Slot =
-  | { k: "tile"; id: number }
+  | { k: "tile"; id: number; full?: boolean } // full: the whole width on tablet (6 columns), 4 rows high
   | { k: "dive" }
   | { k: "tag"; i: number } // team badge, index into team()
   | { k: "client"; i: number } // index into clients()
@@ -18,39 +18,44 @@ export type Slot =
   | { k: "deeper" };
 
 export const W: Slot[] = [
+  // Waldorf, the dive block and a column of two badges and a client.
   { k: "tile", id: 1 },
   { k: "dive" },
   { k: "tag", i: 0 },
   { k: "tag", i: 1 },
   { k: "client", i: 0 },
+  // AG1, Dear Passengers and a column: the starburst, a client, a badge.
   { k: "tile", id: 2 },
-  { k: "tick" },
   { k: "tile", id: 3 },
-  { k: "svc", id: 2, wide: true },
   { k: "star" },
-  { k: "svc2", id: 1 },
   { k: "client", i: 1 },
-  { k: "sheet" },
-  { k: "tile", id: 4 },
   { k: "tag", i: 2 },
-  { k: "tag", i: 3 },
+  { k: "tick" },
+  // Mabrook beside a block of the services, a client, the whale, Telegram and «Ныряй глубже».
+  { k: "tile", id: 4 },
+  { k: "svc2", id: 1 },
+  { k: "svc", id: 2, wide: true },
   { k: "svc", id: 3 },
   { k: "svc", id: 4 },
   { k: "client", i: 2 },
+  { k: "whale" },
+  { k: "svc", id: 5, wide: true },
+  { k: "telegram" },
+  { k: "deeper" },
+  { k: "tile", id: 5, full: true },
+  { k: "tile", id: 6 },
+  // Antiquerus, the team block and two columns: the last badge and five clients.
+  { k: "tile", id: 7 },
+  { k: "team" },
+  { k: "tag", i: 3 },
   { k: "client", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
   { k: "client", i: 6 },
-  { k: "tile", id: 5 },
-  { k: "tile", id: 6 },
-  { k: "tile", id: 7 },
-  { k: "tile", id: 8 },
-  { k: "team" },
   { k: "client", i: 7 },
-  { k: "svc", id: 5, wide: true },
-  { k: "whale" },
-  { k: "telegram" },
-  { k: "deeper" },
+  // DeckForge and the clients' sheet close the wall.
+  { k: "tile", id: 8 },
+  { k: "sheet" },
 ];
 
 // Same tilt on every visit: mulberry32 seeded 21, one draw per sticker in DOM order, ±7 deg.

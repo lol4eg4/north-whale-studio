@@ -130,7 +130,7 @@ export default function init(host: Host) {
           posters.observe(tile.el);
           host.use<CaseApi>("case").setTile?.(c.id, tile.el);
           refresh.push(() => tile.set(tileText(content().caseById(c.id)!)));
-          return cell(`sz-${c.size}`, tile.el, "tile", c.id);
+          return cell(`sz-${c.size}${slot.full ? " t-full" : ""}`, tile.el, "tile", c.id);
         }
         case "tag": {
           const m = team[slot.i];
@@ -241,7 +241,7 @@ export default function init(host: Host) {
           const el = stickerEl("div", "whale-st", r, { "aria-hidden": "true" });
           el.append(h("img", { src: "/whale.svg", alt: "", draggable: "false" }));
           t.bind(el, "cursor.drag", "data-cursor");
-          return cell("sz-s d2 p2", el, "sticker");
+          return cell("sz-s p2", el, "sticker");
         }
         case "telegram": {
           const tg = api.contacts().messengers.find((m) => m.name === "Telegram")?.url;
@@ -255,7 +255,7 @@ export default function init(host: Host) {
           const el = stickerEl("a", "client sh-circle deeper", r, { href: "#finale", style: "--c:var(--lemon);--f:var(--ink)" });
           el.append(t.bind(h("b"), "sticker.deeper"));
           t.bind(el, "cursor.dive", "data-cursor");
-          return cell("sz-s d2", el, "sticker");
+          return cell("sz-s", el, "sticker");
         }
         case "sheet": {
           // The logos load near the screen and after the first 2 s, like the badge photos.
