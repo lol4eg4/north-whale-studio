@@ -54,6 +54,21 @@ describe("cases", () => {
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
 
+  test("every tile has the studio's caption and at least one lemon plate, in both languages; Dear Passengers has two", () => {
+    for (const lang of ["ru", "en"] as const)
+      for (const c of store(lang).cases()) {
+        expect(c.what?.trim(), `case ${c.id} ${lang}`).toBeTruthy();
+        expect(c.result.length, `case ${c.id} ${lang}`).toBeGreaterThan(0);
+        for (const r of c.result) expect(r.trim(), `case ${c.id} ${lang}`).not.toBe("");
+      }
+    expect(store("en").caseById(3)!.result).toEqual(["100M+ organic views", "500K+ Steam wishlists"]);
+    expect(store("ru").caseById(8)!.what).toBe("free 2 play игра");
+  });
+
+  test("Dear Passengers' client sticker names the client, FLEXUS", () => {
+    expect(store("ru").clients().find((c) => c.caseId === 3)!.name).toBe("FLEXUS");
+  });
+
   test("screen readers hear number, client, what, every result and the press that wrote about it", () => {
     expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");

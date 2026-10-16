@@ -1,7 +1,8 @@
 // Wall: dense packing without holes, no sideways scroll, the first tile in view, still posters
 // with a moving round badge, the hover (result plate, curled corner), lazy loops (nothing before
 // 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
-// team badges (names, roles, photos, Maria's loop, roll call, opening big), no console errors.
+// team badges (names, roles, photos, Maria's loop, roll call, opening big), the studio stickers on
+// every screen, no console errors.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
@@ -64,6 +65,24 @@ describe("wall layout", () => {
       const r = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: innerWidth }));
       expect(r.sw, `scroll width at ${width}`).toBeLessThanOrEqual(r.w);
     }
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("the whale, Telegram and «Ныряй глубже» stickers are on the wall at 1440, 768 and 390 px; Dear Passengers' client is FLEXUS", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    for (const width of [1440, 768, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.waitForTimeout(150);
+      const shown = await page.evaluate(() =>
+        [".wall .whale-st", '.wall a.client[href^="https://t.me/"]', ".wall .deeper"].map((s) => {
+          const r = document.querySelector(s)?.getBoundingClientRect();
+          return !!r && r.width > 30 && r.height > 30;
+        }),
+      );
+      expect(shown, `stickers at ${width}`).toEqual([true, true, true]);
+    }
+    expect(await page.$$eval(".wall .client b", (els) => els.map((e) => e.textContent))).toContain("FLEXUS");
     expect(errors).toEqual([]);
     await context.close();
   });
