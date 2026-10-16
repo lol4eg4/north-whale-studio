@@ -1,6 +1,6 @@
 // Play: drag with the mouse (5 px threshold, a drop never opens a case), touch hold-to-lift
 // versus a plain swipe that scrolls, a lost button-up, «Рандомный кейс» (animated and calm) and
-// «Прибраться».
+// «Прибраться», the dock out at the top once something is moved.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser, Page } from "playwright-core";
 import { launch, open, phone, startServer } from "./helpers.ts";
@@ -124,6 +124,23 @@ test("the dock shows once the page is scrolled and hides again at the very top",
   expect(await dockShown(page)).toEqual(["visible", "visible"]);
   await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
   await page.waitForFunction(() => getComputedStyle(document.querySelector(".dive-btn")!).visibility === "hidden");
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
+test("at the very top the dock comes out once a piece is moved, so «Прибраться» is in reach", async () => {
+  const { context, page, errors } = await open(browser, server.url);
+  expect(await dockShown(page)).toEqual(["hidden", "hidden"]);
+  const word = await page.evaluate(() => {
+    const r = document.querySelector(".hero .lede")!.getBoundingClientRect();
+    return { x: r.left + 40, y: r.top + r.height / 2 };
+  });
+  await mouseDrag(page, word, 60, 40);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".tidy-btn")!).visibility === "visible");
+  expect(await page.evaluate(() => scrollY)).toBeLessThan(40);
+  await page.click(".tidy-btn");
+  await page.mouse.click(5, 5); // focus leaves the dock: nothing is moved, so it goes back in
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".tidy-btn")!).visibility === "hidden");
   expect(errors).toEqual([]);
   await context.close();
 });

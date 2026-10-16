@@ -97,7 +97,7 @@ html.calm .hello-spin { animation: none; }
 .wall .team-block, .wall .whale-block { position: absolute; inset: 0; border-radius: var(--rounded-tile); padding: clamp(14px, 5cqmin, 26px); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
 .wall .team-block { background: var(--cobalt); color: var(--paper); cursor: pointer; border: 0; text-align: start; }
 .team-big { margin: 0; font: 600 clamp(16px, 6.2cqmin, 28px)/1.15 var(--sans); }
-.team-big b { display: block; font: 900 clamp(44px, 24cqmin, 120px)/0.9 var(--display); color: var(--lemon); letter-spacing: -0.03em; margin-bottom: 0.12em; }
+.team-big b { display: block; font: 900 clamp(44px, min(24cqmin, 20cqw), 120px)/0.9 var(--display); color: var(--lemon); letter-spacing: -0.03em; margin-bottom: 0.12em; }
 .team-more { opacity: 0.9; }
 .wall .whale-block { background: var(--buoy); align-items: center; justify-content: center; }
 .whale-disc { width: 62cqmin; aspect-ratio: 1; border-radius: 50%; background: var(--cobalt); box-shadow: 0 0 0 5px var(--ink), 0 0 0 11px var(--paper); display: grid; place-items: center; overflow: hidden; }

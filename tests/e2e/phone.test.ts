@@ -1,5 +1,6 @@
 // iPhone, emulated in Chromium (WebKit cannot run on this host; the owner checks a real phone):
 // taps open cases, the dive button too, loops stay muted and inline, controls are thumb-sized,
+// the hero note keeps its place after a language switch,
 // no mouse cursor.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { devices, type Browser } from "playwright-core";
@@ -16,6 +17,29 @@ beforeAll(async () => {
 afterAll(async () => {
   await browser?.close();
   server?.stop();
+});
+
+test("390 and 414 px: after switching to English the hero note sits where a fresh English page puts it, on screen", async () => {
+  for (const width of [390, 414]) {
+    const viewport = { width, height: 844 };
+    const place = (page: import("playwright-core").Page) =>
+      page.evaluate(() => {
+        const r = document.querySelector(".hero-note")!.getBoundingClientRect();
+        return { left: Math.round(r.left), right: Math.round(r.right), height: Math.round(r.height) };
+      });
+    const fresh = await open(browser, `${server.url}/?lang=en`, { ...iphone, viewport });
+    const want = await place(fresh.page);
+    await fresh.context.close();
+    const { context, page, errors } = await open(browser, server.url, { ...iphone, viewport });
+    await page.evaluate(() => document.querySelector<HTMLButtonElement>('.nav-lang button[lang="en"]')!.click());
+    await page.waitForFunction(() => document.querySelector(".hero-note .note-text")!.textContent!.startsWith("Everything"));
+    await page.waitForTimeout(200);
+    const got = await place(page);
+    expect(got, `at ${width}`).toEqual(want);
+    expect(got.right, `at ${width}`).toBeLessThanOrEqual(width);
+    expect(errors).toEqual([]);
+    await context.close();
+  }
 });
 
 test("iPhone: loads clean, no custom cursor, touch copy, loops muted and inline", async () => {

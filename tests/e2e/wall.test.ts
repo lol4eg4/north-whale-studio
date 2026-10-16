@@ -102,6 +102,18 @@ describe("wall layout", () => {
       }, sel);
     expect(await span(".wall > .t3")).toEqual([3, 3]);
     expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
+    // «Привет!» fits the narrow strip: the block clips what overflows.
+    for (const width of [701, 768, 1024, 1100]) {
+      await page.setViewportSize({ width, height: 1024 });
+      await page.waitForTimeout(150);
+      const over = await page.evaluate(() => {
+        const b = document.querySelector(".wall .team-big b")!;
+        const r = document.createRange();
+        r.selectNodeContents(b);
+        return r.getBoundingClientRect().right - b.closest(".team-block")!.getBoundingClientRect().right;
+      });
+      expect(over, `«Привет!» past the block at ${width}`).toBeLessThanOrEqual(0);
+    }
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.waitForTimeout(150);
     expect(await span(".wall > .sz-fam")).toEqual([3, 2]);

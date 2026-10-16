@@ -70,6 +70,8 @@ export default function init(host: Host) {
   // The note sits beside the sticker, narrower when room is short, or under it (mock placeNote).
   const placeNote = () => {
     if (!slot) return;
+    // Measure from the corner: at the old place a longer text (another language) would wrap.
+    heroNote.style.left = heroNote.style.top = "0px";
     const hr = section.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(section).paddingRight);
     const fit = notePlace(hr, slot.getBoundingClientRect(), pad);

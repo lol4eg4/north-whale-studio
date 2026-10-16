@@ -47,7 +47,8 @@ export function writeIn(el: HTMLElement): void {
   if (!("IntersectionObserver" in window)) return;
   el.classList.add("pre");
   let first = true; // the first callback is the state at load
-  const io = new IntersectionObserver(([e]) => {
+  const io = new IntersectionObserver((list) => {
+    const e = list.at(-1)!; // entries can come batched: the last one is now
     const late = !first;
     first = false;
     if (!e.isIntersecting) return;
