@@ -4,8 +4,8 @@
 //   still loading but no longer near              -> drop the source, the slot frees
 //   visible + ready                               -> play (max 6, 4 on phones)
 //   case open, pause button on, hidden tab        -> pause all, attach nothing
-//   play() refused without a gesture              -> poster stays until the next tap, click or key
-//   refused even then, error or 20 s without a frame -> poster stays, never retried
+//   play() refused                                -> poster stays until the next tap, click or key
+//   refused after 3 such gestures, or an error    -> poster stays, never retried
 //
 // schedule() is the pure decision; createVideos() keeps the state and does it.
 
@@ -110,31 +110,32 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     watch(e);
   };
   // Autoplay refused (an iPhone in Low Power Mode): every loop waits for the visitor's next tap,
-  // click or key, and plays from inside it, where the browser allows it.
+  // click or key, and plays from inside it, where the browser allows it. A swipe or a modifier key
+  // may not count as one, so the loops give up only after 3 gestures in a row that the browser
+  // refused too; a loop that plays starts the count again.
+  const GESTURE_TRIES = 3;
   let refused = false;
-  let inGesture = false;
+  let tries = 0;
   const play = (e: Entry) => {
     e.state.playing = true;
-    const fromGesture = inGesture;
-    e.video.play().catch((err: unknown) => {
+    e.video.play().then(() => void (tries = 0), (err: unknown) => {
       // A pause that came first is not a failure.
       if (err instanceof DOMException && err.name === "AbortError") return;
       if (!e.state.playing) return;
-      if (!fromGesture && err instanceof DOMException && err.name === "NotAllowedError") {
+      if (err instanceof DOMException && err.name === "NotAllowedError" && tries < GESTURE_TRIES) {
         e.state.playing = false;
         refused = true;
         return;
       }
-      // Refused even after a gesture, or broken: the poster stays, no retry loop.
+      // Broken, or refused even after the gestures: the poster stays, no retry loop.
       fail(e);
     });
   };
   const gesture = () => {
     if (!refused) return;
     refused = false;
-    inGesture = true;
+    tries++;
     run();
-    inGesture = false;
   };
   for (const type of ["pointerup", "touchend", "keydown"]) addEventListener(type, gesture, true);
   // No data for 20 s: the slot goes back and the tile tries again later (a slow link keeps going

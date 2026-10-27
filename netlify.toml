@@ -1,8 +1,11 @@
 # Netlify builds the public site https://northwhale.studio from this repository.
 # Production branch, set in Netlify (Project configuration > Build & deploy > Branches): production.
+# The export needs no packages; the flags keep Netlify's own install from running their scripts.
 [build]
-  command = "bun install --frozen-lockfile --ignore-scripts && bun run export"
+  command = "bun run export"
   publish = "dist"
 
 [build.environment]
   BUN_VERSION = "1.4.2"
+  BUN_FLAGS = "--ignore-scripts"
+  NPM_FLAGS = "--ignore-scripts"

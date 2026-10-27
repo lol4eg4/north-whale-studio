@@ -72,15 +72,29 @@ describe("export", () => {
     expect(await (await fetch(`${host.url}/health`)).json()).toEqual({ ok: true, commit });
   });
 
-  test("cache rules: the page is checked every visit, the bundle kept for good, media and fonts a day", async () => {
-    const rules = await text("_headers");
-    const rule = (path: string) => new RegExp(`^${path.replace(/[.*]/g, "\\$&")}\\n\\s+Cache-Control: ([^\\n]+)`, "m").exec(rules)?.[1];
-    expect(rule("/")).toBe("no-cache");
-    expect(rule("/index.html")).toBe("no-cache");
-    expect(rule("/app.js")).toBe("public, max-age=31536000, immutable");
-    expect(rule("/app.css")).toBe("public, max-age=31536000, immutable");
-    expect(rule("/media/*")).toBe("public, max-age=86400");
-    expect(rule("/fonts/*")).toBe("public, max-age=86400");
+  test("cache rules: the page is checked every visit, the bundle kept for good, media and fonts a day; all nosniff", async () => {
+    const font = files(join(out, "fonts")).find((f) => f.endsWith(".woff2"))!;
+    const expected: [string, string][] = [
+      ["/", "no-cache"],
+      ["/index.html", "no-cache"],
+      [`/app.js?v=${hash}`, "public, max-age=31536000, immutable"],
+      [`/app.css?v=${hash}`, "public, max-age=31536000, immutable"],
+      ["/media/c1-ring.mp4?v=1", "public, max-age=86400"],
+      [`/fonts/${font}`, "public, max-age=86400"],
+    ];
+    for (const [path, cache] of expected) {
+      const res = await fetch(`${host.url}${path}`);
+      expect(res.status, path).toBe(200);
+      expect(res.headers.get("cache-control"), path).toBe(cache);
+      expect(res.headers.get("x-content-type-options"), path).toBe("nosniff");
+    }
+    expect((await fetch(`${host.url}/whale.svg`)).headers.get("x-content-type-options")).toBe("nosniff");
+  });
+
+  test("a video answers a byte range with 206", async () => {
+    const res = await fetch(`${host.url}/media/c1-ring.mp4`, { headers: { Range: "bytes=0-99" } });
+    expect(res.status).toBe(206);
+    expect((await res.arrayBuffer()).byteLength).toBe(100);
   });
 
   test("a missing address gets the 404 page", async () => {
@@ -89,10 +103,15 @@ describe("export", () => {
     expect(await res.text()).toContain("Такой страницы нет");
   });
 
-  test("the export never empties the repository, a folder holding it, or site/", () => {
-    for (const bad of [root, join(root, ".."), "/", site, join(site, "media"), join(root, "tests", "..")])
-      expect(() => outFolder(bad), bad).toThrow("would overwrite");
-    for (const good of [join(root, "dist"), out, join(root, "tmp", "dist")]) expect(outFolder(good)).toBe(good);
+  test("the export empties only a new, empty or earlier export folder, never the repository or site/", () => {
+    const bad = [root, join(root, ".."), "/", tmpdir(), site, join(site, "media"), join(root, "platform"), join(root, ".git"), join(root, "deploy")];
+    for (const path of bad) expect(() => outFolder(path), path).toThrow("would overwrite");
+    const empty = mkdtempSync(join(tmpdir(), "nws-export-empty-"));
+    try {
+      for (const good of [join(root, "no-such-folder"), empty, out]) expect(outFolder(good)).toBe(good);
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
   });
 
   test("bun run export needs PUBLIC_ORIGIN and writes dist with it", async () => {

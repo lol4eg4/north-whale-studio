@@ -4,6 +4,7 @@
 // The folder holds index.html (bundle hash in ?v=, absolute og:image), app.js, app.css, every
 // site/ file, health.json with the commit (served at /health), and the host's _headers and
 // _redirects from deploy/. The board's bug widget stays out: the public site never loads it.
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { cp, rm } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -14,11 +15,13 @@ const root = join(import.meta.dir, "..");
 // The widget's comment line and <script>, as site/index.html and site/404.html carry them.
 const widget = /\n[ \t]*<!-- The board's bug report widget[^\n]*-->\n[ \t]*<script>[^\n]*widget\.js[^\n]*<\/script>/;
 
-// The export empties its folder first: never the repository, a folder holding it, or site/.
+// The export empties its folder first, so the folder must be new, empty or an earlier export
+// (it has health.json), and never the repository, a folder holding it, or inside site/.
 export function outFolder(path: string): string {
   const out = resolve(path);
-  if (!relative(out, root).startsWith("..") || !relative(join(root, "site"), out).startsWith(".."))
-    throw new Error(`--out ${out} would overwrite the repository or site/; pick a folder of its own, like dist`);
+  const fresh = !existsSync(out) || (statSync(out).isDirectory() && (readdirSync(out).length === 0 || existsSync(join(out, "health.json"))));
+  if (!fresh || !relative(out, root).startsWith("..") || !relative(join(root, "site"), out).startsWith(".."))
+    throw new Error(`--out ${out} would overwrite other files; pick a new folder or an earlier export, like dist`);
   return out;
 }
 

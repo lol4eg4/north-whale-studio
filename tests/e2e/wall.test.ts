@@ -355,9 +355,23 @@ describe("wall media", () => {
     expect(before.playing).toBe(0);
     expect(before.src).toContain("/media/c1-ring.mp4");
     expect(before.plays).toBeGreaterThan(0);
-    expect(before.plays).toBeLessThanOrEqual(6);
-    await page.mouse.click(700, 600);
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 3000 });
+    // No retry loop: scrolling brings more loops in reach, yet nothing asks to play again.
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(1500);
+    expect(await page.evaluate(() => (window as unknown as { __plays: number }).__plays)).toBe(before.plays);
+    // The first tap plays every loop that is on screen and has its source.
+    await page.mouse.click(700, 300);
+    await page.waitForFunction(
+      () => {
+        const on = [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video[src]")].filter((v) => {
+          const r = v.closest(".tile")!.getBoundingClientRect();
+          return r.bottom > 0 && r.top < innerHeight && v.readyState >= 3;
+        });
+        return on.length > 0 && on.every((v) => !v.paused);
+      },
+      null,
+      { timeout: 3000 },
+    );
     expect(pageErrors).toEqual([]);
     await context.close();
   });

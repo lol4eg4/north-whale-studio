@@ -1,7 +1,7 @@
 // Shared e2e fixtures: a server for one app file on a free port, a Chromium page that records
 // console errors, and the wall hole counter.
 import { chromium, type Browser, type BrowserContextOptions, type Page } from "playwright-core";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, normalize } from "node:path";
 import { exportSite } from "../../tools/export.ts";
@@ -41,14 +41,22 @@ export async function startExport(app = "app.json", origin = "https://northwhale
 }
 
 // A static host: a file by its path, / is index.html, deploy/_redirects' /health rewrite, and
-// 404.html with status 404 for anything else. Text goes gzipped, as Netlify sends it; byte
-// ranges come from Bun's file responses.
+// 404.html with status 404 for anything else. Every _headers rule that matches the address adds
+// its headers. Text goes gzipped, as Netlify sends it; byte ranges come from Bun's file responses.
 export function serveFolder(dir: string) {
+  const rules: { path: string; headers: [string, string][] }[] = [];
+  for (const line of readFileSync(join(dir, "_headers"), "utf8").split("\n")) {
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    if (!/^\s/.test(line)) rules.push({ path: line.trim(), headers: [] });
+    else rules.at(-1)!.headers.push(line.trim().split(/:\s*(.*)/s).slice(0, 2) as [string, string]);
+  }
+  const matches = (rule: string, path: string) => rule === path || (rule.endsWith("/*") && path.startsWith(rule.slice(0, -1)));
   const server = Bun.serve({
     port: 0,
     hostname: "127.0.0.1",
     async fetch(req) {
-      let path = decodeURIComponent(new URL(req.url).pathname);
+      const asked = decodeURIComponent(new URL(req.url).pathname);
+      let path = asked;
       if (path === "/") path = "/index.html";
       if (path === "/health") path = "/health.json";
       let file = Bun.file(join(dir, normalize(path)));
@@ -57,9 +65,14 @@ export function serveFolder(dir: string) {
         file = Bun.file(join(dir, "404.html"));
         status = 404;
       }
-      if (!/\.(html|js|css|json|svg)$/.test(file.name!) || !req.headers.get("accept-encoding")?.includes("gzip"))
-        return new Response(file, { status });
-      const headers = { "Content-Type": file.type, "Content-Encoding": "gzip" };
+      const headers: Record<string, string> = {};
+      for (const rule of rules) if (matches(rule.path, asked)) for (const [name, value] of rule.headers) headers[name] = value;
+      if (!/\.(html|js|css|json|svg)$/.test(file.name!) || !req.headers.get("accept-encoding")?.includes("gzip")) {
+        const res = new Response(file, { status });
+        for (const [name, value] of Object.entries(headers)) res.headers.set(name, value);
+        return res;
+      }
+      Object.assign(headers, { "Content-Type": file.type, "Content-Encoding": "gzip" });
       return new Response(Bun.gzipSync(await file.bytes()), { status, headers });
     },
   });
