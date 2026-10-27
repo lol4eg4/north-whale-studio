@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
-import { exportSite } from "../tools/export.ts";
+import { exportSite, outFolder } from "../tools/export.ts";
 import { serveFolder } from "./e2e/helpers.ts";
 
 const root = join(import.meta.dir, "..");
@@ -87,6 +87,12 @@ describe("export", () => {
     const res = await fetch(`${host.url}/no-such-page`);
     expect(res.status).toBe(404);
     expect(await res.text()).toContain("Такой страницы нет");
+  });
+
+  test("the export never empties the repository, a folder holding it, or site/", () => {
+    for (const bad of [root, join(root, ".."), "/", site, join(site, "media"), join(root, "tests", "..")])
+      expect(() => outFolder(bad), bad).toThrow("would overwrite");
+    for (const good of [join(root, "dist"), out, join(root, "tmp", "dist")]) expect(outFolder(good)).toBe(good);
   });
 
   test("bun run export needs PUBLIC_ORIGIN and writes dist with it", async () => {
