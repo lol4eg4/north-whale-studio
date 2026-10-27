@@ -179,7 +179,7 @@ describe("team", () => {
   // From the studio's CEO, in this order. ШАН / SHAN stays in capitals.
   const crew: [string, string, string, string, string][] = [
     ["Погорелов", "Pogorelov", "Арт-директор", "Art Director", "cobalt"],
-    ["ШАН", "SHAN", "Проджект-менеджер", "Project Manager", "ink"],
+    ["ШАН", "SHAN", "Продукт-менеджер", "Product Manager", "ink"],
     ["Мария", "Maria", "Хэд-дизайнер", "Head Designer", "mint"],
     ["Джексон", "Jackson", "Бренд-менеджер", "Brand Manager", "buoy"],
   ];

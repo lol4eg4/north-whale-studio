@@ -471,8 +471,8 @@ describe("wall media", () => {
 
 // The CEO's four, in order. ШАН / SHAN stays in capitals.
 const CREW = {
-  ru: [["Погорелов", "Арт-директор"], ["ШАН", "Проджект-менеджер"], ["Мария", "Хэд-дизайнер"], ["Джексон", "Бренд-менеджер"]],
-  en: [["Pogorelov", "Art Director"], ["SHAN", "Project Manager"], ["Maria", "Head Designer"], ["Jackson", "Brand Manager"]],
+  ru: [["Погорелов", "Арт-директор"], ["ШАН", "Продукт-менеджер"], ["Мария", "Хэд-дизайнер"], ["Джексон", "Бренд-менеджер"]],
+  en: [["Pogorelov", "Art Director"], ["SHAN", "Product Manager"], ["Maria", "Head Designer"], ["Jackson", "Brand Manager"]],
 };
 const PHOTOS = [1, 2, 3, 4].map((n) => `/media/team-${n}.webp`);
 
@@ -715,11 +715,11 @@ describe("team badges", () => {
   test("English: the badge and its close button speak English", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=en`);
     await toBadge(page, 1);
-    expect(await page.locator(".wall .tag").nth(1).getAttribute("aria-label")).toBe("Meet SHAN, Project Manager");
+    expect(await page.locator(".wall .tag").nth(1).getAttribute("aria-label")).toBe("Meet SHAN, Product Manager");
     await page.click(".wall .tag >> nth=1");
     await page.waitForSelector("dialog.meet[open]");
     expect(await page.textContent(".meet-x")).toBe("Close");
-    expect(await page.getAttribute("dialog.meet", "aria-label")).toBe("SHAN, Project Manager");
+    expect(await page.getAttribute("dialog.meet", "aria-label")).toBe("SHAN, Product Manager");
     expect(errors).toEqual([]);
     await context.close();
   });
