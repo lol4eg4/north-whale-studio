@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bun test platform plugins tools tests/server.test.ts tests/build.test.ts tests/tokens.test.ts tests/plugins.test.ts tests/package.regression-1.test.ts",
+    "test": "bun test platform plugins tools tests/server.test.ts tests/build.test.ts tests/tokens.test.ts tests/plugins.test.ts tests/package.regression-1.test.ts tests/export.test.ts",
     "e2e": "bun test tests/e2e --timeout 60000",
     "media": "bun tools/media.ts",
+    "export": "PUBLIC_ORIGIN=https://northwhale.studio bun tools/export.ts",
     "check": "bunx tsc --noEmit -p ."
   },
   "devDependencies": {

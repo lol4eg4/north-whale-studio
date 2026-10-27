@@ -1,0 +1,4 @@
+# Netlify redirects for the public site. tools/export.ts copies this file into dist/.
+# www.northwhale.studio goes to northwhale.studio by Netlify itself: northwhale.studio is the
+# primary domain. A missing address gets 404.html with status 404.
+/health  /health.json  200

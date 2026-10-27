@@ -1,11 +1,16 @@
 // Shared e2e fixtures: a server for one app file on a free port, a Chromium page that records
 // console errors, and the wall hole counter.
 import { chromium, type Browser, type BrowserContextOptions, type Page } from "playwright-core";
-import { join } from "node:path";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, normalize } from "node:path";
+import { exportSite } from "../../tools/export.ts";
 
 const root = join(import.meta.dir, "..", "..");
 
+// E2E_EXPORT=1 runs the browser tests on the exported site (tools/export.ts) as Netlify serves it.
 export async function startServer(app = "app.json", env: Record<string, string> = {}) {
+  if (process.env.E2E_EXPORT) return startExport(app, env.PUBLIC_ORIGIN ?? "https://northwhale.studio");
   const probe = Bun.serve({ port: 0, hostname: "127.0.0.1", fetch: () => new Response() });
   const port = probe.port;
   probe.stop(true);
@@ -24,6 +29,41 @@ export async function startServer(app = "app.json", env: Record<string, string> 
   }
   proc.kill();
   throw new Error(`serve.ts did not start for ${app}: ${await new Response(proc.stderr).text()}`);
+}
+
+// The site exported for one app file into a temporary folder, served like Netlify serves dist/.
+export async function startExport(app = "app.json", origin = "https://northwhale.studio") {
+  const dir = mkdtempSync(join(tmpdir(), "nws-export-"));
+  const commit = Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: root }).stdout.toString().trim();
+  await exportSite({ out: dir, origin, commit, app });
+  const host = serveFolder(dir);
+  return { url: host.url, dir, stop: () => (host.stop(), rmSync(dir, { recursive: true, force: true })) };
+}
+
+// A static host: a file by its path, / is index.html, deploy/_redirects' /health rewrite, and
+// 404.html with status 404 for anything else. Text goes gzipped, as Netlify sends it; byte
+// ranges come from Bun's file responses.
+export function serveFolder(dir: string) {
+  const server = Bun.serve({
+    port: 0,
+    hostname: "127.0.0.1",
+    async fetch(req) {
+      let path = decodeURIComponent(new URL(req.url).pathname);
+      if (path === "/") path = "/index.html";
+      if (path === "/health") path = "/health.json";
+      let file = Bun.file(join(dir, normalize(path)));
+      let status = 200;
+      if (path !== normalize(path) || path.endsWith("/") || !(await file.exists())) {
+        file = Bun.file(join(dir, "404.html"));
+        status = 404;
+      }
+      if (!/\.(html|js|css|json|svg)$/.test(file.name!) || !req.headers.get("accept-encoding")?.includes("gzip"))
+        return new Response(file, { status });
+      const headers = { "Content-Type": file.type, "Content-Encoding": "gzip" };
+      return new Response(Bun.gzipSync(await file.bytes()), { status, headers });
+    },
+  });
+  return { url: `http://127.0.0.1:${server.port}`, stop: () => server.stop(true) };
 }
 
 export async function launch(): Promise<Browser> {

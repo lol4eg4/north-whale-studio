@@ -9,6 +9,10 @@
 - `bun run test` — быстрые проверки без браузера: `platform`, `plugins`, `tools` и файлы `tests/*.test.ts`.
 - `bun run e2e` — проверки в браузере Chromium из `tests/e2e`. Одна проверка: `bun test tests/e2e/<имя>.test.ts --timeout 60000`.
 - `bun run check` — проверка типов TypeScript.
+- `bun run export` — кладёт сайт готовыми файлами в `dist/` для публичного сайта https://northwhale.studio. Код — `tools/export.ts`.
+  - `--out <папка>` — другая папка вместо `dist/`.
+  - Без `bun run`: `PUBLIC_ORIGIN=<адрес> bun tools/export.ts`. Без `PUBLIC_ORIGIN` сборка останавливается с ошибкой.
+- `E2E_EXPORT=1 bun run e2e` — те же проверки в браузере, но на выгруженном сайте, отданном как на Netlify.
 - `bun tools/media.ts` (то же, что `bun run media`) — собирает ролики и фото в `site/media`.
   - `--src <папка>` — исходники кейсов, по умолчанию `tmp/cases-src`.
   - `--only <номер>` — только один кейс.
@@ -34,7 +38,20 @@
 - `/health` — `{ "ok": true, "commit": "<коммит>" }`: какой код отдаёт сервер. По нему выкладка проверяет, что новая версия на месте.
 - `/app.js`, `/app.css` — собранный код и стили страницы.
 - `/media/…`, `/fonts/…`, `/whale.svg`, `/og.jpg`, `/favicon.svg` — файлы из `site/`. Ролики отдаются частями по запросу браузера. Файлы из `/media/` и `/fonts/` браузер хранит сутки. Страница просит медиа с `?v=<хеш>`, поэтому заменённый файл приходит сразу.
-- Любой другой адрес отвечает 404.
+- Любой другой адрес отвечает 404 со страницей `site/404.html`.
+
+## Публичный сайт
+
+Адрес — https://northwhale.studio. Хостинг Netlify сам собирает ветку `production` командой `bun run export` и отдаёт папку `dist/`. Как подключить — [how-to-publish-on-netlify.md](how-to-publish-on-netlify.md) и [how-to-connect-domain-namecheap.md](how-to-connect-domain-namecheap.md).
+
+- `dist/` — всё, что отдаёт сервер: `index.html` с хешем сборки в `?v=` и полным адресом `og:image`, `app.js`, `app.css`, файлы `site/`, `404.html`, `health.json`, `_headers`, `_redirects`.
+- `/health` отдаёт `health.json`: `{ "ok": true, "commit": "<коммит>" }`, коммит, из которого собран сайт.
+- Виджета багов доски в выгрузке нет.
+- `netlify.toml` — команда сборки, папка `dist`, версия Bun.
+- `deploy/_headers` — как долго браузер хранит файлы. Страница — проверяется при каждом заходе. `app.js` и `app.css` — навсегда: новая сборка приходит под новым `?v=`. `/media/` и `/fonts/` — сутки.
+- `deploy/_redirects` — `/health` отдаёт `health.json`. Пропавший адрес получает `404.html` с кодом 404.
+- www.northwhale.studio Netlify переводит на northwhale.studio сам: основной домен — без www.
+- DNS в Namecheap: запись `A` для `@` на `75.2.60.5`, запись `CNAME` для `www` на `northwhale-studio.netlify.app`.
 
 ## Память браузера
 

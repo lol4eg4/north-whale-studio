@@ -105,7 +105,8 @@ test("at 390 px the header shows the short «Написать» button", async (
   await context.close();
 });
 
-test("the served page carries the bug widget loader", async () => {
+test("the served page carries the bug widget loader; the export leaves it out", async () => {
   const html = await (await fetch(server.url)).text();
-  expect(html).toContain("widget.js");
+  if (process.env.E2E_EXPORT) expect(html).not.toContain("widget.js");
+  else expect(html).toContain("widget.js");
 });
