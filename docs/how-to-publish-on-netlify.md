@@ -29,14 +29,22 @@ Netlify по-английски. Названия кнопок даны так, 
 6. Через 2–3 минуты вверху появится **Published**.
 7. Откройте https://northwhale-studio.netlify.app. Должен открыться сайт студии.
 
-## Шаг 3. Домен
+## Шаг 3. Плашка Netlify
+
+На бесплатном тарифе Netlify ставит внизу справа плашку «Powered by Netlify». Она закрывает кнопку «Прибраться», а на телефоне — край «Рандомного кейса».
+
+1. Откройте **Project configuration**, затем **General**.
+2. В разделе **Powered by Netlify badge** выключите плашку и нажмите **Save**.
+3. Выкладка не нужна: плашка пропадает со следующего открытия страницы.
+
+## Шаг 4. Домен
 
 1. В меню проекта откройте **Domain management**.
 2. Нажмите **Add a domain**, впишите `northwhale.studio` без www, нажмите **Verify**, затем **Add domain**.
 3. Netlify сам добавит www.northwhale.studio. Основной адрес — без www, с www Netlify переводит на него.
 4. Netlify покажет **Awaiting External DNS**. Дальше заказчик добавляет записи в Namecheap.
 
-## Шаг 4. HTTPS
+## Шаг 5. HTTPS
 
 1. Когда заказчик добавит записи, откройте **Domain management**, раздел **HTTPS**.
 2. Нажмите **Verify DNS configuration**.
