@@ -14,10 +14,10 @@ Deferred on purpose. Each item names what it waits for.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
 - Case previews for King’s Resort & Casino (5) and Antiquerus (7): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`). DeckForge (8) has the studio's art, its wordmark cropped off (the plate names the game).
 
-## Waits for publication
+## Waits for the public site
 
-- Own domain: set `PUBLIC_ORIGIN` so `og:image` gets an absolute address.
-- Visit counter: `plugins/visits` has only `off.ts`. Needs a store on the server.
+- Visit counter: `plugins/visits` has only `off.ts`. The public site on Netlify has no server of ours, so it needs an outside service.
+- Real iPhone in Low Power Mode: check that case rings show their frame, then play after the first tap. Tested only in Chromium with `play()` refused (`tests/e2e/wall.test.ts`).
 - A share card per case (`/#case-N` shows the site card today).
 - Analytics: none until the studio picks a service.
 
@@ -33,3 +33,7 @@ Deferred on purpose. Each item names what it waits for.
 - Dark theme; illustrations beyond the whale and the stickers.
 - WebM or AV1 encodes next to H.264.
 - An admin panel: texts and cases change through the data files.
+
+## Completed
+
+- Own domain: `bun run export` sets `PUBLIC_ORIGIN=https://northwhale.studio`, so `og:image` is absolute. **Completed:** 2026-10-27.
