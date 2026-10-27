@@ -309,15 +309,56 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("calm: no loop is loaded or played", async () => {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
-    const page = await context.newPage();
-    const loops: string[] = [];
-    page.on("request", (r) => /\/media\/c\d-ring\.mp4/.test(r.url()) && loops.push(r.url()));
-    await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
-    await page.waitForTimeout(3000);
-    expect(loops).toEqual([]);
+  test("calm: the case badges still play, the ticker stands; the pause button shows off and stops the loops", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
+    const first = () => page.evaluate(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused);
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".ticker-row")!).animationName)).toBe("none");
+    expect(await page.getAttribute(".pause-btn", "aria-pressed")).toBe("false");
+    await page.click(".pause-btn");
+    await page.waitForTimeout(100);
+    expect(await first()).toBe(false);
+    expect(await page.getAttribute(".pause-btn", "aria-pressed")).toBe("true");
+    await page.click(".pause-btn");
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("autoplay refused (an iPhone in Low Power Mode): posters stay, no retry loop; the first tap plays the loops", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "ru-RU" });
+    // play() works only once the visitor has touched the page, as on an iPhone in Low Power Mode.
+    // (Playwright's evaluate counts as a gesture, so the stub watches real presses instead.)
+    await context.addInitScript(() => {
+      const real = HTMLMediaElement.prototype.play;
+      const w = window as unknown as { __plays: number };
+      let touched = false;
+      w.__plays = 0;
+      addEventListener("pointerdown", () => (touched = true), true);
+      HTMLMediaElement.prototype.play = function () {
+        w.__plays++;
+        if (!touched) return Promise.reject(new DOMException("No autoplay", "NotAllowedError"));
+        return real.call(this);
+      };
+    });
+    const page = await context.newPage();
+    const pageErrors: string[] = [];
+    page.on("pageerror", (e) => pageErrors.push(String(e)));
+    await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
+    await page.waitForFunction(() => (document.querySelector(".wall .tile video") as HTMLVideoElement).readyState >= 3, null, { timeout: 8000 });
+    await page.waitForTimeout(1500);
+    const before = await page.evaluate(() => ({
+      plays: (window as unknown as { __plays: number }).__plays,
+      playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
+      src: document.querySelector(".wall .tile video")!.getAttribute("src"),
+    }));
+    expect(before.playing).toBe(0);
+    expect(before.src).toContain("/media/c1-ring.mp4");
+    expect(before.plays).toBeGreaterThan(0);
+    expect(before.plays).toBeLessThanOrEqual(6);
+    await page.mouse.click(700, 600);
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 3000 });
+    expect(pageErrors).toEqual([]);
     await context.close();
   });
 

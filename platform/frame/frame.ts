@@ -43,13 +43,14 @@ export function mountFrame(motion: Motion): Partial<Record<RegionName, HTMLEleme
 
   const pause = h(
     "button",
-    { class: "cbtn pause-btn", type: "button", "aria-pressed": String(motion.paused), "data-t-label": "motion.pause" },
-    icon(motion.paused ? "motionPlay" : "motionPause", 18),
+    { class: "cbtn pause-btn", type: "button", "aria-pressed": String(motion.stopped), "data-t-label": "motion.pause" },
+    icon(motion.stopped ? "motionPlay" : "motionPause", 18),
   );
-  pause.addEventListener("click", () => motion.setPaused(!motion.paused));
+  // The button shows the visitor's own pause: in calm the wall's loops still play until it is pressed.
+  pause.addEventListener("click", () => motion.setPaused(!motion.stopped));
   motion.onChange(() => {
-    pause.setAttribute("aria-pressed", String(motion.paused));
-    pause.replaceChildren(icon(motion.paused ? "motionPlay" : "motionPause", 18));
+    pause.setAttribute("aria-pressed", String(motion.stopped));
+    pause.replaceChildren(icon(motion.stopped ? "motionPlay" : "motionPause", 18));
   });
   const cornerLeft = h("div", { class: "ctrl" }, pause);
   const cornerRight = h("div", { class: "dock" });

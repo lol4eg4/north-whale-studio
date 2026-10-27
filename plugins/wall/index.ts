@@ -51,11 +51,12 @@ export default function init(host: Host) {
     t.bind(block, "cursor.drag", "data-cursor");
   });
 
-  // Loops pause while a case is open, motion is paused or calm, or the tab is hidden.
+  // Loops pause while a case is open, the pause button is on, or the tab is hidden. The case
+  // badges play in calm too, as the owner asked; Maria's badge loop stays still in calm.
   let caseOpen = false;
   const videos = createVideos({
     phone: matchMedia("(max-width: 700px)"),
-    blocked: () => caseOpen || motion.paused || motion.calm || document.hidden,
+    blocked: () => caseOpen || motion.stopped || document.hidden,
   });
   host.on("case-opened", () => ((caseOpen = true), videos.update()));
   host.on("case-closed", () => ((caseOpen = false), videos.update()));
@@ -160,7 +161,7 @@ export default function init(host: Host) {
             video.addEventListener("playing", () => spot.classList.add("shown"));
             video.addEventListener("emptied", () => spot.classList.remove("shown"));
             spot.append(video);
-            videos.add(TAG_VIDEO + m.id, el, video, m.video);
+            videos.add(TAG_VIDEO + m.id, el, video, m.video, () => motion.calm);
           }
           el.append(
             h(

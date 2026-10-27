@@ -3,8 +3,9 @@
 //   near (within one viewport) + 2 s after load  -> attach src (max 3 loading at once)
 //   still loading but no longer near              -> drop the source, the slot frees
 //   visible + ready                               -> play (max 6, 4 on phones)
-//   case open, paused, calm, hidden tab           -> pause all, attach nothing
-//   play() refused, error or 20 s without a frame -> poster stays, never retried
+//   case open, pause button on, hidden tab        -> pause all, attach nothing
+//   play() refused without a gesture              -> poster stays until the next tap, click or key
+//   refused even then, error or 20 s without a frame -> poster stays, never retried
 //
 // schedule() is the pure decision; createVideos() keeps the state and does it.
 
@@ -21,7 +22,7 @@ export interface TileState {
 
 export interface Policy {
   armed: boolean; // 2 s have passed since load
-  blocked: boolean; // case open, motion paused or calm, tab hidden
+  blocked: boolean; // case open, pause button on, tab hidden
   maxLoading: number;
   maxPlaying: number;
 }
@@ -63,6 +64,7 @@ export function schedule(tiles: TileState[], p: Policy): Plan {
 
 interface Entry {
   state: TileState;
+  still?: () => boolean; // this loop alone stays still now: it is treated as off screen
   video: HTMLVideoElement;
   src: string;
   stall: number; // timer: a source that brings no data for 20 s gives its slot back
@@ -79,14 +81,14 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   const run = () => {
     queued = false;
     const plan = schedule(
-      entries.map((e) => e.state),
+      entries.map((e) => (e.still?.() ? { ...e.state, near: false, visible: 0 } : e.state)),
       { armed, blocked: opts.blocked(), maxLoading: 3, maxPlaying: opts.phone.matches ? 4 : 6 },
     );
     const get = (id: number) => entries.find((e) => e.state.id === id)!;
     for (const id of plan.pause) pause(get(id));
     for (const id of plan.drop) detach(get(id));
     for (const id of plan.attach) attach(get(id));
-    for (const id of plan.play) play(get(id));
+    if (!refused) for (const id of plan.play) play(get(id));
   };
   const update = () => {
     if (queued) return;
@@ -107,15 +109,34 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
     e.video.src = e.src;
     watch(e);
   };
+  // Autoplay refused (an iPhone in Low Power Mode): every loop waits for the visitor's next tap,
+  // click or key, and plays from inside it, where the browser allows it.
+  let refused = false;
+  let inGesture = false;
   const play = (e: Entry) => {
     e.state.playing = true;
+    const fromGesture = inGesture;
     e.video.play().catch((err: unknown) => {
       // A pause that came first is not a failure.
       if (err instanceof DOMException && err.name === "AbortError") return;
-      // Refused (low-power mode, no autoplay): the poster stays, no retry loop.
-      if (e.state.playing) fail(e);
+      if (!e.state.playing) return;
+      if (!fromGesture && err instanceof DOMException && err.name === "NotAllowedError") {
+        e.state.playing = false;
+        refused = true;
+        return;
+      }
+      // Refused even after a gesture, or broken: the poster stays, no retry loop.
+      fail(e);
     });
   };
+  const gesture = () => {
+    if (!refused) return;
+    refused = false;
+    inGesture = true;
+    run();
+    inGesture = false;
+  };
+  for (const type of ["pointerup", "touchend", "keydown"]) addEventListener(type, gesture, true);
   // No data for 20 s: the slot goes back and the tile tries again later (a slow link keeps going
   // as long as data comes).
   const watch = (e: Entry) => {
@@ -167,9 +188,10 @@ export function createVideos(opts: { phone: MediaQueryList; blocked: () => boole
   else addEventListener("load", arm, { once: true });
 
   return {
-    add(id: number, el: HTMLElement, video: HTMLVideoElement, src: string) {
+    add(id: number, el: HTMLElement, video: HTMLVideoElement, src: string, still?: () => boolean) {
       const e: Entry = {
         state: { id, near: false, visible: 0, attached: false, loading: false, ready: false, playing: false, failed: false },
+        still,
         video,
         src,
         stall: 0,

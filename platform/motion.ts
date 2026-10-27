@@ -20,7 +20,8 @@ export interface PieceInfo {
 
 export interface Motion {
   readonly calm: boolean;
-  readonly paused: boolean;
+  readonly paused: boolean; // the visitor's pause, or calm
+  readonly stopped: boolean; // the visitor's pause button alone: the wall's loops follow it, calm or not
   setPaused(on: boolean): void;
   // While held (the dive is rearranging the wall), nobody picks pieces up.
   readonly held: boolean;
@@ -93,6 +94,9 @@ export function createMotion(memory: Memory, win: Window = window): Motion {
     },
     get paused() {
       return paused || reduce.matches;
+    },
+    get stopped() {
+      return paused;
     },
     spring,
     setPaused(on) {
