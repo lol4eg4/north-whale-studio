@@ -66,17 +66,6 @@
   "phone": true
  },
  {
-  "caseId": 6,
-  "name": {
-   "ru": "Сергей Ибадов",
-   "en": "Sergey Ibadov"
-  },
-  "shape": "pill",
-  "bg": "jellyfish",
-  "fg": "ink",
-  "phone": false
- },
- {
   "caseId": 8,
   "name": {
    "ru": "DeckForge",
@@ -86,5 +75,16 @@
   "bg": "ink",
   "fg": "lemon",
   "phone": true
+ },
+ {
+  "caseId": 9,
+  "name": {
+   "ru": "Skyeng",
+   "en": "Skyeng"
+  },
+  "shape": "pill",
+  "bg": "buoy",
+  "fg": "ink",
+  "phone": false
  }
 ]

@@ -5,7 +5,8 @@ export type { Lang };
 export type TileSize = "xl" | "l" | "t";
 
 export interface CaseItem {
-  id: number;
+  id: number; // the case's address (#case-N) and media names; never reused
+  n: number; // its number on the wall and in the case window: its place in the list, from 1
   client: string;
   what: string | null; // what the studio did, only when the studio's file name says it
   result: string[]; // the lemon plates: what the case achieved, empty when the studio sent none
@@ -50,7 +51,7 @@ export interface CasePage {
   media: string; // label on the video
   sections: { title: string; kicker: string | null; text: string[] }[]; // how we built it; some cases tell it in two parts
   card: { label: string; headline: string; copy: string; hand: string } | null;
-  role: { items: string[]; deliverables: string };
+  role: { items: string[]; deliverables: string | null }; // deliverables: the "What we handed over" line, when the studio wrote one
   results: { items: { value: string; label: string }[]; note: string | null; logos: string | null } | null; // logos: the label over the case's logo row
   links: { label: string; url: string }[];
 }

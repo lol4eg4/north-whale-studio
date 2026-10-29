@@ -1,10 +1,13 @@
 // First screen: kicker, the big headline with its last word on the orange peel sticker,
-// the marker note pointing at it, the lede and the two ways down the page.
+// the marker note pointing at it, the lede, the two ways down the page and the Forbes clipping.
 // Every word is a piece; under the sticker the same word stays printed as an outline.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
+import { media } from "../../platform/media.ts";
 import { h, icon, writeIn } from "../../platform/ui/parts.ts";
+import { logoMark } from "../../platform/ui/tile.ts";
 import type { ContentApi } from "../content/api.ts";
+import { clippingPlace } from "./place.ts";
 import "./style.css";
 
 
@@ -20,6 +23,8 @@ function notePlace(hero: DOMRect, peel: DOMRect, padRight: number, noteWidth = 0
   if (mode === "narrow") return { mode, maxWidth, left: peel.right - hero.left + 8, top: peel.top - hero.top - 14 };
   return { mode, maxWidth, left: peel.right - hero.left + 14, top: peel.top - hero.top + 4 };
 }
+
+const FORBES = "https://forbes.pe/brand-voice/2025-03-12/los-proximos-crypto-revolucionarios-30-under-30-by-kol-capital/";
 
 export default function init(host: Host) {
   const { motion } = host;
@@ -40,13 +45,30 @@ export default function init(host: Host) {
   const watch = h("a", { class: "pill watch", href: "#cases", style: "--r:-1.5deg" }, h("span", { class: "badge", "aria-hidden": "true" }), watchText);
   const howText = h("span");
   const how = h("a", { class: "link-under believe arrowed", href: "#manifesto" }, howText, icon("arrowRight", 18));
+  const forbesBig = h("b", { class: "forbes-big" });
+  const forbesSub = h("span", { class: "mono-s forbes-sub" });
+  const forbesRead = h("span");
+  const forbes = h(
+    "a",
+    { class: "forbes", href: FORBES, target: "_blank", rel: "noopener" },
+    h(
+      "span",
+      { class: "forbes-clip torn" },
+      logoMark({ name: "Forbes", logo: media("/media/press-forbes.svg"), ratio: 3.7, scale: 1 }),
+      forbesBig,
+      forbesSub,
+      h("span", { class: "mono forbes-read arrowed" }, forbesRead, icon("arrowRight", 12)),
+    ),
+  );
+  const side = h("div", { class: "hero-side" }, watch, how);
   const section = h(
     "section",
     { class: "hero", "aria-labelledby": "hero-title" },
     h("div", { class: "kicker mono" }, k1, k2),
     title,
     heroNote,
-    h("div", { class: "hero-row" }, lede, h("div", { class: "hero-side" }, watch, how)),
+    h("div", { class: "hero-row" }, lede, side),
+    forbes,
   );
   host.region("main").append(section);
 
@@ -93,6 +115,36 @@ export default function init(host: Host) {
       const gap = Math.max(parseFloat(getComputedStyle(title).marginBottom), parseFloat(getComputedStyle(lede.parentElement!).marginTop));
       title.style.marginBottom = `${gap + over}px`;
     }
+    placeForbes();
+  };
+
+  // Measured at the hero's corner, tilted, so the box is the one it will take.
+  const placeForbes = () => {
+    // Moving it to another parent drops the keyboard focus: give it back.
+    const focused = document.activeElement === forbes;
+    forbes.classList.remove("flow");
+    if (forbes.parentElement !== section) section.append(forbes);
+    forbes.style.left = forbes.style.top = "0px";
+    const hr = section.getBoundingClientRect();
+    const cs = getComputedStyle(section);
+    // Its box without the visitor's drag (--dx/--dy), which stays on top of the spot.
+    const moved = getComputedStyle(forbes);
+    const r = forbes.getBoundingClientRect();
+    const box = new DOMRect(r.x - (parseFloat(moved.getPropertyValue("--dx")) || 0), r.y - (parseFloat(moved.getPropertyValue("--dy")) || 0), r.width, r.height);
+    const taken = [...section.querySelectorAll<HTMLElement>(".kicker span, .hw, .peel-slot, .hero-note, .lede, .watch, .believe")]
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.width && r.height);
+    const at = clippingPlace(hr, parseFloat(cs.paddingTop), parseFloat(cs.paddingRight), box, taken);
+    if (!at) {
+      forbes.classList.add("flow");
+      forbes.style.left = forbes.style.top = "";
+      side.append(forbes);
+    } else {
+      // The box of the tilted clipping starts a little off its own corner.
+      forbes.style.left = `${at.left - (box.left - hr.left)}px`;
+      forbes.style.top = `${at.top - (box.top - hr.top)}px`;
+    }
+    if (focused && document.activeElement !== forbes) forbes.focus({ preventScroll: true });
   };
 
   host.ready(() => {
@@ -102,6 +154,12 @@ export default function init(host: Host) {
     t.bind(watchText, "hero.watch");
     t.bind(howText, "hero.how");
     t.bind(noteText, "hero.note");
+    t.bind(forbesBig, "hero.forbes");
+    t.bind(forbesSub, "hero.forbesSub");
+    t.bind(forbesRead, "case.read");
+    t.bind(forbes, "hero.forbesLabel", "aria-label");
+    t.bind(forbes, "cursor.read", "data-cursor");
+    motion.add(forbes, { kind: "sticker" });
     for (const el of [k1, k2, lede]) {
       motion.add(el, { kind: "word" });
       t.bind(el, "cursor.drag", "data-cursor");
@@ -113,8 +171,13 @@ export default function init(host: Host) {
     placeNote();
     writeIn(heroNote);
     document.fonts?.ready.then(placeNote);
+    // Fonts a language switch asks for come later and widen the words: place again then.
+    document.fonts?.addEventListener("loadingdone", () => requestAnimationFrame(placeNote));
     let queued = 0; // one placement per frame, however many resize events come
+    let width = innerWidth; // phones resize the height as the address bar hides: nothing moves then
     addEventListener("resize", () => {
+      if (innerWidth === width) return;
+      width = innerWidth;
       cancelAnimationFrame(queued);
       queued = requestAnimationFrame(placeNote);
     });

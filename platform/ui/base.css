@@ -35,3 +35,5 @@ h1, h2, h3, p { margin: 0; }
 .tile.piece.lifted { filter: none; box-shadow: 0 14px 28px rgba(14, 14, 14, 0.22); }
 html.calm .piece { transition: none; }
 html.calm .piece.lifted { rotate: var(--r, 0deg); }
+/* A torn paper edge, top and bottom: the press clippings in a case and the Forbes clipping. */
+.torn { clip-path: polygon(0 5px, 9% 1px, 18% 5px, 29% 0, 41% 4px, 52% 1px, 63% 5px, 74% 0, 86% 4px, 94% 1px, 100% 4px, 100% calc(100% - 3px), 92% calc(100% - 6px), 81% 100%, 69% calc(100% - 5px), 57% calc(100% - 1px), 45% calc(100% - 6px), 33% 100%, 22% calc(100% - 5px), 11% calc(100% - 1px), 0 calc(100% - 5px)); }

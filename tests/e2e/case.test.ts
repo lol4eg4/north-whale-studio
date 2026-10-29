@@ -15,7 +15,9 @@ afterAll(async () => {
   srv?.stop();
 });
 
-const tileSel = (id: number) => `.wall .tile[aria-label^="Кейс ${id}."]`;
+// A tile says its case's place in the list, not its id.
+const ORDER = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+const tileSel = (id: number) => `.wall .tile[aria-label^="Кейс ${ORDER.indexOf(id) + 1}."]`;
 const isOpen = (page: Page) => page.evaluate(() => document.querySelector<HTMLDialogElement>("dialog.case")!.open);
 const waitClosed = (page: Page) => page.waitForFunction(() => !document.querySelector<HTMLDialogElement>("dialog.case")!.open);
 const focusIs = (page: Page, sel: string) => page.evaluate((s) => document.activeElement === document.querySelector(s), sel);
@@ -33,7 +35,7 @@ describe("open and close", () => {
     await openTile(page, 2);
     expect(await title(page)).toBe("AG1");
     expect(await hash(page)).toBe("#case-2");
-    expect(await page.textContent(".case-count")).toBe("Кейс 02 из 08");
+    expect(await page.textContent(".case-count")).toBe("Кейс 02 из 10");
     expect(await focusIs(page, "dialog.case .case-x")).toBe(true);
     await page.keyboard.press("Escape");
     await waitClosed(page);
@@ -74,18 +76,20 @@ describe("open and close", () => {
   test("Next names the next case and opens it without a new history entry; on the last case it leads back to the wall", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     const before = await page.evaluate(() => history.length);
-    await openTile(page, 7);
-    expect(await title(page)).toBe("Антикрус");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: DeckForge");
+    await openTile(page, 10);
+    expect(await title(page)).toBe("Axie Infinity");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Tria");
     await page.click("dialog.case .case-next");
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
-    expect(await hash(page)).toBe("#case-8");
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Tria");
+    expect(await hash(page)).toBe("#case-11");
+    // The studio wrote no "what we handed over" line for Tria: the role card has none.
+    expect(await page.$$eval("dialog.case .case-role p", (els) => els.length)).toBe(0);
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
     expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
     await page.click("dialog.case .case-next");
     await waitClosed(page);
     expect(await hash(page)).toBe("");
-    expect(await focusIs(page, tileSel(8))).toBe(true);
+    expect(await focusIs(page, tileSel(11))).toBe(true);
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -171,7 +175,7 @@ describe("links and history", () => {
     await page.click(".wall .tile");
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
-    expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
+    expect(await page.textContent(".case-count")).toBe("Case 01 of 10");
     expect(await page.textContent("dialog.case .case-next")).toBe("Next: AG1");
     await page.keyboard.press("Escape");
     await waitClosed(page);
@@ -337,7 +341,7 @@ describe("player", () => {
     await context.close();
   });
 
-  for (const id of [3, 6, 8]) {
+  for (const id of [3, 8]) {
     test(`case ${id} opened from its tile plays at once with sound, once through; the sound button mutes it`, async () => {
       const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
       await openTile(page, id);
@@ -368,14 +372,16 @@ describe("player", () => {
     await strict.close();
   });
 
-  test("phone: the case plays in the open case", async () => {
-    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`, phone);
-    await page.waitForFunction(() => {
-      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
-      return !v.paused && v.currentTime > 0;
-    }, null, { timeout: 10000 });
-    expect(errors).toEqual([]);
-    await context.close();
+  test("phone: the case plays in the open case, King's and the three newest", async () => {
+    for (const id of [5, 9, 10, 11]) {
+      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`, phone);
+      await page.waitForFunction(() => {
+        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+        return !v.paused && v.currentTime > 0;
+      }, null, { timeout: 10000 });
+      expect(errors).toEqual([]);
+      await context.close();
+    }
   });
 
   test("the focus ring reads on every case colour (3:1), and inside the torn press clippings", async () => {
@@ -383,9 +389,10 @@ describe("player", () => {
     await page.waitForSelector("dialog.case[open]");
     await page.keyboard.press("Tab"); // keyboard modality, so focus() shows the ring
     const ratios: Record<number, number> = {};
-    for (const id of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    for (const [i, id] of ORDER.entries()) {
       await page.evaluate((n) => (location.hash = `#case-${n}`), id);
-      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.includes(`0${n}`), id);
+      // "Кейс 10 из 10": the number in front, not the total.
+      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.startsWith(`Кейс ${String(n).padStart(2, "0")} `), i + 1);
       await page.focus("dialog.case .case-next");
       ratios[id] = await page.evaluate(() => {
         const lum = (c: string) => {

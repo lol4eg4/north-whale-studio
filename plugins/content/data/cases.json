@@ -176,30 +176,6 @@
   "logos": []
  },
  {
-  "id": 6,
-  "client": {
-   "ru": "Сергей Ибадов",
-   "en": "Sergey Ibadov"
-  },
-  "what": {
-   "ru": "Агент по недвижимости",
-   "en": "Real estate agent"
-  },
-  "result": [
-   {
-    "ru": "Упаковка личного бренда",
-    "en": "Personal brand packaging"
-   }
-  ],
-  "size": "xl",
-  "kind": "video",
-  "sound": true,
-  "vertical": false,
-  "color": "lemon",
-  "press": [],
-  "logos": []
- },
- {
   "id": 7,
   "client": {
    "ru": "Антикрус",
@@ -265,5 +241,77 @@
     "scale": 1
    }
   ]
+ },
+ {
+  "id": 9,
+  "client": {
+   "ru": "Skyeng",
+   "en": "Skyeng"
+  },
+  "what": {
+   "ru": "Онлайн-школа языков",
+   "en": "Online language school"
+  },
+  "result": [
+   {
+    "ru": "Дизайн",
+    "en": "Design"
+   }
+  ],
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "color": "lemon",
+  "press": [],
+  "logos": []
+ },
+ {
+  "id": 10,
+  "client": {
+   "ru": "Axie Infinity",
+   "en": "Axie Infinity"
+  },
+  "what": {
+   "ru": "Web3-игра",
+   "en": "Web3 game"
+  },
+  "result": [
+   {
+    "ru": "Дизайн, ART и сайт",
+    "en": "Design, art and website"
+   }
+  ],
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "color": "signal",
+  "press": [],
+  "logos": []
+ },
+ {
+  "id": 11,
+  "client": {
+   "ru": "Tria",
+   "en": "Tria"
+  },
+  "what": {
+   "ru": "Крипто-необанк",
+   "en": "Crypto neobank"
+  },
+  "result": [
+   {
+    "ru": "Сайт и UI/UX приложения",
+    "en": "Website and app UI/UX"
+   }
+  ],
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "color": "paper",
+  "press": [],
+  "logos": []
  }
 ]

@@ -28,8 +28,24 @@
 .hero .watch { font-size: 20px; padding: 10px 22px 10px 10px; min-height: 44px; background: var(--paper); box-shadow: var(--die); border: 2px solid var(--ink); transition: background 0.2s, scale 0.25s; }
 .hero .watch .badge { width: 34px; height: 34px; }
 .hero .believe { font-size: 18px; }
+/* Forbes 30 Under 30: an ink press clipping with a torn edge, like «В прессе» in the open case,
+   stuck at the hero's right edge (index.ts finds the spot). The shadow follows the torn edge,
+   which lives in platform/ui/base.css (.torn). */
+.hero .forbes { position: absolute; left: 0; top: 0; z-index: 3; display: block; width: clamp(160px, 26vw - 100px, 300px); container-type: inline-size; color: var(--paper); text-decoration: none; --r: 4deg; filter: drop-shadow(0 0 1px rgba(14, 14, 14, 0.35)) drop-shadow(0 6px 8px rgba(14, 14, 14, 0.18)); transition: rotate 0.3s var(--ease-spring), scale 0.3s var(--ease-spring); }
+.forbes-clip { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(4px, 0.5vw, 8px); padding: clamp(16px, 1.5vw, 24px) clamp(14px, 1.4vw, 22px) clamp(14px, 1.3vw, 20px); background: var(--ink); }
+.forbes .logo-mark { --lh: clamp(26px, 2.6vw, 40px); }
+/* One line: sized by the clipping's width. */
+.forbes-big { font: 900 11.6cqi/0.95 var(--display); letter-spacing: -0.02em; text-transform: uppercase; white-space: nowrap; }
+.forbes-sub { color: rgba(255, 255, 255, 0.7); }
+.forbes-read { margin-top: 2px; text-decoration: underline var(--lemon) 2px; text-underline-offset: 0.18em; }
+/* Phones, and no free spot beside the text: in the buttons' row. */
+/* Tilted before it becomes a piece too: a tilt that eased in after load would be measured half-way. */
+.hero .forbes:not(.piece) { rotate: var(--r); }
+.hero .forbes.flow { position: relative; }
+html.calm .hero .forbes { transition: none; }
 @media (hover: hover) {
   .hero .watch:hover { background: var(--lemon); }
+  .hero .forbes:not(.lifted):hover { --r: 1deg; scale: 1.04; }
 }
 @media (max-width: 860px) {
   .hero-row { grid-template-columns: 1fr; }
@@ -45,4 +61,23 @@
   .hero .watch { font-size: 16px; padding: 6px 16px 6px 6px; }
   .hero .watch .badge { width: 28px; height: 28px; }
   .hero .believe { font-size: 16px; }
+  /* Phones: the logo and the line only, small enough for the room beside the headline. */
+  .hero .forbes { width: 134px; --r: 3deg; }
+  .forbes-clip { gap: 3px; padding: 8px 10px 8px; }
+  .forbes .logo-mark { --lh: 16px; }
+  .forbes-big { font-size: 11.4cqi; }
+  .forbes :is(.forbes-sub, .forbes-read) { display: none; }
+  /* No room beside the headline: the buttons one under the other, the clipping beside them. */
+  .hero-side:has(> .forbes) { display: grid; grid-template-columns: max-content 1fr; gap: 10px 12px; }
+  .hero-side:has(> .forbes) :is(.watch, .believe) { grid-column: 1; justify-self: start; }
+  .hero .forbes.flow { grid-column: 2; grid-row: 1 / span 2; justify-self: end; align-self: center; }
+}
+/* Small phones: no room beside both buttons, the clipping goes beside the second one. */
+@media (max-width: 380px) {
+  .hero-side:has(> .forbes) .watch { grid-column: 1 / -1; }
+  .hero .forbes.flow { grid-row: 2; }
+}
+/* The smallest: a smaller clipping, so it stays on the first screen of a 320 x 568 phone. */
+@media (max-width: 340px) {
+  .hero .forbes.flow { width: 116px; }
 }

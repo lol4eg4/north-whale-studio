@@ -1,6 +1,6 @@
 // Cursor label colours (T§4.11 with the site's tokens). Owners write the translated label into
 // data-cursor; the cursor finds which key that label is and paints the pill for it.
-export const CURSOR_KEYS = ["open", "drag", "dragging", "write", "close", "pull", "dive", "spin", "tidy", "meet", "play", "hi"] as const;
+export const CURSOR_KEYS = ["open", "drag", "dragging", "write", "close", "pull", "dive", "spin", "tidy", "meet", "play", "hi", "read"] as const;
 export type CursorKey = (typeof CURSOR_KEYS)[number];
 
 export interface Colors {
@@ -12,6 +12,7 @@ export function cursorColors(key: CursorKey | undefined): Colors {
   switch (key) {
     case "open":
     case "close":
+    case "read":
       return { bg: "var(--ink)", fg: "var(--paper)" };
     case "drag":
     case "dragging":
