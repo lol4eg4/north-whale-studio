@@ -38,8 +38,9 @@ describe("language", () => {
 
 describe("cases", () => {
   const cases = store("ru").cases();
-  test("eight cases in the studio's order, complete, with existing media names", () => {
-    expect(cases.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  test("ten cases in the studio's order, numbered from 1 without a gap, complete, with existing media names", () => {
+    expect(cases.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
+    expect(cases.map((c) => c.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     for (const c of cases) {
       expect(c.client).not.toBe("");
       expect(["xl", "l", "t"]).toContain(c.size);
@@ -48,7 +49,7 @@ describe("cases", () => {
     }
     expect(cases.every((c) => c.kind === "video" && c.media.ring === `/media/c${c.id}-ring.mp4`)).toBe(true);
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
-    expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 6, 8]);
+    expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 8]);
     expect(cases.find((c) => c.id === 8)!.size).toBe("xl");
     for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape", "royal"]).toContain(c.color);
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
@@ -74,7 +75,10 @@ describe("cases", () => {
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. Премиум БАДы. 200% средняя окупаемость рекламы");
     expect(store("en").caseById(4)!.sr).toBe("Case 4. Mabrook. Super app. Website redesign");
-    expect(store("ru").caseById(9)).toBeUndefined();
+    // The number is the case's place on the wall: Антикрус (id 7) is the sixth since case 6 was taken off.
+    expect(store("ru").caseById(7)!.sr).toBe("Кейс 6. Антикрус. Аукционный дом. Полный цикл ребрендинга");
+    expect(store("ru").caseById(6)).toBeUndefined();
+    expect(store("ru").caseById(12)).toBeUndefined();
   });
 
   test("case pages: same cases and same shape in both languages, real links, closed highlights", () => {
@@ -83,14 +87,14 @@ describe("cases", () => {
       if (!p) return null;
       return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
     };
-    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
     for (const c of cases) {
       expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
       const p = c.page;
       if (!p) continue;
       expect(p.sections.length).toBeGreaterThan(0);
-      for (const v of [p.eyebrow, p.client, p.category, p.lead, p.media, ...p.sections.map((x) => x.title), p.role.deliverables]) expect(v.trim()).not.toBe("");
-      const texts = [p.lead, ...p.sections.flatMap((x) => x.text), p.card?.copy ?? "", p.role.deliverables];
+      for (const v of [p.eyebrow, p.client, p.category, p.lead, p.media, ...p.sections.map((x) => x.title), p.role.deliverables ?? "-"]) expect(v.trim()).not.toBe("");
+      const texts = [p.lead, ...p.sections.flatMap((x) => x.text), p.card?.copy ?? "", p.role.deliverables ?? ""];
       for (const t of texts) expect(t.split("==").length % 2, t).toBe(1);
       for (const l of p.links) expect(l.url).toMatch(/^https:\/\//);
     }

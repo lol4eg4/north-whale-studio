@@ -110,3 +110,31 @@ test("the served page carries the bug widget loader; the export leaves it out", 
   if (process.env.E2E_EXPORT) expect(html).not.toContain("widget.js");
   else expect(html).toContain("widget.js");
 });
+
+test("the Forbes 30 Under 30 clipping: on the first screen at every width, clear of the headline, the note and the buttons; opens the article in a new tab", async () => {
+  const ARTICLE = "https://forbes.pe/brand-voice/2025-03-12/los-proximos-crypto-revolucionarios-30-under-30-by-kol-capital/";
+  for (const lang of ["ru", "en"])
+    for (const width of [320, 360, 390, 768, 1024, 1280, 1440]) {
+      const options = width <= 700 ? { ...phone, viewport: { width, height: 844 } } : { viewport: { width, height: 900 } };
+      const { context, page, errors } = await open(browser, `${server.url}/?lang=${lang}`, options);
+      const r = await page.evaluate(() => {
+        const a = document.querySelector<HTMLAnchorElement>(".hero a.forbes")!;
+        const f = a.getBoundingClientRect();
+        const hits = [...document.querySelectorAll(".hero .kicker span, .hero .hw, .hero .peel-slot, .hero .hero-note, .hero .lede, .hero .watch, .hero .believe")]
+          .filter((e) => {
+            const o = e.getBoundingClientRect();
+            return o.width > 0 && o.left < f.right && o.right > f.left && o.top < f.bottom && o.bottom > f.top;
+          })
+          .map((e) => e.textContent);
+        return { href: a.href, target: a.target, rel: a.rel, label: a.getAttribute("aria-label"), logo: a.querySelector(".logo-mark")?.getAttribute("aria-label"), big: a.querySelector(".forbes-big")!.textContent, hits, inView: f.top >= 0 && f.bottom <= innerHeight && f.left >= 0 && f.right <= innerWidth };
+      });
+      expect(r.href).toBe(ARTICLE);
+      expect([r.target, r.rel]).toEqual(["_blank", "noopener"]);
+      expect(r.label).toContain("Forbes 30 Under 30");
+      expect([r.logo, r.big]).toEqual(["Forbes", "30 Under 30"]);
+      expect(r.hits, `${lang} ${width}: covers`).toEqual([]);
+      expect(r.inView, `${lang} ${width}: on the first screen`).toBe(true);
+      expect(errors).toEqual([]);
+      await context.close();
+    }
+});

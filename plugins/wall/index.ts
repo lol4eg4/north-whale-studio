@@ -110,7 +110,7 @@ export default function init(host: Host) {
 
     const tileText = (c: CaseItem) => ({
       label: c.sr,
-      number: api.format("wall.number", { n: two(c.id) }),
+      number: api.format("wall.number", { n: two(c.n) }),
       kicker: c.what ?? api.text("wall.watch"),
       title: c.client,
       result: c.result,

@@ -50,7 +50,7 @@ test("iPhone: loads clean, no custom cursor, touch copy, loops muted and inline"
   const videos = await page.evaluate(() =>
     [...document.querySelectorAll<HTMLVideoElement>(".wall video")].map((v) => ({ muted: v.muted, inline: v.playsInline })),
   );
-  expect(videos.length).toBe(9); // 8 case loops and Maria's badge
+  expect(videos.length).toBe(11); // 10 case loops and Maria's badge
   for (const v of videos) expect(v).toEqual({ muted: true, inline: true });
   expect(errors).toEqual([]);
   await context.close();

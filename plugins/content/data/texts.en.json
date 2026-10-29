@@ -24,8 +24,11 @@
  "hero.lede": "Websites, brand packaging, ads, 3D and trailers. Everything to make you memorable at first sight.",
  "hero.watch": "See the cases",
  "hero.how": "How we work",
+ "hero.forbes": "30 Under 30",
+ "hero.forbesSub": "Crypto & blockchain · 2025",
+ "hero.forbesLabel": "Forbes 30 Under 30: the article on forbes.pe, opens in a new tab",
  "wall.brands": "Our clients",
- "wall.title": "The wall · 8 cases, all live",
+ "wall.title": "The wall · 10 cases, all live",
  "wall.note": "You can move the pieces on the wall too",
  "wall.hintFine": "Drag anything. The whale doesn’t mind.",
  "wall.hintCoarse": "Hold anything to drag it. The whale doesn’t mind.",
@@ -134,5 +137,6 @@
  "cursor.meet": "meet",
  "cursor.play": "play",
  "cursor.hi": "hi",
+ "cursor.read": "read",
  "case.label": "Case {n}"
 }

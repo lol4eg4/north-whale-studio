@@ -3,7 +3,7 @@
 // On desktop it reads in bands of three rows, each one or two big cells and a column or block
 // of stickers; the team block and the clients' sheet close it in two rows, nothing hangs below.
 export type Slot =
-  | { k: "tile"; id: number; narrow?: boolean } // narrow: 3 columns on tablet, beside the next tile
+  | { k: "tile"; id: number; narrow?: boolean } // narrow: 3 columns on tablet, beside another 3-column tile
   | { k: "dive" }
   | { k: "tag"; i: number } // team badge, index into team()
   | { k: "client"; i: number } // index into clients()
@@ -44,18 +44,21 @@ export const W: Slot[] = [
   { k: "deeper" },
   { k: "client", i: 3 },
   { k: "tile", id: 5 },
-  { k: "tile", id: 6, narrow: true },
+  { k: "tile", id: 9, narrow: true },
   // Antiquerus, DeckForge and a column: the last badge, two clients.
   { k: "tile", id: 7 },
   { k: "tile", id: 8 },
   { k: "tag", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
+  // Axie Infinity and Tria side by side; on tablets each is 3 columns wide.
+  { k: "tile", id: 10, narrow: true },
+  { k: "tile", id: 11, narrow: true },
   // Two rows close the wall: the team block, the clients' sheet and the last two clients.
   { k: "team" },
   { k: "sheet" },
-  { k: "client", i: 6 },
   { k: "client", i: 7 },
+  { k: "client", i: 6 },
 ];
 
 // Same tilt on every visit: mulberry32 seeded 21, one draw per sticker in DOM order, ±7 deg.

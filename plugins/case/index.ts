@@ -100,7 +100,7 @@ export default function init(host: Host) {
       { class: "case-card case-role" },
       h("h3", { class: "case-tag" }, text("case.role")),
       h("ul", { class: "case-pills" }, ...p.role.items.map((r) => h("li", {}, r))),
-      h("p", {}, `${text("case.deliverables")} ${p.role.deliverables}`),
+      p.role.deliverables && h("p", {}, `${text("case.deliverables")} ${p.role.deliverables}`),
     ),
     p.results &&
       h(
@@ -116,7 +116,7 @@ export default function init(host: Host) {
         "section",
         { class: "case-press" },
         h("h3", { class: "mono" }, text("case.press")),
-        h("div", { class: "case-clips" }, ...c.press.map((m) => h("a", { class: "case-clip", href: m.url, target: "_blank", rel: "noopener" }, logoMark(m), h("span", { class: "case-clip-t" }, m.title), h("span", { class: "mono" }, `${text("case.read")} →`)))),
+        h("div", { class: "case-clips" }, ...c.press.map((m) => h("a", { class: "case-clip torn", href: m.url, target: "_blank", rel: "noopener" }, logoMark(m), h("span", { class: "case-clip-t" }, m.title), h("span", { class: "mono" }, `${text("case.read")} →`)))),
       ),
     p.links.length > 0 && h("p", { class: "case-out" }, ...p.links.map((l) => h("a", { href: l.url, target: "_blank", rel: "noopener" }, `${l.label} →`))),
   ].filter((x): x is HTMLElement => !!x);

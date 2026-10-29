@@ -219,35 +219,6 @@
    }
   ]
  },
- "6": {
-  "eyebrow": "Sergey Ibadov · Real Estate Agent",
-  "client": "Sergey Ibadov",
-  "category": "Personal Branding, Website",
-  "lead": "In real estate, people don’t choose an agency. They choose a person. We turned Sergey into the agent clients trust before the first viewing.",
-  "media": "The brand",
-  "sections": [
-   {
-    "title": "How we built it",
-    "kicker": "Positioning · Identity · Website",
-    "text": [
-     "Buying or selling a home is one of the biggest decisions people make, and they want someone they can rely on. We built Sergey’s brand around that: ==a clear position, a calm, confident look== and one tone of voice across the website, social and listings.",
-     "The website has one job: more inquiries. It shows his properties and closed deals, explains how he works and makes it easy to book a call. New clients ==arrive already trusting him==, so the first meeting starts with the property, not the pitch."
-    ]
-   }
-  ],
-  "card": null,
-  "role": {
-   "items": [
-    "Positioning",
-    "Branding",
-    "Web Design",
-    "Development"
-   ],
-   "deliverables": "the personal brand identity and a website built to generate inquiries."
-  },
-  "results": null,
-  "links": []
- },
  "7": {
   "eyebrow": "Antiquerus · Moscow, Paris, Dubai",
   "client": "Antiquerus",
@@ -348,5 +319,120 @@
    "logos": "Official partners"
   },
   "links": []
+ },
+ "9": {
+  "eyebrow": "Skyeng · Online language school",
+  "client": "Skyeng",
+  "category": "Design",
+  "lead": "Almost 900,000 students from 45 countries and more than 7,000 teachers. A school this size needs design that speaks to everyone the way a one-on-one lesson does.",
+  "media": "The website",
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Structure · Interface · Visual language",
+    "text": [
+     "Skyeng is not one course but a whole ecosystem: one-on-one lessons, speaking clubs, short chats with native speakers, an AI trainer, an app and eleven languages. We brought it together in ==one visual language==, where every product is recognizable at a glance and together they look like one school.",
+     "The design leads a person from “where do I start” to ==booking a free lesson==: goal, program, teacher, price. Less noise, more clarity, and the decision comes faster."
+    ]
+   }
+  ],
+  "card": {
+   "label": "One school",
+   "headline": "11 languages. 7,000+ teachers. One visual language.",
+   "copy": "Adults and kids, English for IT and Turkish for a holiday, premium and mini-groups: each track has its own voice, but ==the rules are the same==.",
+   "hand": "Like a good lesson: nothing extra."
+  },
+  "role": {
+   "items": [
+    "Web Design",
+    "UX/UI Design",
+    "Design System"
+   ],
+   "deliverables": null
+  },
+  "results": null,
+  "links": [
+   {
+    "label": "Visit skyeng.ru",
+    "url": "https://skyeng.ru/"
+   }
+  ]
+ },
+ "10": {
+  "eyebrow": "Axie Infinity · Lunacia",
+  "client": "Axie Infinity",
+  "category": "Design, art, website",
+  "lead": "The game that brought millions of people to blockchain starts with cute creatures, the Axies. We gave them a world you want to step into and a website where that world comes alive.",
+  "media": "The website",
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Design · Art · Website",
+    "text": [
+     "Axie is a whole ecosystem: Axies can be collected, sent into battle and used in new games. The new chapter, Atia’s Legacy, brings players back to Lunacia, the land where gods once lived. We built the website as ==a gateway into this universe==: ancient ruins, mystic forests, a dream world and the Axies up front.",
+     "The art sets the tone: warm nostalgia, rich color and characters you want to take home. The website explains complex technology ==through a simple game==: play, collect, own."
+    ]
+   }
+  ],
+  "card": {
+   "label": "One world",
+   "headline": "2.2M+ Axies. 229K+ owners. One Lunacia.",
+   "copy": "The illustrations, the interface and the website share ==one visual language==, so the game’s world is recognizable everywhere: on the website, on social media and in the game itself.",
+   "hand": "Cute outside. Fierce in battle."
+  },
+  "role": {
+   "items": [
+    "Web Design",
+    "Development",
+    "Art",
+    "Illustration"
+   ],
+   "deliverables": null
+  },
+  "results": null,
+  "links": [
+   {
+    "label": "Visit axieinfinity.com",
+    "url": "https://axieinfinity.com/"
+   }
+  ]
+ },
+ "11": {
+  "eyebrow": "Tria · Neofinance",
+  "client": "Tria",
+  "category": "Design, website, app UI/UX",
+  "lead": "Crypto still scares people: networks, bridges, gas fees. Tria makes it feel like ordinary money, and the design had to do the same.",
+  "media": "The website",
+  "sections": [
+   {
+    "title": "How we built it",
+    "kicker": "Design · Website · App",
+    "text": [
+     "Tria does a lot: a Visa card for payments in 150+ countries, yield on idle assets, perpetuals trading, transfers across 200+ networks. The website tells it ==one feature per screen==: pay, earn, trade. Then it leads to choosing a card.",
+     "In the app we ==hid the blockchain behind familiar actions==. The user sees an amount and a button, and the app finds the best transfer route on its own. The main thing stays in sight: the keys always stay with the user."
+    ]
+   }
+  ],
+  "card": {
+   "label": "One app",
+   "headline": "500K+ users. 150+ countries. 200+ networks.",
+   "copy": "The website and the app were ==designed together==, so the promise on the website’s first screen is what a person gets in their first minute in the app.",
+   "hand": "Crypto you can finally use."
+  },
+  "role": {
+   "items": [
+    "Web Design",
+    "Development",
+    "App UX/UI Design"
+   ],
+   "deliverables": null
+  },
+  "results": null,
+  "links": [
+   {
+    "label": "Visit tria.so",
+    "url": "https://tria.so/"
+   }
+  ]
  }
 }
