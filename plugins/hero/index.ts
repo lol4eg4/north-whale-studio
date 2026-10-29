@@ -46,7 +46,7 @@ export default function init(host: Host) {
   const howText = h("span");
   const how = h("a", { class: "link-under believe arrowed", href: "#manifesto" }, howText, icon("arrowRight", 18));
   const forbesBig = h("b", { class: "forbes-big" });
-  const forbesSub = h("span", { class: "mono forbes-sub" });
+  const forbesSub = h("span", { class: "mono-s forbes-sub" });
   const forbesRead = h("span");
   const forbes = h(
     "a",
@@ -137,6 +137,7 @@ export default function init(host: Host) {
     const at = clippingPlace(hr, parseFloat(cs.paddingTop), parseFloat(cs.paddingRight), box, taken);
     if (!at) {
       forbes.classList.add("flow");
+      forbes.style.left = forbes.style.top = "";
       side.append(forbes);
     } else {
       // The box of the tilted clipping starts a little off its own corner.
@@ -170,8 +171,13 @@ export default function init(host: Host) {
     placeNote();
     writeIn(heroNote);
     document.fonts?.ready.then(placeNote);
+    // Fonts a language switch asks for come later and widen the words: place again then.
+    document.fonts?.addEventListener("loadingdone", () => requestAnimationFrame(placeNote));
     let queued = 0; // one placement per frame, however many resize events come
+    let width = innerWidth; // phones resize the height as the address bar hides: nothing moves then
     addEventListener("resize", () => {
+      if (innerWidth === width) return;
+      width = innerWidth;
       cancelAnimationFrame(queued);
       queued = requestAnimationFrame(placeNote);
     });

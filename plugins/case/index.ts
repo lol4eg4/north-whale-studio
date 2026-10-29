@@ -1,6 +1,6 @@
 // Open case: a native modal dialog over the wall, kept in step with the address (history.ts).
 //
-//   [ media frame + player ][ North Whale Studio · Кейс 03 из 08     [× Назад к стене Esc] ]
+//   [ media frame + player ][ North Whale Studio · Кейс 03 из 10     [× Назад к стене Esc] ]
 //   [                      ][ eyebrow / client / client · category / lead                 ]
 //   [                      ][ how we did it, cards: one batch, our role, results; links    ]
 //   [                      ][ [Дальше: <next case> →] [Написать нам] Скопировать ссылку    ]
@@ -122,9 +122,7 @@ export default function init(host: Host) {
   ].filter((x): x is HTMLElement => !!x);
 
   const render = (c: CaseItem) => {
-    const all = content().cases();
-    const i = all.findIndex((x) => x.id === c.id);
-    counter.textContent = content().format("case.counter", { n: two(i + 1), total: two(all.length) });
+    counter.textContent = content().format("case.counter", { n: two(c.n), total: two(content().cases().length) });
     panel.dataset.bg = c.color;
     panel.style.setProperty("--case-bg", `var(--${c.color})`);
     panel.classList.toggle("on-ink", dark.has(c.color));

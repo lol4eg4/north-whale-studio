@@ -82,6 +82,8 @@ describe("open and close", () => {
     await page.click("dialog.case .case-next");
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Tria");
     expect(await hash(page)).toBe("#case-11");
+    // The studio wrote no "what we handed over" line for Tria: the role card has none.
+    expect(await page.$$eval("dialog.case .case-role p", (els) => els.length)).toBe(0);
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
     expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
     await page.click("dialog.case .case-next");
@@ -387,9 +389,10 @@ describe("player", () => {
     await page.waitForSelector("dialog.case[open]");
     await page.keyboard.press("Tab"); // keyboard modality, so focus() shows the ring
     const ratios: Record<number, number> = {};
-    for (const [i, id] of [1, 2, 3, 4, 5, 7, 8, 9, 10, 11].entries()) {
+    for (const [i, id] of ORDER.entries()) {
       await page.evaluate((n) => (location.hash = `#case-${n}`), id);
-      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.includes(String(n).padStart(2, "0")), i + 1);
+      // "Кейс 10 из 10": the number in front, not the total.
+      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.startsWith(`Кейс ${String(n).padStart(2, "0")} `), i + 1);
       await page.focus("dialog.case .case-next");
       ratios[id] = await page.evaluate(() => {
         const lum = (c: string) => {

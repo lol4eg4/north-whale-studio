@@ -85,7 +85,7 @@ describe("cases", () => {
     const shape = (id: number, lang: "ru" | "en") => {
       const p = store(lang).caseById(id)!.page;
       if (!p) return null;
-      return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
+      return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.role.deliverables === null, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
     };
     expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
     for (const c of cases) {

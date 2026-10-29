@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import cases from "../../content/data/cases.json";
 import { isSticker, starPoints, tilts, W } from "../layout.ts";
 
 describe("wall order", () => {
@@ -17,7 +18,7 @@ describe("wall order", () => {
     expect(W.flatMap((s) => (s.k === "svc" && s.wide ? [s.id] : []))).toEqual([2]);
     expect(W.flatMap((s) => (s.k === "tile" && s.narrow ? [s.id] : []))).toEqual([8, 10, 11]);
     // The tiles read in the cases' order, so their numbers go up down the wall.
-    expect(W.flatMap((s) => (s.k === "tile" ? [s.id] : []))).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
+    expect(W.flatMap((s) => (s.k === "tile" ? [s.id] : []))).toEqual(cases.map((c) => c.id));
   });
 
   test("the wall closes with the team block, the clients' sheet and two clients", () => {

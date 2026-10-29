@@ -44,9 +44,10 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
       const what = c.what ? local(c.what) : null;
       const result = c.result.map(local);
       const still = c.kind === "still";
+      const n = i + 1;
       return {
         id: c.id,
-        n: i + 1,
+        n,
         client,
         what,
         result,
@@ -67,7 +68,7 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         },
         story: { task: text("case.task"), did: text("case.did"), result: text("case.result") },
         page: pages[getLang()][c.id] ?? null,
-        sr: [format("case.label", { n: i + 1 }), client, what, ...result, c.press.length ? `${text("case.seenIn")}: ${c.press.map((p) => p.name).join(", ")}` : null]
+        sr: [format("case.label", { n }), client, what, ...result, c.press.length ? `${text("case.seenIn")}: ${c.press.map((p) => p.name).join(", ")}` : null]
           .filter(Boolean)
           .join(". "),
       };

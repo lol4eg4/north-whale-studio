@@ -112,23 +112,24 @@ test("the served page carries the bug widget loader; the export leaves it out", 
 });
 
 // The Forbes clipping: what it covers among the hero's words, the note and the buttons, and
-// whether it is whole on the first screen.
+// whether it is whole on the first screen, inside the page's side margins (12 px at least).
 const forbesSpot = (page: Page) =>
   page.evaluate(() => {
-    const f = document.querySelector(".hero a.forbes")!.getBoundingClientRect();
+    const a = document.querySelector(".hero a.forbes")!;
+    const f = a.getBoundingClientRect();
     const hits = [...document.querySelectorAll(".hero .kicker span, .hero .hw, .hero .peel-slot, .hero .hero-note, .hero .lede, .hero .watch, .hero .believe")]
       .filter((e) => {
         const o = e.getBoundingClientRect();
         return o.width > 0 && o.left < f.right && o.right > f.left && o.top < f.bottom && o.bottom > f.top;
       })
       .map((e) => e.textContent);
-    return { hits, inView: f.top >= 0 && f.bottom <= innerHeight && f.left >= 0 && f.right <= innerWidth };
+    return { hits, inView: f.top >= 0 && f.bottom <= innerHeight && f.left >= 12 && f.right <= innerWidth - 12, flow: a.classList.contains("flow"), at: [Math.round(f.left), Math.round(f.top)] };
   });
 
-test("the Forbes 30 Under 30 clipping: on the first screen at every width, clear of the headline, the note and the buttons; opens the article in a new tab", async () => {
+test("the Forbes 30 Under 30 clipping: on the first screen at every width, clear of the headline, the note and the buttons; links to the article in a new tab", async () => {
   const ARTICLE = "https://forbes.pe/brand-voice/2025-03-12/los-proximos-crypto-revolucionarios-30-under-30-by-kol-capital/";
-  // Phones, tablets, laptops (two of them short), wide screens.
-  const views = [[320, 844], [360, 844], [390, 844], [768, 900], [1024, 900], [1280, 720], [1280, 900], [1366, 768], [1440, 900], [1920, 1080]];
+  // Phones (two of them small), tablets, laptops (two of them short), wide screens.
+  const views = [[320, 568], [320, 844], [360, 844], [375, 667], [390, 844], [768, 900], [1024, 900], [1280, 720], [1280, 900], [1366, 768], [1440, 900], [1920, 1080]];
   for (const lang of ["ru", "en"])
     for (const [width, height] of views) {
       const options = width <= 700 ? { ...phone, viewport: { width, height } } : { viewport: { width, height } };
@@ -151,25 +152,38 @@ test("the Forbes 30 Under 30 clipping: on the first screen at every width, clear
 
 test("the Forbes clipping finds a new spot after a language switch and a resize, and keeps the keyboard focus", async () => {
   const frames = (page: Page) => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
-  // 1440 px: the English headline wraps otherwise, so the spot moves.
+  // 1440 px: the English headline wraps otherwise, so the spot moves to where a fresh English page has it.
   {
-    const { context, page, errors } = await open(browser, `${server.url}/?lang=ru`, { viewport: { width: 1440, height: 900 } });
+    const desktop = { viewport: { width: 1440, height: 900 } };
+    const fresh = await open(browser, `${server.url}/?lang=en`, desktop);
+    const want = await forbesSpot(fresh.page);
+    await fresh.context.close();
+    const { context, page, errors } = await open(browser, `${server.url}/?lang=ru`, desktop);
+    const before = await forbesSpot(page);
     await page.locator(".nav .lang button[lang=en]").click();
     await page.waitForFunction(() => document.documentElement.lang === "en");
     await frames(page);
-    expect(await forbesSpot(page)).toEqual({ hits: [], inView: true });
+    const after = await forbesSpot(page);
+    expect(after).toEqual(want);
+    expect(after.at).not.toEqual(before.at);
+    expect(after.hits).toEqual([]);
     expect(errors).toEqual([]);
     await context.close();
   }
   // Phones: at 360 and 430 px it stands beside the buttons, at 390 px beside the headline.
   const { context, page, errors } = await open(browser, `${server.url}/?lang=ru`, { ...phone, viewport: { width: 360, height: 844 } });
   await page.focus(".hero a.forbes");
+  const flow: boolean[] = [];
   for (const width of [390, 430, 1280, 360]) {
     await page.setViewportSize({ width, height: width > 700 ? 900 : 844 });
     await frames(page);
-    expect(await forbesSpot(page), `${width}`).toEqual({ hits: [], inView: true });
+    const spot = await forbesSpot(page);
+    expect([spot.hits, spot.inView], `${width}`).toEqual([[], true]);
     expect(await page.evaluate(() => document.activeElement?.classList.contains("forbes")), `${width}: focus`).toBe(true);
+    flow.push(spot.flow);
   }
+  // It really moved between the buttons and the headline.
+  expect(new Set(flow)).toEqual(new Set([true, false]));
   expect(errors).toEqual([]);
   await context.close();
 });

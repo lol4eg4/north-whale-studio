@@ -58,7 +58,7 @@ export const W: Slot[] = [
   // Two rows close the wall: the team block, the clients' sheet and the last two clients.
   { k: "team" },
   { k: "sheet" },
-  { k: "client", i: 7 },
+  { k: "client", i: 7 }, // Skyeng, where Sergey Ibadov's sticker was
   { k: "client", i: 6 },
 ];
 

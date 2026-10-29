@@ -5,6 +5,7 @@ describe("cursor", () => {
   test("label colours follow the key", () => {
     expect(cursorColors("open")).toEqual({ bg: "var(--ink)", fg: "var(--paper)" });
     expect(cursorColors("close")).toEqual({ bg: "var(--ink)", fg: "var(--paper)" });
+    expect(cursorColors("read")).toEqual({ bg: "var(--ink)", fg: "var(--paper)" });
     for (const k of ["drag", "pull", "tidy", "dragging"] as const) expect(cursorColors(k)).toEqual({ bg: "var(--buoy)", fg: "var(--ink)" });
     for (const k of ["write", "hi", "meet", "play"] as const) expect(cursorColors(k)).toEqual({ bg: "var(--jellyfish)", fg: "var(--ink)" });
     for (const k of ["dive", "spin"] as const) expect(cursorColors(k)).toEqual({ bg: "var(--cobalt)", fg: "var(--paper)" });

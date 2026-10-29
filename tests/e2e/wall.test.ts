@@ -87,7 +87,7 @@ describe("wall layout", () => {
     await context.close();
   });
 
-  test("tablet (768 px): DeckForge is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+  test("tablet (768 px): DeckForge is 3 columns wide beside Антикрус, Axie Infinity beside Tria, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
     // Columns and rows a cell takes, from its box and the wall's grid tracks.
     const span = (sel: string) =>
@@ -100,7 +100,11 @@ describe("wall layout", () => {
         const r = document.querySelector(s)!.getBoundingClientRect();
         return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
       }, sel);
-    expect(await span(".wall > .t3")).toEqual([3, 3]);
+    // DeckForge, Axie Infinity and Tria (cases 7, 9 and 10 on the wall) are 3x3; the last two share a row.
+    const t3 = (n: number) => `.wall > .t3:has(.tile[aria-label^="Кейс ${n}."])`;
+    for (const n of [7, 9, 10]) expect(await span(t3(n)), `case ${n}`).toEqual([3, 3]);
+    const top = (n: number) => page.$eval(t3(n), (e) => Math.round(e.getBoundingClientRect().top));
+    expect(await top(9)).toBe(await top(10));
     expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
     // «Привет!» fits the narrow strip: the block clips what overflows.
     for (const width of [701, 768, 1024, 1100]) {
