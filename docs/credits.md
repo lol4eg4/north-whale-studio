@@ -65,7 +65,7 @@ Publications (Waldorf Astoria Berlin, "As seen in" and "In the press"):
 
 Publications (the Forbes 30 Under 30 clipping on the first screen), accessed 2026-10-29:
 
-- `press-forbes.svg`: Wikimedia Commons, `Forbes_logo.svg` (public domain, text logo), recoloured to ink.
+- `press-forbes.svg`: Wikimedia Commons, `Forbes_logo.svg` (public domain, text logo), drawn in one colour through a CSS mask.
 
 Partners (DeckForge, "Official partners"):
 
