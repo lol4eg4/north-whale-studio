@@ -12,10 +12,12 @@ describe("wall order", () => {
     expect(W.filter((s) => s.k === "dive").length).toBe(1);
   });
 
-  test("badges come in team order down the wall; one service sticker is wide; Skyeng, Axie Infinity and Tria are the tablet's narrow tiles", () => {
+  test("badges come in team order down the wall; one service sticker is wide; DeckForge, Axie Infinity and Tria are the tablet's narrow tiles", () => {
     expect(W.flatMap((s) => (s.k === "tag" ? [s.i] : []))).toEqual([0, 1, 2, 3]);
     expect(W.flatMap((s) => (s.k === "svc" && s.wide ? [s.id] : []))).toEqual([2]);
-    expect(W.flatMap((s) => (s.k === "tile" && s.narrow ? [s.id] : []))).toEqual([9, 10, 11]);
+    expect(W.flatMap((s) => (s.k === "tile" && s.narrow ? [s.id] : []))).toEqual([8, 10, 11]);
+    // The tiles read in the cases' order, so their numbers go up down the wall.
+    expect(W.flatMap((s) => (s.k === "tile" ? [s.id] : []))).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
   });
 
   test("the wall closes with the team block, the clients' sheet and two clients", () => {

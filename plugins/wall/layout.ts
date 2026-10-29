@@ -43,15 +43,16 @@ export const W: Slot[] = [
   { k: "telegram" },
   { k: "deeper" },
   { k: "client", i: 3 },
+  // King's, Antiquerus and a column: the last badge, two clients.
   { k: "tile", id: 5 },
-  { k: "tile", id: 9, narrow: true },
-  // Antiquerus, DeckForge and a column: the last badge, two clients.
   { k: "tile", id: 7 },
-  { k: "tile", id: 8 },
   { k: "tag", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
-  // Axie Infinity and Tria side by side; on tablets each is 3 columns wide.
+  // DeckForge and Skyeng, then Axie Infinity and Tria: two big tiles a band, in the cases' order.
+  // On tablets DeckForge pairs with Antiquerus, Skyeng with the team block, Axie Infinity with Tria.
+  { k: "tile", id: 8, narrow: true },
+  { k: "tile", id: 9 },
   { k: "tile", id: 10, narrow: true },
   { k: "tile", id: 11, narrow: true },
   // Two rows close the wall: the team block, the clients' sheet and the last two clients.

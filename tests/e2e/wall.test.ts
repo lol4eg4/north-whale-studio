@@ -87,7 +87,7 @@ describe("wall layout", () => {
     await context.close();
   });
 
-  test("tablet (768 px): Skyeng is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+  test("tablet (768 px): DeckForge is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
     // Columns and rows a cell takes, from its box and the wall's grid tracks.
     const span = (sel: string) =>
@@ -207,14 +207,13 @@ describe("wall media", () => {
         return { label: t.getAttribute("aria-label")!, top: r.top, bottom: r.bottom, poster: img.getAttribute("src"), src: t.querySelector("video")!.getAttribute("src") };
       }),
     );
-    // Tiles in wall order: the case ids, and the numbers the tiles say (each case's place in the list).
-    const ids = [1, 2, 3, 4, 5, 9, 7, 8, 10, 11];
-    const numbers = [1, 2, 3, 4, 5, 8, 6, 7, 9, 10];
+    // Tiles in wall order, which is the cases' order: their ids, and the numbers they say.
+    const ids = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
     expect(tiles.length).toBe(10);
     const vh = 900;
     tiles.forEach((tile, i) => {
       const id = ids[i];
-      expect(tile.label.startsWith(`Кейс ${numbers[i]}.`)).toBe(true);
+      expect(tile.label.startsWith(`Кейс ${i + 1}.`)).toBe(true);
       const near = tile.top < 2 * vh && tile.bottom > -vh;
       // Posters, like loops, wait until their tile is within one screen of the viewport.
       expect(plain(tile.poster), `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
