@@ -370,14 +370,16 @@ describe("player", () => {
     await strict.close();
   });
 
-  test("phone: the case plays in the open case", async () => {
-    const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-5`, phone);
-    await page.waitForFunction(() => {
-      const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
-      return !v.paused && v.currentTime > 0;
-    }, null, { timeout: 10000 });
-    expect(errors).toEqual([]);
-    await context.close();
+  test("phone: the case plays in the open case, King's and the three newest", async () => {
+    for (const id of [5, 9, 10, 11]) {
+      const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`, phone);
+      await page.waitForFunction(() => {
+        const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
+        return !v.paused && v.currentTime > 0;
+      }, null, { timeout: 10000 });
+      expect(errors).toEqual([]);
+      await context.close();
+    }
   });
 
   test("the focus ring reads on every case colour (3:1), and inside the torn press clippings", async () => {

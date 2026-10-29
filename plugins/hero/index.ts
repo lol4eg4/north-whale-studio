@@ -7,6 +7,7 @@ import { media } from "../../platform/media.ts";
 import { h, icon, writeIn } from "../../platform/ui/parts.ts";
 import { logoMark } from "../../platform/ui/tile.ts";
 import type { ContentApi } from "../content/api.ts";
+import { clippingPlace } from "./place.ts";
 import "./style.css";
 
 
@@ -24,18 +25,6 @@ function notePlace(hero: DOMRect, peel: DOMRect, padRight: number, noteWidth = 0
 }
 
 const FORBES = "https://forbes.pe/brand-voice/2025-03-12/los-proximos-crypto-revolucionarios-30-under-30-by-kol-capital/";
-
-// The Forbes clipping goes in the highest free spot at the hero's right edge, mostly beside the
-// headline. It keeps `gap` px off every word, the note and the buttons, and stays inside the hero.
-// null: no such spot, it goes beside the buttons, in their row.
-export function clippingPlace(hero: DOMRect, padTop: number, padRight: number, box: { width: number; height: number }, taken: DOMRect[], gap = 10) {
-  const x = hero.right - padRight - box.width;
-  for (let y = hero.top + padTop; y + box.height <= hero.bottom; y += 4) {
-    const hit = taken.some((r) => x < r.right + gap && x + box.width > r.left - gap && y < r.bottom + gap && y + box.height > r.top - gap);
-    if (!hit) return { left: x - hero.left, top: y - hero.top };
-  }
-  return null;
-}
 
 export default function init(host: Host) {
   const { motion } = host;
@@ -131,6 +120,8 @@ export default function init(host: Host) {
 
   // Measured at the hero's corner, tilted, so the box is the one it will take.
   const placeForbes = () => {
+    // Moving it to another parent drops the keyboard focus: give it back.
+    const focused = document.activeElement === forbes;
     forbes.classList.remove("flow");
     if (forbes.parentElement !== section) section.append(forbes);
     forbes.style.left = forbes.style.top = "0px";
@@ -147,11 +138,12 @@ export default function init(host: Host) {
     if (!at) {
       forbes.classList.add("flow");
       side.append(forbes);
-      return;
+    } else {
+      // The box of the tilted clipping starts a little off its own corner.
+      forbes.style.left = `${at.left - (box.left - hr.left)}px`;
+      forbes.style.top = `${at.top - (box.top - hr.top)}px`;
     }
-    // The box of the tilted clipping starts a little off its own corner.
-    forbes.style.left = `${at.left - (box.left - hr.left)}px`;
-    forbes.style.top = `${at.top - (box.top - hr.top)}px`;
+    if (focused && document.activeElement !== forbes) forbes.focus({ preventScroll: true });
   };
 
   host.ready(() => {
