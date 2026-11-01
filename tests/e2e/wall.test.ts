@@ -87,7 +87,7 @@ describe("wall layout", () => {
     await context.close();
   });
 
-  test("tablet (768 px): Ибадов is 3 columns wide beside Антикрус, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+  test("tablet (768 px): DeckForge is 3 columns wide beside Антикрус, Axie Infinity beside Tria, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
     // Columns and rows a cell takes, from its box and the wall's grid tracks.
     const span = (sel: string) =>
@@ -100,7 +100,11 @@ describe("wall layout", () => {
         const r = document.querySelector(s)!.getBoundingClientRect();
         return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
       }, sel);
-    expect(await span(".wall > .t3")).toEqual([3, 3]);
+    // DeckForge, Axie Infinity and Tria (cases 7, 9 and 10 on the wall) are 3x3; the last two share a row.
+    const t3 = (n: number) => `.wall > .t3:has(.tile[aria-label^="Кейс ${n}."])`;
+    for (const n of [7, 9, 10]) expect(await span(t3(n)), `case ${n}`).toEqual([3, 3]);
+    const top = (n: number) => page.$eval(t3(n), (e) => Math.round(e.getBoundingClientRect().top));
+    expect(await top(9)).toBe(await top(10));
     expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
     // «Привет!» fits the narrow strip: the block clips what overflows.
     for (const width of [701, 768, 1024, 1100]) {
@@ -168,12 +172,12 @@ describe("wall media", () => {
     const seq: string[] = []; // "poster:<id>" and "loop:<id>" in request order
     let loadAt = 0;
     page.on("request", (r) => {
-      const m = /\/media\/c(\d)-ring\.mp4/.exec(r.url());
+      const m = /\/media\/c(\d+)-ring\.mp4/.exec(r.url());
       if (m) {
         loops.push({ id: Number(m[1]), at: Date.now() });
         seq.push(`loop:${m[1]}`);
       }
-      const p = /\/media\/c(\d)(-phone)?\.webp/.exec(r.url());
+      const p = /\/media\/c(\d+)(-phone)?\.webp/.exec(r.url());
       if (p) seq.push(`poster:${p[1]}`);
     });
     page.on("load", () => (loadAt = Date.now()));
@@ -207,11 +211,13 @@ describe("wall media", () => {
         return { label: t.getAttribute("aria-label")!, top: r.top, bottom: r.bottom, poster: img.getAttribute("src"), src: t.querySelector("video")!.getAttribute("src") };
       }),
     );
-    expect(tiles.length).toBe(8);
+    // Tiles in wall order, which is the cases' order: their ids, and the numbers they say.
+    const ids = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+    expect(tiles.length).toBe(10);
     const vh = 900;
     tiles.forEach((tile, i) => {
-      const id = i + 1;
-      expect(tile.label.startsWith(`Кейс ${id}.`)).toBe(true);
+      const id = ids[i];
+      expect(tile.label.startsWith(`Кейс ${i + 1}.`)).toBe(true);
       const near = tile.top < 2 * vh && tile.bottom > -vh;
       // Posters, like loops, wait until their tile is within one screen of the viewport.
       expect(plain(tile.poster), `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
@@ -221,7 +227,7 @@ describe("wall media", () => {
     expect(loops.some((l) => l.id === 8)).toBe(false);
 
     // Every poster answers, and the first one is painted.
-    for (let id = 1; id <= 8; id++) expect((await fetch(`${full.url}/media/c${id}.webp`)).status, `c${id}.webp`).toBe(200);
+    for (const id of ids) expect((await fetch(`${full.url}/media/c${id}.webp`)).status, `c${id}.webp`).toBe(200);
     expect(await page.evaluate(() => (document.querySelector(".wall .tile-poster") as HTMLImageElement).naturalWidth > 0)).toBe(true);
     // The first tile plays its loop.
     expect(await page.evaluate(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused)).toBe(true);
@@ -428,7 +434,7 @@ describe("wall media", () => {
         poster: t.querySelector(".tile-poster")!.tagName,
       })),
     );
-    expect(r).toEqual(Array.from({ length: 8 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
+    expect(r).toEqual(Array.from({ length: 10 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
     expect(plain(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster")))).toBe("/media/c1-ring.webp");
     expect(errors).toEqual([]);
     await context.close();

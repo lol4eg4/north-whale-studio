@@ -15,6 +15,6 @@ export default function off(host: Host) {
     team: none,
     clients: none,
     brands: none,
-    contacts: () => ({ email: "", messengers: [], socials: [] }),
+    contacts: () => ({ bot: { url: "" }, support: { url: "" }, socials: [] }),
   });
 }

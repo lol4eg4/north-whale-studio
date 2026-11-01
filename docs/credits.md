@@ -63,6 +63,10 @@ Publications (Waldorf Astoria Berlin, "As seen in" and "In the press"):
 - `press-conde-nast-traveler.svg`: the header logo of https://www.cntraveler.com/hotels/berlin/waldorf-astoria-berlin
 - `press-business-traveller.svg`: the header logo of https://www.businesstraveller.com/tried-tested/hotel-check-waldorf-astoria-berlin/
 
+Publications (the Forbes 30 Under 30 clipping on the first screen), accessed 2026-10-29:
+
+- `press-forbes.svg`: Wikimedia Commons, `Forbes_logo.svg` (public domain, text logo), drawn in one colour through a CSS mask.
+
 Partners (DeckForge, "Official partners"):
 
 - `partner-vk.svg`: Wikimedia Commons, `VK Full Logo (2021-present).svg`.

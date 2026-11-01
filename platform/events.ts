@@ -9,7 +9,6 @@ export interface PageEvents {
   "case-closed": { id: number };
   "service-opened": { id: number };
   "tile-hovered": { id: number };
-  "email-copied": {};
   "piece-grabbed": { piece: number };
   "piece-dropped": { piece: number };
   "wall-shuffled": {};

@@ -190,10 +190,6 @@ export function createEngine(Ctor: typeof AudioContext) {
       marimba(5, t + 0.28, 0.3);
       marimba(2, t + 0.44, 0.3);
     },
-    copy(t) {
-      marimba(7, t, 0.55);
-      marimba(10, t + 0.09, 0.6);
-    },
     whoosh(t, p) {
       // A stretched band snapping (twang), louder and brighter with power.
       const f0 = hz(5);
