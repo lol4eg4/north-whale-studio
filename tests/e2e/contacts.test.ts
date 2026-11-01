@@ -24,9 +24,9 @@ test("the bot and the support account are links that open in a new tab; the QR c
     [...document.querySelectorAll<HTMLAnchorElement>("#contacts a")].map((a) => [a.className.replace(" piece", ""), a.textContent, a.getAttribute("href"), a.target, a.rel]),
   );
   expect(links).toEqual([
-    ["contact-bot", "Написать нам в Telegram", BOT, "_blank", "noopener"],
-    ["btn", "Поддержка в Telegram", SUPPORT, "_blank", "noopener"],
-    ["contact-qr", "Наведите камеру — откроется чат", BOT, "_blank", "noopener"],
+    ["contact-bot", "Наш бот в Телеграм", BOT, "_blank", "noopener"],
+    ["btn", "Поддержка в Телеграм", SUPPORT, "_blank", "noopener"],
+    ["contact-qr", "QR — бот North Whale Studio", BOT, "_blank", "noopener"],
   ]);
   const qr = page.locator(".contact-qr");
   await qr.scrollIntoViewIfNeeded();
