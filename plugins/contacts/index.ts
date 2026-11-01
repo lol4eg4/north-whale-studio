@@ -32,7 +32,7 @@ export default function init(host: Host) {
   const supportLink = t.bind(h("a", { class: "btn", href: support.url, ...out }, support.handle), "cursor.write", "data-cursor");
   motion.add(supportLink, { kind: "sticker" });
 
-  const qrImg = t.bind(h("img", { src: "/qr-bot.svg", width: "220", height: "220", draggable: "false" }), "contacts.qrAlt", "alt");
+  const qrImg = t.bind(h("img", { src: "/qr-bot.svg", width: "220", height: "220", loading: "lazy", draggable: "false" }), "contacts.qrAlt", "alt");
   const qr = piece(h("a", { class: "contact-qr", href: bot.url, ...out }, qrImg, h("span", { class: "mono" }, bot.handle.toUpperCase())), "sticker");
 
   const socialGroup =

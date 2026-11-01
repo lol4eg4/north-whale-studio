@@ -31,7 +31,9 @@ test("the bot and the support account are links that open in a new tab; the QR c
   const qr = page.locator(".contact-qr");
   await qr.scrollIntoViewIfNeeded();
   expect(await qr.isVisible()).toBe(true);
-  expect(await page.locator(".contact-qr img").evaluate((i: HTMLImageElement) => [i.complete && i.naturalWidth > 0, i.alt])).toEqual([true, "QR-код: бот North Whale Studio в Telegram"]);
+  // The QR loads lazily, once the card is near the screen.
+  await page.waitForFunction(() => (document.querySelector<HTMLImageElement>(".contact-qr img")?.naturalWidth ?? 0) > 0, undefined, { timeout: 5000 });
+  expect(await page.locator(".contact-qr img").getAttribute("alt")).toBe("QR-код: бот North Whale Studio в Telegram");
   // No socials until the studio sends them.
   expect(await page.locator("#contacts .stamp").count()).toBe(0);
   expect(errors).toEqual([]);
