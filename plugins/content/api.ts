@@ -83,8 +83,8 @@ export interface Client {
 }
 
 export interface Contacts {
-  bot: { handle: string; url: string }; // the studio's Telegram bot: buttons, QR, footer, wall sticker, menu
-  support: { handle: string; url: string }; // the support account in Telegram
+  bot: { url: string }; // the studio's Telegram bot: the main call, QR, footer, wall sticker, menu
+  support: { url: string }; // the support account in Telegram
   socials: { name: string }[];
 }
 

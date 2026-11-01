@@ -15,8 +15,8 @@ describe("texts", () => {
 
   test("contacts are the bot and the support account in Telegram, over https", () => {
     const { bot, support } = store("ru").contacts();
-    expect(bot).toEqual({ handle: "@North_Whale_Studio_Bot", url: "https://t.me/North_Whale_Studio_Bot" });
-    expect(support).toEqual({ handle: "@NORTH_WHALE_STUDIO", url: "https://t.me/NORTH_WHALE_STUDIO" });
+    expect(bot.url).toBe("https://t.me/North_Whale_Studio_Bot");
+    expect(support.url).toBe("https://t.me/NORTH_WHALE_STUDIO");
   });
 
   test("format fills parameters; an unknown key is reported", () => {

@@ -1,4 +1,4 @@
-// Contacts: the bot and the support account in Telegram, the QR card (not on phones), the bot
+// Contacts: calls to the bot and the support account in Telegram (no handles), the QR card (not on phones), the bot
 // everywhere else on the page; no email, personal Telegram or WhatsApp left.
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import type { Browser } from "playwright-core";
@@ -24,9 +24,9 @@ test("the bot and the support account are links that open in a new tab; the QR c
     [...document.querySelectorAll<HTMLAnchorElement>("#contacts a")].map((a) => [a.className.replace(" piece", ""), a.textContent, a.getAttribute("href"), a.target, a.rel]),
   );
   expect(links).toEqual([
-    ["contact-bot", "@North_Whale_Studio_Bot", BOT, "_blank", "noopener"],
-    ["btn", "@NORTH_WHALE_STUDIO", SUPPORT, "_blank", "noopener"],
-    ["contact-qr", "@NORTH_WHALE_STUDIO_BOT", BOT, "_blank", "noopener"],
+    ["contact-bot", "Написать нам в Telegram", BOT, "_blank", "noopener"],
+    ["btn", "Поддержка в Telegram", SUPPORT, "_blank", "noopener"],
+    ["contact-qr", "Наведите камеру — откроется чат", BOT, "_blank", "noopener"],
   ]);
   const qr = page.locator(".contact-qr");
   await qr.scrollIntoViewIfNeeded();
