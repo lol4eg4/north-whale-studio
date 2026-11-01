@@ -1,52 +1,48 @@
-// Contacts: the big «Напишите нам», the studio's email (a mailto: link, never a piece) with the
-// copy button, the messengers and socials: a link where the studio sent an address, a stamped
-// placeholder until then. A group with no entries is left out.
-//
-//   copy ok        -> label «Скопировано» 2.4 s + toast + email-copied
-//   copy refused   -> the address is selected + hint toast
+// Contacts: the big «Напишите нам», the studio's Telegram bot (a big link, never a piece) and its
+// support account, the QR card to the bot (computer and tablet; phones get the buttons only), and
+// the socials: a stamped placeholder until the studio sends an address. No socials: no group.
+// Every contact link opens in a new tab.
 import type { Host } from "../../platform/host.ts";
 import type { PieceKind } from "../../platform/motion.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, icon, stamp, toast } from "../../platform/ui/parts.ts";
+import { h, stamp } from "../../platform/ui/parts.ts";
 import type { ContentApi } from "../content/api.ts";
 import "./style.css";
+
+const out = { target: "_blank", rel: "noopener" };
 
 export default function init(host: Host) {
   const content = host.use<ContentApi>("content");
   const motion = host.motion;
   const t = binder(content.text);
-  const data = content.contacts();
-  const mailto = `mailto:${data.email}`;
+  const { bot, support, socials } = content.contacts();
 
   const piece = <E extends HTMLElement>(el: E, kind: PieceKind): E => {
     motion.add(el, { kind });
     t.bind(el, "cursor.drag", "data-cursor");
     return el;
   };
-  const stamped = () => t.bind(stamp(""), "placeholder.stamp");
+  const name = (key: string) => t.bind(h("span", { class: "mono contact-group-name" }), key);
 
   const kicker = piece(t.bind(h("div", { class: "contact-kick mono" }), "contacts.kicker"), "block");
   const title = h("h2", { class: "contact-say", id: "contacts-h" });
   const lede = piece(t.bind(h("p", { class: "contact-lede" }), "contacts.lede"), "block");
 
-  const email = t.bind(h("a", { class: "contact-email", href: mailto }, data.email), "cursor.write", "data-cursor");
-  const copyLabel = h("span");
-  const copy = piece(h("button", { type: "button", class: "btn contact-copy" }, icon("check", 16), copyLabel), "sticker");
+  const botLink = t.bind(h("a", { class: "contact-bot", href: bot.url, ...out }, bot.handle), "cursor.write", "data-cursor");
+  const supportLink = t.bind(h("a", { class: "btn", href: support.url, ...out }, support.handle), "cursor.write", "data-cursor");
+  motion.add(supportLink, { kind: "sticker" });
 
-  // Messengers and socials: a chip with an address is a link; the rest are stamped placeholders.
-  const link = (label: string, url: string) => {
-    const a = h("a", { class: "btn", href: url, target: "_blank", rel: "noopener" }, label);
-    motion.add(a, { kind: "sticker" });
-    return t.bind(a, "cursor.write", "data-cursor");
-  };
-  const group = (labelKey: string, items: { label: string; url?: string }[]) =>
-    items.length > 0 &&
+  const qrImg = t.bind(h("img", { src: "/qr-bot.svg", width: "220", height: "220", draggable: "false" }), "contacts.qrAlt", "alt");
+  const qr = piece(h("a", { class: "contact-qr", href: bot.url, ...out }, qrImg, h("span", { class: "mono" }, bot.handle.toUpperCase())), "sticker");
+
+  const socialGroup =
+    socials.length > 0 &&
     h(
       "div",
       { class: "contact-group" },
-      t.bind(h("span", { class: "mono contact-group-name" }), labelKey),
-      ...items.map(({ label, url }) => (url ? link(label, url) : piece(h("span", { class: "contact-ph" }, label), "sticker"))),
-      ...(items.some((i) => !i.url) ? [stamped()] : []),
+      name("contacts.socials"),
+      ...socials.map((s) => piece(h("span", { class: "contact-ph" }, s.name), "sticker")),
+      t.bind(stamp(""), "placeholder.stamp"),
     );
 
   host.region("main").append(
@@ -56,18 +52,23 @@ export default function init(host: Host) {
       kicker,
       title,
       lede,
-      h("div", { class: "contact-row" }, email, copy),
       h(
         "div",
-        { class: "contact-reach" },
-        group("contacts.messengers", data.messengers.map((m) => ({ label: `${m.name} ${m.handle}`, url: m.url }))),
-        group("contacts.socials", data.socials.map((s) => ({ label: s.name }))),
+        { class: "contact-body" },
+        h(
+          "div",
+          { class: "contact-reach" },
+          h("div", { class: "contact-group" }, name("contacts.bot"), botLink),
+          h("div", { class: "contact-group" }, name("contacts.support"), supportLink),
+          socialGroup,
+        ),
+        qr,
       ),
     ),
   );
 
-  // The menu (<= 1100 px) shows the address too, in mono.
-  host.region("menu-foot").append(h("p", { class: "menu-mail mono" }, h("a", { href: mailto }, data.email)));
+  // The menu (<= 1100 px) shows the bot too, in mono.
+  host.region("menu-foot").append(h("p", { class: "menu-tg mono" }, h("a", { href: bot.url, ...out }, bot.handle)));
 
   // Headline words: one piece each, rebuilt when the language changes.
   let words: number[] = [];
@@ -78,43 +79,9 @@ export default function init(host: Host) {
     words = [...title.querySelectorAll<HTMLElement>(".w")].map((w) => motion.add(w, { kind: "word" }));
   };
 
-  let copied = false;
-  let copiedTimer = 0;
-  const showLabel = () => {
-    copyLabel.textContent = content.text(copied ? "contacts.copied" : "contacts.copy");
-    copy.classList.toggle("done", copied);
-  };
-
-  copy.addEventListener("click", async () => {
-    try {
-      if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
-      await navigator.clipboard.writeText(data.email);
-    } catch {
-      // The browser said no: select the address so one keystroke copies it.
-      const range = document.createRange();
-      range.selectNodeContents(email);
-      const selection = getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-      toast(content.text("contacts.copyFail"), 3200);
-      return;
-    }
-    copied = true;
-    showLabel();
-    clearTimeout(copiedTimer);
-    copiedTimer = window.setTimeout(() => {
-      copied = false;
-      showLabel();
-    }, 2400);
-    toast(content.text("contacts.toast"));
-    host.emit("email-copied", {});
-  });
-
   buildTitle();
-  showLabel();
   host.on("language-changed", () => {
     t.refresh();
     buildTitle();
-    showLabel();
   });
 }

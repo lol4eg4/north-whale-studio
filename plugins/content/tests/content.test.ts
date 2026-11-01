@@ -13,10 +13,10 @@ describe("texts", () => {
     for (const [k, v] of [...Object.entries(ru), ...Object.entries(en)]) expect(v.trim(), k).not.toBe("");
   });
 
-  test("a messenger or social with an address links over https", () => {
-    const { messengers } = store("ru").contacts();
-    for (const m of messengers) if (m.url) expect(m.url, m.name).toStartWith("https://");
-    expect(messengers.find((m) => m.name === "Telegram")?.url).toBe("https://t.me/romansmirn0v");
+  test("contacts are the bot and the support account in Telegram, over https", () => {
+    const { bot, support } = store("ru").contacts();
+    expect(bot).toEqual({ handle: "@North_Whale_Studio_Bot", url: "https://t.me/North_Whale_Studio_Bot" });
+    expect(support).toEqual({ handle: "@NORTH_WHALE_STUDIO", url: "https://t.me/NORTH_WHALE_STUDIO" });
   });
 
   test("format fills parameters; an unknown key is reported", () => {

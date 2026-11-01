@@ -10,7 +10,6 @@ describe("sound cues", () => {
     expect(cueFor("service-opened", { id: 1 })).toEqual({ name: "pop" });
     expect(cueFor("case-closed", { id: 1 })).toEqual({ name: "click", pitch: 0.6 }); // a soft click
     expect(cueFor("tile-hovered", { id: 2 })).toEqual({ name: "tick" });
-    expect(cueFor("email-copied", {})).toEqual({ name: "copy" });
     expect(cueFor("wall-shuffled", {})).toEqual({ name: "shuffle" });
     expect(cueFor("wall-tidied", {})).toEqual({ name: "sweep" });
     expect(cueFor("whale-launched", { power: 0.7 })).toEqual({ name: "whoosh", pitch: 0.7 });
