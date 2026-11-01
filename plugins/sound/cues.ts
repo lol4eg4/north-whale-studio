@@ -25,8 +25,6 @@ export function cueFor<K extends keyof PageEvents>(type: K, detail: PageEvents[K
       return { name: "click", pitch: 0.6 };
     case "tile-hovered":
       return { name: "tick" };
-    case "email-copied":
-      return { name: "copy" };
     case "wall-shuffled":
       return { name: "shuffle" };
     case "wall-tidied":

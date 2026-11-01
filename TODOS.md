@@ -9,7 +9,7 @@ Deferred on purpose. Each item names what it waits for.
 - Pictures for AG1 (2: advertorials, landing pages): the page shows only the video.
 - Brand films for Waldorf Astoria Berlin (1) and King’s Resort & Casino (5): their pages name a film, but the case videos are the website recordings.
 - Like Center logo for the clients' sheet: no vector logo found (likecentre.ru and like.center do not answer from the server). Add it to `brands.json` when the studio sends the file.
-- Contacts: Behance and VK addresses. Left out of the page until they arrive (`socials` in `plugins/content/data/contacts.json` is empty; email, Telegram and WhatsApp are real; the `<noscript>` line in `site/index.html` repeats the email).
+- Contacts: Behance and VK addresses. Left out of the page until they arrive (`socials` in `plugins/content/data/contacts.json` is empty; the bot and support links are real; the `<noscript>` line in `site/index.html` repeats the bot link).
 - Subtitles for cases 3 and 8 (the cases with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
 - Case previews for King’s Resort & Casino (5), Antiquerus (7), Skyeng (9), Axie Infinity (10) and Tria (11): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`). DeckForge (8) has the studio's art, its wordmark cropped off (the plate names the game).

@@ -19,7 +19,6 @@ const EVENTS: (keyof PageEvents)[] = [
   "case-closed",
   "service-opened",
   "tile-hovered",
-  "email-copied",
   "piece-grabbed",
   "piece-dropped",
   "wall-shuffled",
