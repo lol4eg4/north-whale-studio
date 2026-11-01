@@ -1,8 +1,7 @@
 // Contacts: the big «Напишите нам», calls to write to the studio's Telegram bot (a big link, never
 // a piece) and to its support account, the QR card to the bot (computer and tablet; phones get the
-// buttons only), and
-// the socials: a stamped placeholder until the studio sends an address. No socials: no group.
-// Every contact link opens in a new tab.
+// buttons only), and the socials: a stamped placeholder until the studio sends an address. No
+// socials: no group. Every contact link opens in a new tab.
 import type { Host } from "../../platform/host.ts";
 import type { PieceKind } from "../../platform/motion.ts";
 import { binder } from "../../platform/text-binder.ts";
