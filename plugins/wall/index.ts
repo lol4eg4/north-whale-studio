@@ -1,4 +1,4 @@
-// The wall: eight live case tiles packed with stickers, the ticker and the team block.
+// The wall: the live case tiles packed with stickers, the ticker and the team block.
 //
 //   init:  section, heading, slot places (dive cell, hint)        -> slots resolve
 //   ready: every other cell in W order around the dive cell        -> motion group "wall"
@@ -52,10 +52,11 @@ export default function init(host: Host) {
   });
 
   // Loops pause while a case is open, the pause button is on, or the tab is hidden. The case
-  // badges play in calm too, as the owner asked; Maria's badge loop stays still in calm.
+  // tiles' loops play in calm too, as the owner asked; Maria's badge loop stays still in calm.
   let caseOpen = false;
+  const phone = matchMedia("(max-width: 700px)");
   const videos = createVideos({
-    phone: matchMedia("(max-width: 700px)"),
+    phone,
     blocked: () => caseOpen || motion.stopped || document.hidden,
   });
   host.on("case-opened", () => ((caseOpen = true), videos.update()));
@@ -121,13 +122,15 @@ export default function init(host: Host) {
       switch (slot.k) {
         case "tile": {
           const c = api.caseById(slot.id)!;
-          const tile = caseTile(tileText(c), { poster: c.media.poster, posterPhone: c.media.posterPhone, ringPoster: c.media.ringPoster, eager: c.id === 1 });
+          const tile = caseTile(tileText(c), { poster: c.media.poster, posterPhone: c.media.posterPhone, eager: c.id === 1 });
           t.bind(tile.el, "cursor.open", "data-cursor");
           tile.el.addEventListener("click", () => host.use<CaseApi>("case").open(c.id, "tile", tile.el));
           tile.el.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && host.emit("tile-hovered", { id: c.id }));
-          if (c.media.ring) videos.add(c.id, tile.el, tile.video, c.media.ring);
-          // The badge's still waits like the badge photos: the first screen's bytes go to the posters.
-          posterLoads.set(tile.el, () => (tile.loadPoster(), void later.then(tile.loadRing)));
+          // The loop in the poster's crop: the phone one at <= 700 px, as the page opened.
+          const loop = phone.matches ? c.media.loopPhone : c.media.loop;
+          if (loop) videos.add(c.id, tile.el, tile.video, loop);
+          // The press logos wait like the badge photos: the first screen's bytes go to the posters.
+          posterLoads.set(tile.el, () => (tile.loadPoster(), void later.then(tile.loadLogos)));
           posters.observe(tile.el);
           host.use<CaseApi>("case").setTile?.(c.id, tile.el);
           refresh.push(() => tile.set(tileText(content().caseById(c.id)!)));
@@ -249,6 +252,12 @@ export default function init(host: Host) {
           const to: Record<string, string> = tg ? { href: tg, target: "_blank", rel: "noopener" } : { href: "#contacts" };
           const el = stickerEl("a", "client sh-pill", r, { ...to, style: "--c:var(--cobalt);--f:var(--paper)" });
           el.append(t.bind(h("b"), "sticker.telegram"), t.bind(h("span", { class: "ck" }), "sticker.telegramSub"));
+          t.bind(el, "cursor.write", "data-cursor");
+          return cell("sz-s", el, "sticker");
+        }
+        case "concept": {
+          const el = stickerEl("a", "client sh-circle concept", r, { href: api.contacts().bot.url, target: "_blank", rel: "noopener", style: "--c:var(--mint);--f:var(--ink)" });
+          el.append(t.bind(h("b"), "sticker.concept"), t.bind(h("span", { class: "ck" }), "sticker.conceptSub"));
           t.bind(el, "cursor.write", "data-cursor");
           return cell("sz-s", el, "sticker");
         }

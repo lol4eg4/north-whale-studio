@@ -271,55 +271,6 @@
   },
   "links": []
  },
- "8": {
-  "eyebrow": "DeckForge · MMO Roguelike Card Battler",
-  "client": "DeckForge",
-  "category": "Website, Art, Game Teaser",
-  "lead": "A free-to-play card battler with a whole multiverse behind it. We gave it a home, its heroes and a first glimpse of gameplay.",
-  "media": "The teaser",
-  "sections": [
-   {
-    "title": "How we built it",
-    "kicker": "Website · Characters · Illustration · Teaser",
-    "text": [
-     "DeckForge mixes ==relic cards, seasonal updates and endless replayability== across PC, mobile and consoles. We built the website as a gateway into that multiverse: the world, the heroes and the platforms are one click from “Play”.",
-     "We designed the characters and illustrations that give the universe its faces, then cut a gameplay teaser that shows ==how a run actually feels==: draw, play, forge, repeat."
-    ]
-   }
-  ],
-  "card": {
-   "label": "One universe",
-   "headline": "1 website. A cast of heroes. 1 teaser.",
-   "copy": "Every piece was made by one team, so the site, the characters and the teaser ==share a single visual language==, ready for every platform the game ships on.",
-   "hand": "Forge your deck. We forged the rest."
-  },
-  "role": {
-   "items": [
-    "Web Design",
-    "Development",
-    "Character Design",
-    "Illustration",
-    "Production",
-    "Editing"
-   ],
-   "deliverables": "the DeckForge website, character designs and illustrations, and the gameplay teaser."
-  },
-  "results": {
-   "items": [
-    {
-     "value": "100K+",
-     "label": "players"
-    },
-    {
-     "value": "1h+",
-     "label": "average session"
-    }
-   ],
-   "note": null,
-   "logos": "Official partners"
-  },
-  "links": []
- },
  "9": {
   "eyebrow": "Skyeng · Online language school",
   "client": "Skyeng",
@@ -355,45 +306,6 @@
    {
     "label": "Visit skyeng.ru",
     "url": "https://skyeng.ru/"
-   }
-  ]
- },
- "10": {
-  "eyebrow": "Axie Infinity · Lunacia",
-  "client": "Axie Infinity",
-  "category": "Design, art, website",
-  "lead": "The game that brought millions of people to blockchain starts with cute creatures, the Axies. We gave them a world you want to step into and a website where that world comes alive.",
-  "media": "The website",
-  "sections": [
-   {
-    "title": "How we built it",
-    "kicker": "Design · Art · Website",
-    "text": [
-     "Axie is a whole ecosystem: Axies can be collected, sent into battle and used in new games. The new chapter, Atia’s Legacy, brings players back to Lunacia, the land where gods once lived. We built the website as ==a gateway into this universe==: ancient ruins, mystic forests, a dream world and the Axies up front.",
-     "The art sets the tone: warm nostalgia, rich color and characters you want to take home. The website explains complex technology ==through a simple game==: play, collect, own."
-    ]
-   }
-  ],
-  "card": {
-   "label": "One world",
-   "headline": "2.2M+ Axies. 229K+ owners. One Lunacia.",
-   "copy": "The illustrations, the interface and the website share ==one visual language==, so the game’s world is recognizable everywhere: on the website, on social media and in the game itself.",
-   "hand": "Cute outside. Fierce in battle."
-  },
-  "role": {
-   "items": [
-    "Web Design",
-    "Development",
-    "Art",
-    "Illustration"
-   ],
-   "deliverables": null
-  },
-  "results": null,
-  "links": [
-   {
-    "label": "Visit axieinfinity.com",
-    "url": "https://axieinfinity.com/"
    }
   ]
  },

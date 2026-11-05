@@ -1,5 +1,6 @@
-// First screen: kicker, the big headline with its last word on the orange peel sticker,
-// the marker note pointing at it, the lede, the two ways down the page and the Forbes clipping.
+// First screen: kicker (with the language switch on phones), the big headline with its last word
+// on the orange peel sticker, the marker note pointing at it, the lede, the two ways down the page,
+// the free concept offer (one link straight to the studio's Telegram bot) and the Forbes clipping.
 // Every word is a piece; under the sticker the same word stays printed as an outline.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
@@ -61,13 +62,25 @@ export default function init(host: Host) {
     ),
   );
   const side = h("div", { class: "hero-side" }, watch, how);
+  // The offer: the whole card is the link, so a thumb cannot miss it.
+  const offerTitle = h("b", { class: "offer-t" });
+  const offerCta = h("span");
+  const offerHint = h("span", { class: "mono-s offer-hint" });
+  const offer = h(
+    "a",
+    { class: "offer", href: content().contacts().bot.url, target: "_blank", rel: "noopener" },
+    offerTitle,
+    h("span", { class: "offer-cta arrowed" }, offerCta, icon("arrowRight", 18)),
+    offerHint,
+  );
+  const kicker = h("div", { class: "kicker mono" }, k1, k2);
   const section = h(
     "section",
     { class: "hero", "aria-labelledby": "hero-title" },
-    h("div", { class: "kicker mono" }, k1, k2),
+    kicker,
     title,
     heroNote,
-    h("div", { class: "hero-row" }, lede, side),
+    h("div", { class: "hero-row" }, h("div", { class: "hero-main" }, lede, side), offer),
     forbes,
   );
   host.region("main").append(section);
@@ -112,7 +125,7 @@ export default function init(host: Host) {
     const over = n.bottom + 8 - l.top;
     if (over > 0 && n.left < l.right && n.right > l.left) {
       // The headline's bottom margin collapses with the row's top margin: grow the larger one.
-      const gap = Math.max(parseFloat(getComputedStyle(title).marginBottom), parseFloat(getComputedStyle(lede.parentElement!).marginTop));
+      const gap = Math.max(parseFloat(getComputedStyle(title).marginBottom), parseFloat(getComputedStyle(lede.closest(".hero-row")!).marginTop));
       title.style.marginBottom = `${gap + over}px`;
     }
     placeForbes();
@@ -131,7 +144,7 @@ export default function init(host: Host) {
     const moved = getComputedStyle(forbes);
     const r = forbes.getBoundingClientRect();
     const box = new DOMRect(r.x - (parseFloat(moved.getPropertyValue("--dx")) || 0), r.y - (parseFloat(moved.getPropertyValue("--dy")) || 0), r.width, r.height);
-    const taken = [...section.querySelectorAll<HTMLElement>(".kicker span, .hw, .peel-slot, .hero-note, .lede, .watch, .believe")]
+    const taken = [...section.querySelectorAll<HTMLElement>(".kicker > span, .hero-lang, .hw, .peel-slot, .hero-note, .lede, .watch, .believe, .offer")]
       .map((el) => el.getBoundingClientRect())
       .filter((r) => r.width && r.height);
     const at = clippingPlace(hr, parseFloat(cs.paddingTop), parseFloat(cs.paddingRight), box, taken);
@@ -159,6 +172,15 @@ export default function init(host: Host) {
     t.bind(forbesRead, "case.read");
     t.bind(forbes, "hero.forbesLabel", "aria-label");
     t.bind(forbes, "cursor.read", "data-cursor");
+    t.bind(offerTitle, "hero.offer");
+    t.bind(offerCta, "hero.offerCta");
+    t.bind(offerHint, "hero.offerHint");
+    t.bind(offer, "hero.offerLabel", "aria-label");
+    t.bind(offer, "cursor.write", "data-cursor");
+    // Phones have no room for the switch in the top bar: it stands in the kicker's row.
+    const lang = content().languageSwitch();
+    lang.classList.add("hero-lang");
+    kicker.append(lang);
     motion.add(forbes, { kind: "sticker" });
     for (const el of [k1, k2, lede]) {
       motion.add(el, { kind: "word" });

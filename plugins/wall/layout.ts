@@ -14,6 +14,7 @@ export type Slot =
   | { k: "team" }
   | { k: "whale" }
   | { k: "telegram" }
+  | { k: "concept" } // the free concept offer, to the bot
   | { k: "sheet" } // the studio's clients as one sheet of logos (the reference's sticker sheet)
   | { k: "deeper" };
 
@@ -49,17 +50,15 @@ export const W: Slot[] = [
   { k: "tag", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
-  // DeckForge and Skyeng, then Axie Infinity and Tria: two big tiles a band, in the cases' order.
-  // On tablets DeckForge pairs with Antiquerus, Skyeng with the team block, Axie Infinity with Tria.
-  { k: "tile", id: 8, narrow: true },
-  { k: "tile", id: 9 },
-  { k: "tile", id: 10, narrow: true },
-  { k: "tile", id: 11, narrow: true },
-  // Two rows close the wall: the team block, the clients' sheet and the last two clients.
+  // Skyeng and Tria: two big tiles a band, in the cases' order.
+  // On tablets Skyeng pairs with Antiquerus, Tria with the team block.
+  { k: "tile", id: 9, narrow: true },
+  { k: "tile", id: 11 },
+  // Two rows close the wall: the team block, the clients' sheet, the last client and the free concept.
   { k: "team" },
   { k: "sheet" },
-  { k: "client", i: 7 }, // Skyeng, where Sergey Ibadov's sticker was
-  { k: "client", i: 6 },
+  { k: "client", i: 6 }, // Skyeng
+  { k: "concept" },
 ];
 
 // Same tilt on every visit: mulberry32 seeded 21, one draw per sticker in DOM order, ±7 deg.

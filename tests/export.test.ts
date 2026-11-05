@@ -79,7 +79,7 @@ describe("export", () => {
       ["/index.html", "no-cache"],
       [`/app.js?v=${hash}`, "public, max-age=31536000, immutable"],
       [`/app.css?v=${hash}`, "public, max-age=31536000, immutable"],
-      ["/media/c1-ring.mp4?v=1", "public, max-age=86400"],
+      ["/media/c1-loop.mp4?v=1", "public, max-age=86400"],
       [`/fonts/${font}`, "public, max-age=86400"],
     ];
     for (const [path, cache] of expected) {
@@ -92,7 +92,7 @@ describe("export", () => {
   });
 
   test("a video answers a byte range with 206", async () => {
-    const res = await fetch(`${host.url}/media/c1-ring.mp4`, { headers: { Range: "bytes=0-99" } });
+    const res = await fetch(`${host.url}/media/c1-loop.mp4`, { headers: { Range: "bytes=0-99" } });
     expect(res.status).toBe(206);
     expect((await res.arrayBuffer()).byteLength).toBe(100);
   });

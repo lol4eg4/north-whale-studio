@@ -23,8 +23,23 @@
 .hero-note.narrow { font-size: 17px; rotate: -6deg; }
 .hero-note.narrow .left { width: 58px; height: 39px; margin-top: 2px; }
 .hero-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; margin-top: clamp(20px, 3vw, 40px); }
+.hero-main { display: flex; flex-direction: column; gap: clamp(18px, 2vw, 28px); align-items: flex-start; }
 .hero .lede { font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); max-width: 40ch; margin: 0; }
-.hero-side { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.hero-side { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+/* The free concept: a cobalt card, the whole card one link to the bot, the orange action inside. */
+.hero .offer { justify-self: end; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: min(100%, 470px); padding: clamp(18px, 1.8vw, 28px); border: 3px solid var(--paper); border-radius: var(--rounded-card); background: var(--cobalt); color: var(--paper); box-shadow: var(--die); rotate: -1.5deg; text-decoration: none; transition: rotate 0.3s var(--ease-spring), scale 0.3s var(--ease-spring); }
+.offer-t { font: 900 clamp(28px, 2.8vw, 46px)/0.98 var(--display); letter-spacing: -0.02em; }
+.offer-cta { display: inline-flex; min-height: 44px; padding: 13px 22px; border-radius: 99px; background: var(--buoy); color: var(--ink); font: 900 18px/1.1 var(--display); box-shadow: 0 0 0 3px var(--paper); transition: background 0.2s; }
+.offer-hint { color: rgba(255, 255, 255, 0.78); }
+.hero .offer:focus-visible { outline-color: var(--lemon); }
+.hero-lang { display: none; }
+/* Wide screens: a short card, the title beside the action, so the wall still starts on the first screen. */
+@media (min-width: 1200px) {
+  .hero-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero .offer { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 20px; width: min(100%, 660px); }
+  .offer-t { grid-row: 1 / span 2; font-size: clamp(26px, 2.3vw, 38px); }
+  .offer-hint { grid-column: 2; justify-self: center; }
+}
 .hero .watch { font-size: 20px; padding: 10px 22px 10px 10px; min-height: 44px; background: var(--paper); box-shadow: var(--die); border: 2px solid var(--ink); transition: background 0.2s, scale 0.25s; }
 .hero .watch .badge { width: 34px; height: 34px; }
 .hero .believe { font-size: 18px; }
@@ -43,17 +58,29 @@
 .hero .forbes:not(.piece) { rotate: var(--r); }
 .hero .forbes.flow { position: relative; }
 html.calm .hero .forbes { transition: none; }
+html.calm .hero .offer { transition: none; }
+.hero .offer:active { scale: 0.98; }
 @media (hover: hover) {
+  .hero .offer:hover { rotate: 0deg; scale: 1.02; }
+  .hero .offer:hover .offer-cta { background: var(--lemon); }
   .hero .watch:hover { background: var(--lemon); }
   .hero .forbes:not(.lifted):hover { --r: 1deg; scale: 1.04; }
 }
+/* One column: the offer comes right after the lede, before the ways down the page. */
 @media (max-width: 860px) {
   .hero-row { grid-template-columns: 1fr; }
+  .hero-main { display: contents; }
+  .hero .offer { order: 1; justify-self: stretch; width: auto; max-width: 560px; rotate: -1deg; }
+  .hero-side { order: 2; }
 }
 @media (max-width: 700px) {
   .hero { padding-bottom: 14px; }
-  .hero .kicker { margin-bottom: 14px; }
+  .hero .kicker { margin-bottom: 10px; align-items: center; flex-wrap: nowrap; }
   .hero .kicker span:first-child { display: none; }
+  .hero .hero-lang { display: flex; margin-left: auto; }
+  .hero .offer { gap: 12px; padding: 16px 16px 14px; }
+  .offer-t { font-size: min(28px, 7.4vw); }
+  .offer-cta { font-size: 17px; padding: 12px 18px; }
   .hero .kicker span:nth-child(2)::before { display: none; }
   .hero-title { font-size: min(44px, 11.3vw); }
   .hero-row { margin-top: 16px; gap: 16px; }

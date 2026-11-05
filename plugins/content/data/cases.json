@@ -200,49 +200,6 @@
   "logos": []
  },
  {
-  "id": 8,
-  "client": {
-   "ru": "DeckForge",
-   "en": "DeckForge"
-  },
-  "what": {
-   "ru": "free 2 play игра",
-   "en": "Free-to-play game"
-  },
-  "result": [
-   {
-    "ru": "Дизайн, ART, креатив и продакшн",
-    "en": "Design, art, creative and production"
-   }
-  ],
-  "size": "xl",
-  "kind": "video",
-  "sound": true,
-  "vertical": true,
-  "color": "cobalt",
-  "press": [],
-  "logos": [
-   {
-    "name": "VK",
-    "logo": "/media/partner-vk.svg",
-    "ratio": 5.75,
-    "scale": 1
-   },
-   {
-    "name": "RuStore",
-    "logo": "/media/partner-rustore.svg",
-    "ratio": 4,
-    "scale": 1
-   },
-   {
-    "name": "Xiaomi",
-    "logo": "/media/partner-xiaomi.svg",
-    "ratio": 3.75,
-    "scale": 1
-   }
-  ]
- },
- {
   "id": 9,
   "client": {
    "ru": "Skyeng",
@@ -263,30 +220,6 @@
   "sound": false,
   "vertical": false,
   "color": "lemon",
-  "press": [],
-  "logos": []
- },
- {
-  "id": 10,
-  "client": {
-   "ru": "Axie Infinity",
-   "en": "Axie Infinity"
-  },
-  "what": {
-   "ru": "Web3-игра",
-   "en": "Web3 game"
-  },
-  "result": [
-   {
-    "ru": "Дизайн, ART и сайт",
-    "en": "Design, art and website"
-   }
-  ],
-  "size": "xl",
-  "kind": "video",
-  "sound": false,
-  "vertical": false,
-  "color": "signal",
   "press": [],
   "logos": []
  },

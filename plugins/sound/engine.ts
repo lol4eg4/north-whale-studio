@@ -3,7 +3,6 @@
 //   notes (marimba, wood, piano) -> notes .5 --\
 //   effects (noise, sweeps)      -> fx 2.2  ---> room: highpass, soft clip, lowpass -> master -> compressor -> out
 //                                               room -> reverb send .3 -> convolver 2.4 s -> master
-//   music (music.ts) ---------------------------------------------------------> compressor
 import type { SoundName } from "./api.ts";
 import { hz } from "./cues.ts";
 
@@ -236,7 +235,6 @@ export function createEngine(Ctor: typeof AudioContext) {
 
   return {
     ctx,
-    out: comp, // the music joins here, past the master the effects share
     play(name: SoundName | "on", pitch = 0) {
       if (ctx.state !== "running") return;
       effects[name](ctx.currentTime + 0.005, pitch);

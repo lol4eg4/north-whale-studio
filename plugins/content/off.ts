@@ -7,6 +7,7 @@ export default function off(host: Host) {
   host.provide<ContentApi>("content", {
     language: () => "ru",
     setLanguage() {},
+    languageSwitch: () => document.createElement("div"),
     text: (key) => key,
     format: (key) => key,
     cases: none,
