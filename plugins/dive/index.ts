@@ -68,6 +68,8 @@ export default function init(host: Host) {
   };
   addEventListener("scroll", atTop, { passive: true });
   addEventListener("resize", atTop, { passive: true });
+  // Late fonts move the offer without a scroll.
+  document.fonts?.addEventListener("loadingdone", () => requestAnimationFrame(atTop));
   dock.addEventListener("focusout", () => requestAnimationFrame(atTop));
   atTop();
 

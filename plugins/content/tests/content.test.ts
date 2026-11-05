@@ -32,6 +32,10 @@ describe("language", () => {
     expect(pickLanguage("?lang=xx", "en")).toBe("en");
     expect(pickLanguage("", null)).toBe("ru");
     expect(pickLanguage("?lang=de", null)).toBe("ru");
+    // A stored value that is not a language is no choice.
+    expect(pickLanguage("", "de")).toBe("ru");
+    expect(pickLanguage("", "")).toBe("ru");
+    expect(pickLanguage("?lang=en", "de")).toBe("en");
   });
 });
 
@@ -48,6 +52,8 @@ describe("cases", () => {
     expect(cases.every((c) => c.kind === "video" && c.media.loop === `/media/c${c.id}-loop.mp4` && c.media.loopPhone === `/media/c${c.id}-loop-phone.mp4`)).toBe(true);
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
     expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3]);
+    // The wall's heading says how many cases there are.
+    for (const lang of ["ru", "en"] as const) expect(store(lang).text("wall.title")).toContain(` ${cases.length} `);
     for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape", "royal"]).toContain(c.color);
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
@@ -113,7 +119,7 @@ describe("cases", () => {
   test("logos taken from other sites are plain drawings: no scripts, handlers, embedded pictures or outside addresses", () => {
     const dir = `${import.meta.dir}/../../../site/media`;
     const files = readdirSync(dir).filter((f) => /^(client|partner|platform|press)-.*\.svg$/.test(f));
-    expect(files.length).toBeGreaterThanOrEqual(17); // 9 clients, VK, 3 platforms, 4 publications
+    expect(files.length).toBeGreaterThanOrEqual(18); // 9 clients, VK, 3 platforms, 5 publications (4 on Waldorf, Forbes)
     for (const f of files) {
       const svg = readFileSync(`${dir}/${f}`, "utf8");
       expect(svg.trimStart().startsWith("<svg") || svg.trimStart().startsWith("<?xml"), f).toBe(true);

@@ -42,7 +42,6 @@ export default function init(host: Host) {
     setLanguage(next) {
       if (next === lang || !LANGS.includes(next)) return;
       lang = next;
-      host.memory.set("language", lang);
       const url = new URL(location.href);
       url.searchParams.set("lang", lang);
       history.replaceState(history.state, "", url);
@@ -63,7 +62,11 @@ export default function init(host: Host) {
   function switcher(named: boolean): { el: HTMLElement; show(current: Lang): void } {
     const buttons = LANGS.map((l) => {
       const b = h("button", { type: "button", lang: l, "aria-pressed": "false" }, named ? NAMES[l] : l.toUpperCase());
-      b.addEventListener("click", () => api.setLanguage(l));
+      // The click alone is remembered: an address followed by Back or Forward is not a choice.
+      b.addEventListener("click", () => {
+        host.memory.set("language", l);
+        api.setLanguage(l);
+      });
       return b;
     });
     const s = {

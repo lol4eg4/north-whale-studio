@@ -134,6 +134,8 @@ function tileScale(c: Case, info: Info): string {
 
 /** The loop's fragment must be at most 8 s and inside the video. */
 function checkFragment(c: Case, info: Info) {
+  // Written so a missing number (an entry with the old ringStart / ringLength) fails here, not in ffmpeg.
+  if (!(c.loopStart >= 0 && c.loopLength > 0)) throw new Error(`case ${c.id}: loopStart and loopLength must be numbers`);
   if (c.loopLength > 8) throw new Error(`case ${c.id}: loopLength ${c.loopLength} is over 8 s`);
   if (c.loopStart + c.loopLength > info.duration + 0.05) {
     throw new Error(`case ${c.id}: fragment ${c.loopStart}+${c.loopLength} s is longer than the video (${info.duration} s)`);

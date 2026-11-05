@@ -68,7 +68,7 @@ export default function init(host: Host) {
   const offerHint = h("span", { class: "mono-s offer-hint" });
   const offer = h(
     "a",
-    { class: "offer", href: content().contacts().bot.url, target: "_blank", rel: "noopener", "data-dock-clear": "" },
+    { class: "offer", "data-dock-clear": "" },
     offerTitle,
     h("span", { class: "offer-cta arrowed" }, offerCta, icon("arrowRight", 18)),
     offerHint,
@@ -80,7 +80,8 @@ export default function init(host: Host) {
     kicker,
     title,
     heroNote,
-    h("div", { class: "hero-row" }, h("div", { class: "hero-main" }, lede, side), offer),
+    // Tab follows the phone's reading order: lede, offer, the ways down the page.
+    h("div", { class: "hero-row" }, lede, offer, side),
     forbes,
   );
   host.region("main").append(section);
@@ -177,6 +178,10 @@ export default function init(host: Host) {
     t.bind(offerHint, "hero.offerHint");
     t.bind(offer, "hero.offerLabel", "aria-label");
     t.bind(offer, "cursor.write", "data-cursor");
+    // The bot in a new tab; with no bot address, the contacts block, like the wall's Telegram sticker.
+    const bot = content().contacts().bot.url;
+    const to: Record<string, string> = bot ? { href: bot, target: "_blank", rel: "noopener" } : { href: "#contacts" };
+    for (const [k, v] of Object.entries(to)) offer.setAttribute(k, v);
     // Phones have no room for the switch in the top bar: it stands in the kicker's row.
     const lang = content().languageSwitch();
     lang.classList.add("hero-lang");

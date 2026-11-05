@@ -89,7 +89,7 @@ test("a browser in English with no ?lang opens in Russian; a click on EN switche
   await context.close();
 });
 
-test("only the click on the switch is remembered, under nws.language; the old nws.lang is ignored", async () => {
+test("only the click on the switch is remembered, under nws.language; the old nws.lang and Back to a ?lang are not", async () => {
   const { context, page, errors } = await open(browser, server.url, { locale: "en-US" });
   await page.evaluate(() => localStorage.setItem("nws.lang", "en"));
   await page.reload({ waitUntil: "load" });
@@ -97,6 +97,37 @@ test("only the click on the switch is remembered, under nws.language; the old nw
   expect(await page.evaluate(() => localStorage.getItem("nws.language"))).toBeNull();
   await page.locator(".nav .lang button[lang=en]").click();
   expect(await page.evaluate(() => localStorage.getItem("nws.language"))).toBe("en");
+  // Back to an address with ?lang=ru: the page follows it, the choice stays the click's.
+  await page.evaluate(() => {
+    history.pushState(null, "", "?lang=ru");
+    history.pushState(null, "", "?lang=en");
+    history.back();
+  });
+  await page.waitForFunction(() => document.documentElement.lang === "ru");
+  expect(await page.evaluate(() => localStorage.getItem("nws.language"))).toBe("en");
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
+test("phone: the switch stands in the kicker row on the first screen, thumb-sized; the menu names the languages; all switches agree", async () => {
+  const { context, page, errors } = await open(browser, server.url, phone);
+  const hero = page.locator(".hero .kicker .hero-lang");
+  expect(await page.locator(".nav .nav-lang").isVisible()).toBe(false);
+  expect(await hero.isVisible()).toBe(true);
+  const box = (await hero.boundingBox())!;
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
+  for (const b of await hero.locator("button").all()) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await hero.locator("button[lang=en]").click();
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe("en");
+  await page.locator(".nav .plus").click();
+  expect(await page.locator(".menu-lang > .mono").textContent()).toBe("Site language");
+  expect(await page.locator(".menu-lang .lang-named button").allTextContents()).toEqual(["Русский", "English"]);
+  // Every switch on the page shows the same pressed language.
+  const pressed = () => page.$$eval(".lang", (els) => els.map((g) => g.querySelector('[aria-pressed="true"]')!.getAttribute("lang")));
+  expect(await pressed()).toEqual(["en", "en", "en"]);
+  await page.locator(".menu-lang button[lang=ru]").click();
+  expect(await pressed()).toEqual(["ru", "ru", "ru"]);
+  expect(await page.evaluate(() => localStorage.getItem("nws.language"))).toBe("ru");
   expect(errors).toEqual([]);
   await context.close();
 });
@@ -115,6 +146,9 @@ test("the hero offer is one link to the Telegram bot in a new tab, in view on th
           rel: a.rel,
           title: a.querySelector(".offer-t")!.textContent,
           cta: a.querySelector(".offer-cta")!.textContent,
+          label: a.getAttribute("aria-label")!,
+          // Tab meets the card before the buttons, as the phone shows it.
+          beforeButtons: !!(a.compareDocumentPosition(document.querySelector(".hero .watch")!) & Node.DOCUMENT_POSITION_FOLLOWING),
           // The whole card is the link: nothing inside it is another link or button.
           inner: a.querySelectorAll("a, button").length,
           inView: b.width > 0 && b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth,
@@ -126,7 +160,14 @@ test("the hero offer is one link to the Telegram bot in a new tab, in view on th
         lang === "ru" ? ["Бесплатный концепт вашего сайта", "Получить концепт"] : ["A free concept for your website", "Get the concept"],
       );
       expect(r.inner, `${lang} ${name}: links inside the card`).toBe(0);
+      expect(r.beforeButtons, `${lang} ${name}: tab order`).toBe(true);
+      // Its name holds the words on it, so a voice command with the button's words finds it.
+      expect(r.label.startsWith(`${r.title}. ${r.cta}:`), `${lang} ${name}: ${r.label}`).toBe(true);
       expect(r.inView, `${lang} ${name}: on the first screen`).toBe(true);
+      // Its focus ring sits on the white page, outside the card: cobalt, as everywhere on paper.
+      await page.keyboard.press("Tab");
+      await page.locator(".hero a.offer").focus();
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector(".hero a.offer:focus-visible")!).outlineColor)).toBe("rgb(47, 75, 255)");
       expect(errors).toEqual([]);
       await context.close();
     }

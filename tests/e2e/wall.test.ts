@@ -87,17 +87,29 @@ describe("wall layout", () => {
     await context.close();
   });
 
-  test("the «Концепт сайта» sticker closes the wall and links to the Telegram bot in a new tab, at 1440, 768 and 390 px; EN too", async () => {
+  // The sticker is the last cell. The dense grid leaves it in the last row on 8 columns only: on 6
+  // it fills the column beside Mabrook, on 2 the row before the team block.
+  test("the «Концепт сайта» sticker links to the Telegram bot in a new tab: last row at 1440, beside Mabrook at 768 and 701, before the team block at 390; its words stay on the circle; EN too", async () => {
     const BOT = "https://t.me/North_Whale_Studio_Bot";
     for (const [lang, name, sub] of [["ru", "Концепт сайта", "Бесплатно"], ["en", "Site concept", "Free"]]) {
       const { context, page, errors } = await open(browser, `${full.url}/?lang=${lang}`);
-      for (const width of [1440, 768, 390]) {
+      for (const [width, spot] of [[1440, "lastRow"], [768, "besideMabrook"], [701, "besideMabrook"], [390, "beforeTeam"]] as const) {
         await page.setViewportSize({ width, height: 900 });
         await page.waitForTimeout(150);
         const r = await page.evaluate(() => {
           const a = document.querySelector<HTMLAnchorElement>(".wall a.concept")!;
           const b = a.getBoundingClientRect();
           const cells = [...document.querySelectorAll(".wall > .cell")].filter((c) => getComputedStyle(c).display !== "none");
+          const own = a.closest(".cell")!.getBoundingClientRect();
+          const mabrook = document.querySelector(".wall > .cell:has(.tile[aria-label*='Mabrook'])")!.getBoundingClientRect();
+          const team = document.querySelector(".wall > .sz-fam")!.getBoundingClientRect();
+          // The words' own boxes, at least 2 px inside the circle's box on each side.
+          const fits = [...a.querySelectorAll("b, .ck")].every((e) => {
+            const range = document.createRange();
+            range.selectNodeContents(e);
+            const t = range.getBoundingClientRect();
+            return t.left >= b.left + 2 && t.right <= b.right - 2;
+          });
           return {
             href: a.href,
             target: a.target,
@@ -106,9 +118,17 @@ describe("wall layout", () => {
             sub: a.querySelector(".ck")!.textContent,
             size: b.width > 30 && b.height > 30,
             last: cells.at(-1)!.contains(a),
+            fits,
+            spot: {
+              lastRow: !cells.some((c) => c.getBoundingClientRect().bottom > own.bottom + 1),
+              besideMabrook: own.top >= mabrook.top - 1 && own.bottom <= mabrook.bottom + 1,
+              beforeTeam: own.bottom <= team.top + 1 && team.top - own.bottom < 40,
+            },
           };
         });
-        expect(r, `${lang} ${width}`).toEqual({ href: BOT, target: "_blank", rel: "noopener", name, sub, size: true, last: true });
+        const { spot: where, ...rest } = r;
+        expect(rest, `${lang} ${width}`).toEqual({ href: BOT, target: "_blank", rel: "noopener", name, sub, size: true, last: true, fits: true });
+        expect(where[spot], `${lang} ${width}: ${spot}`).toBe(true);
       }
       expect(errors).toEqual([]);
       await context.close();
@@ -356,6 +376,23 @@ describe("wall media", () => {
     await context.close();
   });
 
+  test("a loop that played and then broke hands the tile back to its poster", async () => {
+    const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
+    await page.waitForFunction(() => document.querySelector(".wall .tile")!.classList.contains("live"), null, { timeout: 8000 });
+    await page.evaluate(() => document.querySelector(".wall .tile-loop")!.dispatchEvent(new Event("error")));
+    await page.waitForFunction(() => !document.querySelector(".wall .tile")!.classList.contains("live"), null, { timeout: 2000 });
+    await page.waitForTimeout(700); // the fade
+    const r = await page.evaluate(() => {
+      const t = document.querySelector(".wall .tile")!;
+      const v = t.querySelector<HTMLVideoElement>(".tile-loop")!;
+      const img = t.querySelector<HTMLImageElement>(".tile-poster")!;
+      return { src: v.getAttribute("src"), opacity: getComputedStyle(v).opacity, poster: img.complete && img.naturalWidth > 0 && !t.classList.contains("no-poster") };
+    });
+    expect(r).toEqual({ src: null, opacity: "0", poster: true });
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
   test("calm: the tile loops still play, the ticker stands; the pause button shows off and stops the loops", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
     const first = () => page.evaluate(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused);
@@ -574,6 +611,26 @@ describe("wall media", () => {
     const touch = await open(browser, `${full.url}/?lang=ru`, phone);
     expect(await touch.page.evaluate(() => getComputedStyle(document.querySelectorAll(".wall .plate-stat")[0]).opacity)).toBe("1");
     await touch.context.close();
+  });
+
+  test("phones: no result pill lies on its case's name, at 320 and 390 px, RU and EN", async () => {
+    for (const lang of ["ru", "en"])
+      for (const width of [320, 390]) {
+        const { context, page, errors } = await open(browser, `${full.url}/?lang=${lang}`, { ...phone, viewport: { width, height: 844 } });
+        await page.waitForTimeout(600); // the pills fly out
+        const hits = await page.evaluate(() =>
+          [...document.querySelectorAll(".wall .tile")].flatMap((t) => {
+            const name = t.querySelector(".plate-t")!.getBoundingClientRect();
+            return [...t.querySelectorAll(".plate-stat")]
+              .map((s) => s.getBoundingClientRect())
+              .filter((s) => s.top < name.bottom && s.bottom > name.top && s.left < name.right && s.right > name.left)
+              .map(() => t.querySelector(".plate-t")!.textContent);
+          }),
+        );
+        expect(hits, `${lang} ${width}`).toEqual([]);
+        expect(errors).toEqual([]);
+        await context.close();
+      }
   });
 
   test("opening a case pauses the wall loops; closing resumes them", async () => {

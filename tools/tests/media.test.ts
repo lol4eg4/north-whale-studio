@@ -56,13 +56,22 @@ describe("streams", () => {
       expect([phone.width, phone.height]).toEqual(c.size === "t" ? [720, 1080] : [720, 900]);
     });
 
-    // the height can differ: a picture poster has its own aspect
-    test(`case ${c.id}: the tile loop is as wide as the tile's still`, async () => {
+    // A picture poster has its own aspect; a frame of the video has the loop's.
+    test(`case ${c.id}: the tile loop is as wide as the tile's still${typeof c.poster === "number" ? " and as high" : ""}`, async () => {
       const still = await probe(path(`c${c.id}.webp`));
       const tile = await probe(path(`c${c.id}-loop.mp4`));
       expect(tile.width).toBe(still.width);
+      if (typeof c.poster === "number") expect(Math.abs(tile.height - still.height)).toBeLessThanOrEqual(2);
     });
   }
+
+  test("every video case names its loop: loopStart from 0, loopLength up to 8 s", () => {
+    for (const c of cases.filter((c) => c.kind === "video")) {
+      expect(c.loopStart, `case ${c.id}`).toBeGreaterThanOrEqual(0);
+      expect(c.loopLength, `case ${c.id}`).toBeGreaterThan(0);
+      expect(c.loopLength, `case ${c.id}`).toBeLessThanOrEqual(8);
+    }
+  });
 
   test("cases 8 and 10 are gone", async () => {
     expect(cases.filter((c) => c.id === 8 || c.id === 10)).toEqual([]);

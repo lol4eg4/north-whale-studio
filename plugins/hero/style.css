@@ -22,16 +22,17 @@
 .hero.note-under .hero-title { margin-bottom: 96px; }
 .hero-note.narrow { font-size: 17px; rotate: -6deg; }
 .hero-note.narrow .left { width: 58px; height: 39px; margin-top: 2px; }
-.hero-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; margin-top: clamp(20px, 3vw, 40px); }
-.hero-main { display: flex; flex-direction: column; gap: clamp(18px, 2vw, 28px); align-items: flex-start; }
-.hero .lede { font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); max-width: 40ch; margin: 0; }
-.hero-side { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+/* The lede over the ways down the page, the offer beside both. The first row takes what the offer
+   adds, so the lede stays right above the buttons and both end with the card. */
+.hero-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: "lede offer" "side offer"; gap: clamp(18px, 2vw, 28px) 48px; align-items: end; margin-top: clamp(20px, 3vw, 40px); }
+.hero .lede { grid-area: lede; justify-self: start; font: 500 clamp(18px, 1.6vw, 23px)/1.35 var(--sans); max-width: 40ch; margin: 0; }
+.hero-side { grid-area: side; justify-self: start; display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
 /* The free concept: a cobalt card, the whole card one link to the bot, the orange action inside. */
-.hero .offer { justify-self: end; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: min(100%, 470px); padding: clamp(18px, 1.8vw, 28px); border: 3px solid var(--paper); border-radius: var(--rounded-card); background: var(--cobalt); color: var(--paper); box-shadow: var(--die); rotate: -1.5deg; text-decoration: none; transition: rotate 0.3s var(--ease-spring), scale 0.3s var(--ease-spring); }
+.hero .offer { grid-area: offer; justify-self: end; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: min(100%, 470px); padding: clamp(18px, 1.8vw, 28px); border: 3px solid var(--paper); border-radius: var(--rounded-card); background: var(--cobalt); color: var(--paper); box-shadow: var(--die); rotate: -1.5deg; text-decoration: none; transition: rotate 0.3s var(--ease-spring), scale 0.3s var(--ease-spring); }
 .offer-t { font: 900 clamp(28px, 2.8vw, 46px)/0.98 var(--display); letter-spacing: -0.02em; }
 .offer-cta { display: inline-flex; min-height: 44px; padding: 13px 22px; border-radius: 99px; background: var(--buoy); color: var(--ink); font: 900 18px/1.1 var(--display); box-shadow: 0 0 0 3px var(--paper); transition: background 0.2s; }
-.offer-hint { color: rgba(255, 255, 255, 0.78); }
-.hero .offer:focus-visible { outline-color: var(--lemon); }
+/* 85 % white keeps the 10 px line at 4.5:1 on cobalt, like the open case's soft text. */
+.offer-hint { color: rgba(255, 255, 255, 0.85); }
 .hero-lang { display: none; }
 /* Wide screens: a short card, the title beside the action, so the wall still starts on the first screen. */
 @media (min-width: 1200px) {
@@ -68,10 +69,9 @@ html.calm .hero .offer { transition: none; }
 }
 /* One column: the offer comes right after the lede, before the ways down the page. */
 @media (max-width: 860px) {
-  .hero-row { grid-template-columns: 1fr; }
-  .hero-main { display: contents; }
-  .hero .offer { order: 1; justify-self: stretch; width: auto; max-width: 560px; rotate: -1deg; }
-  .hero-side { order: 2; }
+  .hero-row { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "lede" "offer" "side"; gap: 24px; }
+  .hero .offer { justify-self: stretch; width: auto; max-width: 560px; rotate: -1deg; }
+  .hero-side { justify-self: stretch; }
 }
 @media (max-width: 700px) {
   .hero { padding-top: 16px; padding-bottom: 14px; }
@@ -84,7 +84,7 @@ html.calm .hero .offer { transition: none; }
   .hero .kicker span:nth-child(2)::before { display: none; }
   .hero-title { font-size: min(44px, 11.3vw); }
   .hero-row { margin-top: 16px; gap: 14px; }
-  .hero-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .hero-side { gap: 10px 16px; }
   .hero .watch { font-size: 16px; padding: 6px 16px 6px 6px; }
   .hero .watch .badge { width: 28px; height: 28px; }
   .hero .believe { font-size: 16px; }

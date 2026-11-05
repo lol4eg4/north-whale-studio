@@ -134,9 +134,11 @@ test("the dock never covers the free concept offer while the page scrolls, and c
   for (const [width, height] of [[1280, 720], [1366, 768], [1440, 900], [1920, 1080], [1024, 768]]) {
     const { context, page, errors } = await open(browser, server.url, { viewport: { width, height } });
     const hits: number[] = [];
+    const waited: number[] = []; // scrolled, yet the dock stays in: the offer is under its corner
     for (let y = 0; y <= 1200; y += 50) {
       await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      if (y >= 40 && (await dockShown(page))[0] === "hidden") waited.push(y);
       const hit = await page.evaluate(() => {
         const o = document.querySelector(".hero .offer")!.getBoundingClientRect();
         return [...document.querySelectorAll<HTMLElement>(".dive-btn, .tidy-btn")]
@@ -149,6 +151,8 @@ test("the dock never covers the free concept offer while the page scrolls, and c
       if (hit) hits.push(y);
     }
     expect(hits, `${width}x${height}: dock over the offer at these scroll positions`).toEqual([]);
+    // On the laptops the owner used, the offer does reach the corner: the dock waits there.
+    if (width === 1280 || width === 1366) expect(waited.length, `${width}x${height}: the dock waited for the offer`).toBeGreaterThan(0);
     expect(await dockShown(page), `${width}x${height}: the dock is out once the offer is past`).toEqual(["visible", "visible"]);
     expect(errors).toEqual([]);
     await context.close();

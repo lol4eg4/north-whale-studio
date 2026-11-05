@@ -370,7 +370,7 @@ describe("player", () => {
     await strict.close();
   });
 
-  test("phone: the case plays in the open case, King's and the three newest", async () => {
+  test("phone: the case plays in the open case, King's, Skyeng and Tria", async () => {
     for (const id of [5, 9, 11]) {
       const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`, phone);
       await page.waitForFunction(() => {
