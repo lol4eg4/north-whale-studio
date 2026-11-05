@@ -115,6 +115,10 @@ export default function init(host: Host) {
     heroNote.classList.toggle("narrow", fit.mode === "narrow");
     section.classList.toggle("note-under", fit.mode === "under");
     heroNote.style.maxWidth = fit.maxWidth ? `${fit.maxWidth}px` : "";
+    // A word wider than the narrow room (a 320 px phone) takes a smaller marker, so it is never cut.
+    heroNote.style.fontSize = "";
+    if (fit.mode === "narrow" && heroNote.scrollWidth > heroNote.clientWidth + 1)
+      heroNote.style.fontSize = `${Math.floor((parseFloat(getComputedStyle(heroNote).fontSize) * heroNote.clientWidth) / heroNote.scrollWidth)}px`;
     const q = slot.getBoundingClientRect();
     const at = notePlace(hr, q, pad, heroNote.offsetWidth);
     heroNote.style.left = `${at.left}px`;
