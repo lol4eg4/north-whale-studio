@@ -81,51 +81,52 @@
   "logos": []
  },
  {
-  "id": 3,
+  "id": 11,
   "client": {
-   "ru": "Dear Passengers",
-   "en": "Dear Passengers"
+   "ru": "Tria",
+   "en": "Tria"
   },
   "what": {
-   "ru": "first-person, physics-driven cooperative action",
-   "en": "first-person, physics-driven cooperative action"
+   "ru": "Крипто-необанк",
+   "en": "Crypto neobank"
   },
   "result": [
    {
-    "ru": "100 млн+ органических просмотров",
-    "en": "100M+ organic views"
-   },
-   {
-    "ru": "500 тыс.+ вишлистов в Steam",
-    "en": "500K+ Steam wishlists"
+    "ru": "Сайт и UI/UX приложения",
+    "en": "Website and app UI/UX"
    }
   ],
   "size": "xl",
   "kind": "video",
-  "sound": true,
+  "sound": false,
   "vertical": false,
-  "color": "buoy",
+  "color": "paper",
   "press": [],
-  "logos": [
+  "logos": []
+ },
+ {
+  "id": 9,
+  "client": {
+   "ru": "Skyeng",
+   "en": "Skyeng"
+  },
+  "what": {
+   "ru": "Онлайн-школа языков",
+   "en": "Online language school"
+  },
+  "result": [
    {
-    "name": "Instagram",
-    "logo": "/media/platform-instagram.svg",
-    "ratio": 4.53,
-    "scale": 1.1
-   },
-   {
-    "name": "YouTube",
-    "logo": "/media/platform-youtube.svg",
-    "ratio": 4.48,
-    "scale": 1
-   },
-   {
-    "name": "TikTok",
-    "logo": "/media/platform-tiktok.svg",
-    "ratio": 4.92,
-    "scale": 0.85
+    "ru": "Дизайн",
+    "en": "Design"
    }
-  ]
+  ],
+  "size": "xl",
+  "kind": "video",
+  "sound": false,
+  "vertical": false,
+  "color": "lemon",
+  "press": [],
+  "logos": []
  },
  {
   "id": 4,
@@ -200,51 +201,50 @@
   "logos": []
  },
  {
-  "id": 9,
+  "id": 3,
   "client": {
-   "ru": "Skyeng",
-   "en": "Skyeng"
+   "ru": "Dear Passengers",
+   "en": "Dear Passengers"
   },
   "what": {
-   "ru": "Онлайн-школа языков",
-   "en": "Online language school"
+   "ru": "first-person, physics-driven cooperative action",
+   "en": "first-person, physics-driven cooperative action"
   },
   "result": [
    {
-    "ru": "Дизайн",
-    "en": "Design"
+    "ru": "100 млн+ органических просмотров",
+    "en": "100M+ organic views"
+   },
+   {
+    "ru": "500 тыс.+ вишлистов в Steam",
+    "en": "500K+ Steam wishlists"
    }
   ],
   "size": "xl",
   "kind": "video",
-  "sound": false,
+  "sound": true,
   "vertical": false,
-  "color": "lemon",
+  "color": "buoy",
   "press": [],
-  "logos": []
- },
- {
-  "id": 11,
-  "client": {
-   "ru": "Tria",
-   "en": "Tria"
-  },
-  "what": {
-   "ru": "Крипто-необанк",
-   "en": "Crypto neobank"
-  },
-  "result": [
+  "logos": [
    {
-    "ru": "Сайт и UI/UX приложения",
-    "en": "Website and app UI/UX"
+    "name": "Instagram",
+    "logo": "/media/platform-instagram.svg",
+    "ratio": 4.53,
+    "scale": 1.1
+   },
+   {
+    "name": "YouTube",
+    "logo": "/media/platform-youtube.svg",
+    "ratio": 4.48,
+    "scale": 1
+   },
+   {
+    "name": "TikTok",
+    "logo": "/media/platform-tiktok.svg",
+    "ratio": 4.92,
+    "scale": 0.85
    }
-  ],
-  "size": "xl",
-  "kind": "video",
-  "sound": false,
-  "vertical": false,
-  "color": "paper",
-  "press": [],
-  "logos": []
+  ]
  }
 ]

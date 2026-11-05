@@ -115,7 +115,7 @@ describe("wall layout", () => {
     }
   });
 
-  test("tablet (768 px): Skyeng is 3 columns wide beside Антикрус, Tria 4 columns wide beside the team block, a 2x3 strip; 8 columns the team block is 3x2", async () => {
+  test("tablet (768 px): King's is 3 columns wide beside Антикрус, Dear Passengers 4 columns wide beside the team block, a 2x3 strip; 8 columns the team block is 3x2", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
     // Columns and rows a cell takes, from its box and the wall's grid tracks.
     const span = (sel: string) =>
@@ -129,13 +129,13 @@ describe("wall layout", () => {
         return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
       }, sel);
     const top = (sel: string) => page.$eval(sel, (e) => Math.round(e.getBoundingClientRect().top));
-    // Антикрус, Skyeng and Tria are cases 6, 7 and 8 on the wall. Антикрус and Skyeng are 3x3 and
-    // share a row; Tria is 4x3 and shares the next one with the team block.
+    // King's, Антикрус and Dear Passengers are cases 6, 7 and 8 on the wall. King's and Антикрус
+    // are 3x3 and share a row; Dear Passengers is 4x3 and shares the next one with the team block.
     const cell = (n: number) => `.wall > .cell:has(.tile[aria-label^="Кейс ${n}."])`;
-    expect(await span(cell(6)), "Антикрус").toEqual([3, 3]);
-    expect(await span(cell(7)), "Skyeng").toEqual([3, 3]);
+    expect(await span(cell(6)), "King's").toEqual([3, 3]);
+    expect(await span(cell(7)), "Антикрус").toEqual([3, 3]);
     expect(await top(cell(6))).toBe(await top(cell(7)));
-    expect(await span(cell(8)), "Tria").toEqual([4, 3]);
+    expect(await span(cell(8)), "Dear Passengers").toEqual([4, 3]);
     expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
     expect(await top(cell(8))).toBe(await top(".wall > .sz-fam"));
     // «Привет!» fits the narrow strip: the block clips what overflows.
@@ -246,7 +246,7 @@ describe("wall media", () => {
       }),
     );
     // Tiles in wall order, which is the cases' order: their ids, and the numbers they say.
-    const ids = [1, 2, 3, 4, 5, 7, 9, 11];
+    const ids = [1, 2, 11, 9, 4, 5, 7, 3];
     expect(tiles.length).toBe(8);
     const vh = 900;
     tiles.forEach((tile, i) => {
@@ -261,8 +261,8 @@ describe("wall media", () => {
       }
     });
     expect(loops.some((l) => l.id === 1)).toBe(true);
-    // Tria, the last tile, is far down the wall.
-    expect(loops.some((l) => l.id === 11)).toBe(false);
+    // Dear Passengers, the last tile, is far down the wall.
+    expect(loops.some((l) => l.id === 3)).toBe(false);
 
     // Every poster answers, and the first one is painted.
     for (const id of ids) expect((await fetch(`${full.url}/media/c${id}.webp`)).status, `c${id}.webp`).toBe(200);
@@ -532,7 +532,7 @@ describe("wall media", () => {
     // Headless Chromium reports no hover; these settings give it a mouse.
     const mouse = await chromium.launch({ args: ["--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4"] });
     const { context, page, errors } = await open(mouse, `${full.url}/?lang=ru`);
-    const tile = page.locator(".wall .tile").nth(2); // Dear Passengers: the case with a result
+    const tile = page.locator(".wall .tile").nth(7); // Dear Passengers: the case with two results
     await tile.scrollIntoViewIfNeeded();
     const look = () =>
       tile.evaluate((t) => ({

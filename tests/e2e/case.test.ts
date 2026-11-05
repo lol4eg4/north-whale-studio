@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 // A tile says its case's place in the list, not its id.
-const ORDER = [1, 2, 3, 4, 5, 7, 9, 11];
+const ORDER = [1, 2, 11, 9, 4, 5, 7, 3];
 const tileSel = (id: number) => `.wall .tile[aria-label^="Кейс ${ORDER.indexOf(id) + 1}."]`;
 const isOpen = (page: Page) => page.evaluate(() => document.querySelector<HTMLDialogElement>("dialog.case")!.open);
 const waitClosed = (page: Page) => page.waitForFunction(() => !document.querySelector<HTMLDialogElement>("dialog.case")!.open);
@@ -76,20 +76,22 @@ describe("open and close", () => {
   test("Next names the next case and opens it without a new history entry; on the last case it leads back to the wall", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     const before = await page.evaluate(() => history.length);
-    await openTile(page, 9);
-    expect(await title(page)).toBe("Skyeng");
-    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Tria");
+    await openTile(page, 7);
+    expect(await title(page)).toBe("Антикрус");
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Dear Passengers");
     await page.click("dialog.case .case-next");
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Tria");
-    expect(await hash(page)).toBe("#case-11");
-    // The studio wrote no "what we handed over" line for Tria: the role card has none.
-    expect(await page.$$eval("dialog.case .case-role p", (els) => els.length)).toBe(0);
+    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Dear Passengers");
+    expect(await hash(page)).toBe("#case-3");
     expect(await page.evaluate(() => history.length)).toBe(before + 1);
     expect(await page.textContent("dialog.case .case-next")).toBe("Назад к стене");
     await page.click("dialog.case .case-next");
     await waitClosed(page);
     expect(await hash(page)).toBe("");
-    expect(await focusIs(page, tileSel(11))).toBe(true);
+    expect(await focusIs(page, tileSel(3))).toBe(true);
+    // The studio wrote no "what we handed over" line for Tria: the role card has none.
+    await openTile(page, 11);
+    expect(await page.$$eval("dialog.case .case-role p", (els) => els.length)).toBe(0);
+    expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Skyeng");
     expect(errors).toEqual([]);
     await context.close();
   });

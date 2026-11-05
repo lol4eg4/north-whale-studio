@@ -25,15 +25,15 @@ export const W: Slot[] = [
   { k: "tag", i: 0 },
   { k: "tag", i: 1 },
   { k: "client", i: 0 },
-  // AG1, Dear Passengers and a column: the starburst, a client, a badge.
+  // AG1, Tria and a column: the starburst, a client, a badge.
   { k: "tile", id: 2 },
-  { k: "tile", id: 3 },
+  { k: "tile", id: 11 },
   { k: "star" },
   { k: "client", i: 1 },
   { k: "tag", i: 2 },
   { k: "tick" },
-  // Mabrook beside a block of the services, two clients, the whale, Telegram and «Ныряй глубже».
-  { k: "tile", id: 4 },
+  // Skyeng beside a block of the services, two clients, the whale, Telegram and «Ныряй глубже».
+  { k: "tile", id: 9 },
   { k: "svc2", id: 1 },
   { k: "svc", id: 2, wide: true },
   { k: "svc", id: 3 },
@@ -44,16 +44,16 @@ export const W: Slot[] = [
   { k: "telegram" },
   { k: "deeper" },
   { k: "client", i: 3 },
-  // King's, Antiquerus and a column: the last badge, two clients.
-  { k: "tile", id: 5 },
+  // Mabrook and King's: two big tiles a band. On tablets King's pairs with Antiquerus.
+  { k: "tile", id: 4 },
+  { k: "tile", id: 5, narrow: true },
+  // Antiquerus, Dear Passengers and a column: the last badge, two clients. On tablets Dear
+  // Passengers pairs with the team block.
   { k: "tile", id: 7 },
+  { k: "tile", id: 3 },
   { k: "tag", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
-  // Skyeng and Tria: two big tiles a band, in the cases' order.
-  // On tablets Skyeng pairs with Antiquerus, Tria with the team block.
-  { k: "tile", id: 9, narrow: true },
-  { k: "tile", id: 11 },
   // Two rows close the wall: the team block, the clients' sheet, the last client and the free concept.
   { k: "team" },
   { k: "sheet" },

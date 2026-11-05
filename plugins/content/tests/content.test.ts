@@ -38,7 +38,7 @@ describe("language", () => {
 describe("cases", () => {
   const cases = store("ru").cases();
   test("eight cases in the studio's order, numbered from 1 without a gap, complete, with existing media names", () => {
-    expect(cases.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 9, 11]);
+    expect(cases.map((c) => c.id)).toEqual([1, 2, 11, 9, 4, 5, 7, 3]);
     expect(cases.map((c) => c.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     for (const c of cases) {
       expect(c.client).not.toBe("");
@@ -68,12 +68,12 @@ describe("cases", () => {
   });
 
   test("screen readers hear number, client, what, every result and the press that wrote about it", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 8. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. Премиум БАДы. 200% средняя окупаемость рекламы");
-    expect(store("en").caseById(4)!.sr).toBe("Case 4. Mabrook. Super app. Website redesign");
-    // The number is the case's place on the wall: Антикрус (id 7) is the sixth since case 6 was taken off.
-    expect(store("ru").caseById(7)!.sr).toBe("Кейс 6. Антикрус. Аукционный дом. Полный цикл ребрендинга");
+    expect(store("en").caseById(4)!.sr).toBe("Case 5. Mabrook. Super app. Website redesign");
+    // The number is the case's place on the wall, not its id: Антикрус (id 7) is the seventh.
+    expect(store("ru").caseById(7)!.sr).toBe("Кейс 7. Антикрус. Аукционный дом. Полный цикл ребрендинга");
     expect(store("ru").caseById(6)).toBeUndefined();
     expect(store("ru").caseById(12)).toBeUndefined();
   });
@@ -84,7 +84,7 @@ describe("cases", () => {
       if (!p) return null;
       return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.role.deliverables === null, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
     };
-    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 9, 11]);
+    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 11, 9, 4, 5, 7, 3]);
     for (const c of cases) {
       expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
       const p = c.page;

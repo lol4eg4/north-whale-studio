@@ -68,7 +68,7 @@ export default function init(host: Host) {
   const offerHint = h("span", { class: "mono-s offer-hint" });
   const offer = h(
     "a",
-    { class: "offer", href: content().contacts().bot.url, target: "_blank", rel: "noopener" },
+    { class: "offer", href: content().contacts().bot.url, target: "_blank", rel: "noopener", "data-dock-clear": "" },
     offerTitle,
     h("span", { class: "offer-cta arrowed" }, offerCta, icon("arrowRight", 18)),
     offerHint,
