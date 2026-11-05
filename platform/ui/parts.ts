@@ -28,6 +28,15 @@ export function icon(name: IconName, size = 20): SVGSVGElement {
 }
 
 export type ButtonKind = "outline" | "action" | "ghost";
+// A floating control that would cover a call to action marked data-dock-clear (the hero's free
+// concept offer) steps aside: true when any of `boxes` overlaps one.
+export function coversClear(boxes: DOMRect[]): boolean {
+  return [...document.querySelectorAll("[data-dock-clear]")].some((el) => {
+    const r = el.getBoundingClientRect();
+    return boxes.some((d) => d.width > 0 && r.left < d.right && r.right > d.left && r.top < d.bottom && r.bottom > d.top);
+  });
+}
+
 export function button(label: string, kind: ButtonKind = "outline", attrs: Attrs = {}): HTMLButtonElement {
   const cls = { outline: "btn", action: "btn btn-action", ghost: "btn btn-ghost" }[kind];
   return h("button", { type: "button", ...attrs, class: `${cls} ${attrs.class ?? ""}`.trim() }, label);

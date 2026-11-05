@@ -27,30 +27,33 @@ describe("texts", () => {
 });
 
 describe("language", () => {
-  test("address first, then the last visit, then the browser; anything but Russian reads English", () => {
-    expect(pickLanguage("?lang=en", "ru", ["ru-RU"])).toBe("en");
-    expect(pickLanguage("?lang=xx", "en", ["ru-RU"])).toBe("en");
-    expect(pickLanguage("", null, ["ru-RU", "en"])).toBe("ru");
-    expect(pickLanguage("", null, ["de-DE"])).toBe("en");
-    expect(pickLanguage("", null, [])).toBe("en");
+  test("address first, then the visitor's choice; otherwise Russian", () => {
+    expect(pickLanguage("?lang=en", "ru")).toBe("en");
+    expect(pickLanguage("?lang=xx", "en")).toBe("en");
+    expect(pickLanguage("", null)).toBe("ru");
+    expect(pickLanguage("?lang=de", null)).toBe("ru");
+    // A stored value that is not a language is no choice.
+    expect(pickLanguage("", "de")).toBe("ru");
+    expect(pickLanguage("", "")).toBe("ru");
+    expect(pickLanguage("?lang=en", "de")).toBe("en");
   });
 });
 
 describe("cases", () => {
   const cases = store("ru").cases();
-  test("ten cases in the studio's order, numbered from 1 without a gap, complete, with existing media names", () => {
-    expect(cases.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
-    expect(cases.map((c) => c.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  test("eight cases in the studio's order, numbered from 1 without a gap, complete, with existing media names", () => {
+    expect(cases.map((c) => c.id)).toEqual([1, 2, 11, 9, 4, 5, 7, 3]);
+    expect(cases.map((c) => c.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     for (const c of cases) {
       expect(c.client).not.toBe("");
       expect(["xl", "l", "t"]).toContain(c.size);
-      expect(c.media.ringPoster).toBe(`/media/c${c.id}-ring.webp`);
       expect(c.kind === "still" ? c.media.still : c.media.full).toBeTruthy();
     }
-    expect(cases.every((c) => c.kind === "video" && c.media.ring === `/media/c${c.id}-ring.mp4`)).toBe(true);
+    expect(cases.every((c) => c.kind === "video" && c.media.loop === `/media/c${c.id}-loop.mp4` && c.media.loopPhone === `/media/c${c.id}-loop-phone.mp4`)).toBe(true);
     expect(cases.find((c) => c.id === 5)!.client).toBe("King’s Resort & Casino");
-    expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3, 8]);
-    expect(cases.find((c) => c.id === 8)!.size).toBe("xl");
+    expect(cases.filter((c) => c.sound).map((c) => c.id)).toEqual([3]);
+    // The wall's heading says how many cases there are.
+    for (const lang of ["ru", "en"] as const) expect(store(lang).text("wall.title")).toContain(` ${cases.length} `);
     for (const c of cases) expect(["ink", "paper", "buoy", "cobalt", "lemon", "jellyfish", "mint", "signal", "tape", "royal"]).toContain(c.color);
     expect(new Set(cases.map((c) => c.color)).size).toBe(cases.length);
   });
@@ -63,7 +66,7 @@ describe("cases", () => {
         for (const r of c.result) expect(r.trim(), `case ${c.id} ${lang}`).not.toBe("");
       }
     expect(store("en").caseById(3)!.result).toEqual(["100M+ organic views", "500K+ Steam wishlists"]);
-    expect(store("ru").caseById(8)!.what).toBe("free 2 play игра");
+    expect(store("ru").caseById(9)!.what).toBe("Онлайн-школа языков");
   });
 
   test("Dear Passengers' client sticker names the client, FLEXUS", () => {
@@ -71,12 +74,12 @@ describe("cases", () => {
   });
 
   test("screen readers hear number, client, what, every result and the press that wrote about it", () => {
-    expect(store("ru").caseById(3)!.sr).toBe("Кейс 3. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
+    expect(store("ru").caseById(3)!.sr).toBe("Кейс 8. Dear Passengers. first-person, physics-driven cooperative action. 100 млн+ органических просмотров. 500 тыс.+ вишлистов в Steam");
     expect(store("en").caseById(1)!.sr).toBe("Case 1. Waldorf Astoria Berlin. Hilton Hotels. Live Content Production. As seen in: Rolling Stone UK, Forbes Travel Guide, Condé Nast Traveler, Business Traveller");
     expect(store("ru").caseById(2)!.sr).toBe("Кейс 2. AG1. Премиум БАДы. 200% средняя окупаемость рекламы");
-    expect(store("en").caseById(4)!.sr).toBe("Case 4. Mabrook. Super app. Website redesign");
-    // The number is the case's place on the wall: Антикрус (id 7) is the sixth since case 6 was taken off.
-    expect(store("ru").caseById(7)!.sr).toBe("Кейс 6. Антикрус. Аукционный дом. Полный цикл ребрендинга");
+    expect(store("en").caseById(4)!.sr).toBe("Case 5. Mabrook. Super app. Website redesign");
+    // The number is the case's place on the wall, not its id: Антикрус (id 7) is the seventh.
+    expect(store("ru").caseById(7)!.sr).toBe("Кейс 7. Антикрус. Аукционный дом. Полный цикл ребрендинга");
     expect(store("ru").caseById(6)).toBeUndefined();
     expect(store("ru").caseById(12)).toBeUndefined();
   });
@@ -87,7 +90,7 @@ describe("cases", () => {
       if (!p) return null;
       return [p.sections.map((x) => [x.text.length, !!x.kicker]), !!p.card, p.role.items.length, p.role.deliverables === null, p.results?.items.length ?? 0, !!p.results?.note, p.links.length];
     };
-    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10, 11]);
+    expect(cases.filter((c) => c.page).map((c) => c.id)).toEqual([1, 2, 11, 9, 4, 5, 7, 3]);
     for (const c of cases) {
       expect(shape(c.id, "en"), `case ${c.id}`).toEqual(shape(c.id, "ru"));
       const p = c.page;
@@ -101,9 +104,9 @@ describe("cases", () => {
     expect(store("en").caseById(3)!.page!.links[0].url).toBe(store("ru").caseById(3)!.page!.links[0].url);
   });
 
-  test("logo rows: Dear Passengers' platforms, DeckForge's partners, each under a label in its results, each logo on disk", () => {
+  test("logo rows: Dear Passengers' platforms, the only row, under a label in its results, each logo on disk", () => {
     expect(cases.find((c) => c.id === 3)!.logos.map((p) => p.name)).toEqual(["Instagram", "YouTube", "TikTok"]);
-    expect(cases.find((c) => c.id === 8)!.logos.map((p) => p.name)).toEqual(["VK", "RuStore", "Xiaomi"]);
+    expect(cases.filter((c) => c.logos.length).map((c) => c.id)).toEqual([3]);
     for (const c of cases) {
       for (const lang of ["ru", "en"] as const) expect(!!store(lang).caseById(c.id)!.page?.results?.logos, `case ${c.id} ${lang}`).toBe(c.logos.length > 0);
       for (const p of c.logos) {
@@ -116,7 +119,7 @@ describe("cases", () => {
   test("logos taken from other sites are plain drawings: no scripts, handlers, embedded pictures or outside addresses", () => {
     const dir = `${import.meta.dir}/../../../site/media`;
     const files = readdirSync(dir).filter((f) => /^(client|partner|platform|press)-.*\.svg$/.test(f));
-    expect(files.length).toBeGreaterThanOrEqual(19); // 9 clients, 3 partners, 3 platforms, 4 publications
+    expect(files.length).toBeGreaterThanOrEqual(18); // 9 clients, VK, 3 platforms, 5 publications (4 on Waldorf, Forbes)
     for (const f of files) {
       const svg = readFileSync(`${dir}/${f}`, "utf8");
       expect(svg.trimStart().startsWith("<svg") || svg.trimStart().startsWith("<?xml"), f).toBe(true);
@@ -158,7 +161,7 @@ describe("studio data", () => {
     }
   });
 
-  test("a logo used twice (VK on the sheet and in DeckForge's partners) has one name, ratio and scale", () => {
+  test("a logo file has one name, ratio and scale wherever it is used", () => {
     const s = store("ru");
     const all = [...s.brands(), ...s.cases().flatMap((c) => [...c.logos, ...c.press])];
     const seen = new Map<string, string>();
@@ -167,7 +170,6 @@ describe("studio data", () => {
       expect(seen.get(l.logo) ?? shape, l.logo).toBe(shape);
       seen.set(l.logo, shape);
     }
-    expect(seen.size).toBeLessThan(all.length);
   });
 
   test("clients come from the cases; websites and packaging lead the services", () => {

@@ -68,7 +68,9 @@ html.calm .meet-x { transition: none; rotate: none; }
 .wall .client.sh-circle { width: 80cqmin; height: 80cqmin; border-radius: 50%; padding: 8%; }
 .wall .client b { font: 900 clamp(11px, min(10cqmin, 9cqw), 22px)/1 var(--display); letter-spacing: -0.01em; }
 .wall .client .ck { font: 500 clamp(10px, 5cqmin, 11px)/1.2 var(--mono); letter-spacing: 0.16em; opacity: 0.92; margin-top: 6%; text-transform: uppercase; }
-.wall .deeper b { width: min-content; }
+.wall :is(.deeper, .concept) b { width: min-content; }
+/* «БЕСПЛАТНО» is long for a 1-cell circle: label spacing (DESIGN.md), so it stays on the mint down to 701 px. */
+.wall .concept .ck { letter-spacing: 0.04em; }
 
 /* Services */
 .wall .svc { width: 92cqw; height: 70cqh; border-radius: var(--rounded-sticker); padding: 8% 9%; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left; background: var(--c); color: var(--f); font: inherit; cursor: pointer; margin: 0; }
@@ -118,7 +120,7 @@ html.calm .wall .hello { transition: none; }
 @media (max-width: 1100px) {
   .wall > .sz-sheet { grid-column: span 6; grid-row: span 2; }
   .brand-sheet .logo-mark { --lh: clamp(14px, 13cqh, 36px); }
-  /* Six columns: the team block is a 2x3 strip beside Skyeng; DeckForge pairs with Антикрус, Axie Infinity with Tria. */
+  /* Six columns: the team block is a 2x3 strip beside Dear Passengers; King's pairs with Антикрус. */
   .wall > .sz-fam { grid-column: span 2; grid-row: span 3; }
   .wall > .t3 { grid-column: span 3; }
   .wall > .p2 { grid-column: span 2; }

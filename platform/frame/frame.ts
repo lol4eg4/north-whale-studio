@@ -10,7 +10,7 @@
 //   dialog      menu at <= 1100 px: sections, region "menu-lang", region "menu-foot"
 import type { Motion } from "../motion.ts";
 import type { RegionName } from "../host.ts";
-import { h, icon } from "../ui/parts.ts";
+import { coversClear, h, icon } from "../ui/parts.ts";
 
 // The page's sections in order, with their label keys (the footer lists them too).
 export const SECTIONS: [string, string][] = [
@@ -53,6 +53,11 @@ export function mountFrame(motion: Motion): Partial<Record<RegionName, HTMLEleme
     pause.replaceChildren(icon(motion.stopped ? "motionPlay" : "motionPause", 18));
   });
   const cornerLeft = h("div", { class: "ctrl" }, pause);
+  // On a small phone the control would sit on the offer's title at load: it steps aside until the
+  // offer has scrolled past (keyboard focus keeps it out).
+  const clearOffer = () => cornerLeft.classList.toggle("aside", coversClear([cornerLeft.getBoundingClientRect()]));
+  for (const type of ["scroll", "resize", "load"]) addEventListener(type, clearOffer, { passive: true });
+  document.fonts?.addEventListener("loadingdone", () => requestAnimationFrame(clearOffer));
   const cornerRight = h("div", { class: "dock" });
 
   // Menu: a modal sheet with its own top bar, so focus stays inside and Esc closes it.

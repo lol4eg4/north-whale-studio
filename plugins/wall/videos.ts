@@ -1,4 +1,4 @@
-// Wall loops (the case tiles' round badges, Maria's badge): which get a source and which play.
+// Wall loops (the case tiles, Maria's badge): which get a source and which play.
 //
 //   near (within one viewport) + 2 s after load  -> attach src (max 3 loading at once)
 //   still loading but no longer near              -> drop the source, the slot frees
