@@ -27,7 +27,7 @@ Deferred on purpose. Each item names what it waits for.
 - Plan B polaroid (finale): it turns site sound on and off but has no `aria-pressed`, unlike the sound button; the sound API has no state to read. Impact: polish, accessibility (2026-10-15).
 - Roll call on a 1024x768 screen: the badges stand in two rows under the team block, and the sound and pause pill (bottom left) covers Maria's role for the 3 s of the roll call. Repro: 1024x768, «Команда» in the menu. Severity low, visual (testing, 2026-10-15).
 
-- Phone previews (2026-11-05): the 720x900 loops are cut from the middle of wide site recordings, so AG1, Tria and Skyeng show words cut at the edges while they play. A crop offset per case in `tools/media.json` would aim each one at its subject. Impact: polish, visual.
+- Phone previews (2026-11-05): the 720x900 loops are cut from the middle of wide site recordings, so AG1, Tria and Skyeng show words cut at the edges while they play. Tuning each case's `phoneFocus` in `tools/media.json` and rebuilding that case (`bun tools/media.ts --only N`) would aim each one at its subject: the phone poster and the phone loop share it. Impact: polish, visual.
 
 ## Not planned
 
