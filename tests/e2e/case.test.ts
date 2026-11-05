@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 // A tile says its case's place in the list, not its id.
-const ORDER = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+const ORDER = [1, 2, 3, 4, 5, 7, 9, 11];
 const tileSel = (id: number) => `.wall .tile[aria-label^="Кейс ${ORDER.indexOf(id) + 1}."]`;
 const isOpen = (page: Page) => page.evaluate(() => document.querySelector<HTMLDialogElement>("dialog.case")!.open);
 const waitClosed = (page: Page) => page.waitForFunction(() => !document.querySelector<HTMLDialogElement>("dialog.case")!.open);
@@ -35,7 +35,7 @@ describe("open and close", () => {
     await openTile(page, 2);
     expect(await title(page)).toBe("AG1");
     expect(await hash(page)).toBe("#case-2");
-    expect(await page.textContent(".case-count")).toBe("Кейс 02 из 10");
+    expect(await page.textContent(".case-count")).toBe("Кейс 02 из 08");
     expect(await focusIs(page, "dialog.case .case-x")).toBe(true);
     await page.keyboard.press("Escape");
     await waitClosed(page);
@@ -76,8 +76,8 @@ describe("open and close", () => {
   test("Next names the next case and opens it without a new history entry; on the last case it leads back to the wall", async () => {
     const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
     const before = await page.evaluate(() => history.length);
-    await openTile(page, 10);
-    expect(await title(page)).toBe("Axie Infinity");
+    await openTile(page, 9);
+    expect(await title(page)).toBe("Skyeng");
     expect(await page.textContent("dialog.case .case-next")).toBe("Дальше: Tria");
     await page.click("dialog.case .case-next");
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Tria");
@@ -175,7 +175,7 @@ describe("links and history", () => {
     await page.click(".wall .tile");
     await page.waitForSelector("dialog.case[open]");
     expect(page.url()).toBe(`${srv.url}/?lang=en#case-1`);
-    expect(await page.textContent(".case-count")).toBe("Case 01 of 10");
+    expect(await page.textContent(".case-count")).toBe("Case 01 of 08");
     expect(await page.textContent("dialog.case .case-next")).toBe("Next: AG1");
     await page.keyboard.press("Escape");
     await waitClosed(page);
@@ -277,17 +277,13 @@ describe("player", () => {
     expect(await page.$$eval("dialog.case .case-results b", (els) => els.map((e) => e.textContent))).toEqual(["170%", "36%", "42%", "200%"]);
     expect(await page.$$("dialog.case .case-logos")).toHaveLength(0);
     expect(await page.textContent("dialog.case .case-sub")).toBe("200% average return on ad spend");
-    // DeckForge: its partners' logos under the numbers.
-    await page.evaluate(() => (location.hash = "#case-8"));
-    await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "DeckForge");
-    expect(await page.textContent("dialog.case .case-logos .mono")).toBe("Official partners");
-    expect(await page.$$eval("dialog.case .case-logos .logo-mark", (els) => els.map((e) => [e.getAttribute("aria-label"), Math.round(e.getBoundingClientRect().width)]))).toEqual([
-      ["VK", 127],
-      ["RuStore", 88],
-      ["Xiaomi", 83],
-    ]);
-    expect(await page.$$("dialog.case .case-out a")).toHaveLength(0);
-    expect(await page.$$("dialog.case .ph-box")).toHaveLength(0);
+    // Only Dear Passengers has a logo row (its platforms); no other case has one, nor a placeholder box.
+    for (const id of ORDER.filter((n) => n !== 3)) {
+      await page.evaluate((n) => (location.hash = `#case-${n}`), id);
+      await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.startsWith(`Case ${String(n).padStart(2, "0")} `), ORDER.indexOf(id) + 1);
+      expect(await page.$$("dialog.case .case-logos"), `logo row of case ${id}`).toHaveLength(0);
+      expect(await page.$$("dialog.case .ph-box"), `placeholder box of case ${id}`).toHaveLength(0);
+    }
     // Antiquerus: a rise with no figure is the site's arrow, turned up, named for screen readers.
     await page.evaluate(() => (location.hash = "#case-7"));
     await page.waitForFunction(() => document.querySelector("#case-title")!.textContent === "Antiquerus");
@@ -341,7 +337,7 @@ describe("player", () => {
     await context.close();
   });
 
-  for (const id of [3, 8]) {
+  for (const id of [3]) {
     test(`case ${id} opened from its tile plays at once with sound, once through; the sound button mutes it`, async () => {
       const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru`);
       await openTile(page, id);
@@ -373,7 +369,7 @@ describe("player", () => {
   });
 
   test("phone: the case plays in the open case, King's and the three newest", async () => {
-    for (const id of [5, 9, 10, 11]) {
+    for (const id of [5, 9, 11]) {
       const { context, page, errors } = await open(browser, `${srv.url}/?lang=ru#case-${id}`, phone);
       await page.waitForFunction(() => {
         const v = document.querySelector<HTMLVideoElement>("dialog.case video")!;
@@ -391,7 +387,7 @@ describe("player", () => {
     const ratios: Record<number, number> = {};
     for (const [i, id] of ORDER.entries()) {
       await page.evaluate((n) => (location.hash = `#case-${n}`), id);
-      // "Кейс 10 из 10": the number in front, not the total.
+      // "Кейс 08 из 08": the number in front, not the total.
       await page.waitForFunction((n) => document.querySelector(".case-count")!.textContent!.startsWith(`Кейс ${String(n).padStart(2, "0")} `), i + 1);
       await page.focus("dialog.case .case-next");
       ratios[id] = await page.evaluate(() => {

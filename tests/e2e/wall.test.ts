@@ -1,5 +1,5 @@
 // Wall: dense packing without holes, no sideways scroll, the first tile in view, still posters
-// with a moving round badge, the hover (result plate, curled corner), lazy loops (nothing before
+// with a loop over the whole tile, the hover (result plate, curled corner), lazy loops (nothing before
 // 2 s, only near the screen, at most 3 loading), posters that stay when a loop fails, the four
 // team badges (names, roles, photos, Maria's loop, roll call, opening big), the studio stickers on
 // every screen, no console errors.
@@ -87,7 +87,35 @@ describe("wall layout", () => {
     await context.close();
   });
 
-  test("tablet (768 px): DeckForge is 3 columns wide beside Антикрус, Axie Infinity beside Tria, the team block a 2x3 strip; 8 columns the team block is 3x2", async () => {
+  test("the «Концепт сайта» sticker closes the wall and links to the Telegram bot in a new tab, at 1440, 768 and 390 px; EN too", async () => {
+    const BOT = "https://t.me/North_Whale_Studio_Bot";
+    for (const [lang, name, sub] of [["ru", "Концепт сайта", "Бесплатно"], ["en", "Site concept", "Free"]]) {
+      const { context, page, errors } = await open(browser, `${full.url}/?lang=${lang}`);
+      for (const width of [1440, 768, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.waitForTimeout(150);
+        const r = await page.evaluate(() => {
+          const a = document.querySelector<HTMLAnchorElement>(".wall a.concept")!;
+          const b = a.getBoundingClientRect();
+          const cells = [...document.querySelectorAll(".wall > .cell")].filter((c) => getComputedStyle(c).display !== "none");
+          return {
+            href: a.href,
+            target: a.target,
+            rel: a.rel,
+            name: a.querySelector("b")!.textContent,
+            sub: a.querySelector(".ck")!.textContent,
+            size: b.width > 30 && b.height > 30,
+            last: cells.at(-1)!.contains(a),
+          };
+        });
+        expect(r, `${lang} ${width}`).toEqual({ href: BOT, target: "_blank", rel: "noopener", name, sub, size: true, last: true });
+      }
+      expect(errors).toEqual([]);
+      await context.close();
+    }
+  });
+
+  test("tablet (768 px): Skyeng is 3 columns wide beside Антикрус, Tria 4 columns wide beside the team block, a 2x3 strip; 8 columns the team block is 3x2", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`, { viewport: { width: 768, height: 1024 } });
     // Columns and rows a cell takes, from its box and the wall's grid tracks.
     const span = (sel: string) =>
@@ -100,12 +128,16 @@ describe("wall layout", () => {
         const r = document.querySelector(s)!.getBoundingClientRect();
         return [Math.round((r.width + gap) / (col + gap)), Math.round((r.height + gap) / (row + gap))];
       }, sel);
-    // DeckForge, Axie Infinity and Tria (cases 7, 9 and 10 on the wall) are 3x3; the last two share a row.
-    const t3 = (n: number) => `.wall > .t3:has(.tile[aria-label^="Кейс ${n}."])`;
-    for (const n of [7, 9, 10]) expect(await span(t3(n)), `case ${n}`).toEqual([3, 3]);
-    const top = (n: number) => page.$eval(t3(n), (e) => Math.round(e.getBoundingClientRect().top));
-    expect(await top(9)).toBe(await top(10));
+    const top = (sel: string) => page.$eval(sel, (e) => Math.round(e.getBoundingClientRect().top));
+    // Антикрус, Skyeng and Tria are cases 6, 7 and 8 on the wall. Антикрус and Skyeng are 3x3 and
+    // share a row; Tria is 4x3 and shares the next one with the team block.
+    const cell = (n: number) => `.wall > .cell:has(.tile[aria-label^="Кейс ${n}."])`;
+    expect(await span(cell(6)), "Антикрус").toEqual([3, 3]);
+    expect(await span(cell(7)), "Skyeng").toEqual([3, 3]);
+    expect(await top(cell(6))).toBe(await top(cell(7)));
+    expect(await span(cell(8)), "Tria").toEqual([4, 3]);
     expect(await span(".wall > .sz-fam")).toEqual([2, 3]);
+    expect(await top(cell(8))).toBe(await top(".wall > .sz-fam"));
     // «Привет!» fits the narrow strip: the block clips what overflows.
     for (const width of [701, 768, 1024, 1100]) {
       await page.setViewportSize({ width, height: 1024 });
@@ -127,24 +159,26 @@ describe("wall layout", () => {
   const firstTileShare = (page: import("playwright-core").Page) =>
     page.evaluate(() => {
       const r = document.querySelector(".wall .tile")!.getBoundingClientRect();
-      return (Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
+      return Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
     });
 
-  test("first tile is at least 30 % in view at 1440x900, RU and EN", async () => {
+  // The owner's offer card sits on the first screen, so the wall starts lower: 21 % (RU) and 23 % (EN)
+  // of the first tile show at 1440x900. On a phone the tile starts just under the offer.
+  test("first tile is at least 15 % in view at 1440x900, RU and EN", async () => {
     for (const lang of ["ru", "en"]) {
       const { context, page } = await open(browser, `${full.url}/?lang=${lang}`);
-      expect(await firstTileShare(page)).toBeGreaterThanOrEqual(0.3);
+      expect(await firstTileShare(page), lang).toBeGreaterThanOrEqual(0.15);
       await context.close();
     }
   });
 
-  test("first tile is at least 50 % in view on a 390x844 phone, RU and EN", async () => {
-    for (const lang of ["ru", "en"]) {
+  for (const lang of ["ru", "en"]) {
+    test(`first tile's top edge is inside the screen on a 390x844 phone, ${lang.toUpperCase()}`, async () => {
       const { context, page } = await open(browser, `${full.url}/?lang=${lang}`, phone);
-      expect(await firstTileShare(page)).toBeGreaterThanOrEqual(0.5);
+      expect(await firstTileShare(page), `${lang}: share of the first tile in view`).toBeGreaterThan(0);
       await context.close();
-    }
-  });
+    });
+  }
 });
 
 describe("wall media", () => {
@@ -172,7 +206,7 @@ describe("wall media", () => {
     const seq: string[] = []; // "poster:<id>" and "loop:<id>" in request order
     let loadAt = 0;
     page.on("request", (r) => {
-      const m = /\/media\/c(\d+)-ring\.mp4/.exec(r.url());
+      const m = /\/media\/c(\d+)-loop\.mp4/.exec(r.url());
       if (m) {
         loops.push({ id: Number(m[1]), at: Date.now() });
         seq.push(`loop:${m[1]}`);
@@ -208,12 +242,12 @@ describe("wall media", () => {
       [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => {
         const r = t.getBoundingClientRect();
         const img = t.querySelector<HTMLImageElement>(".tile-poster")!;
-        return { label: t.getAttribute("aria-label")!, top: r.top, bottom: r.bottom, poster: img.getAttribute("src"), src: t.querySelector("video")!.getAttribute("src") };
+        return { label: t.getAttribute("aria-label")!, top: r.top, bottom: r.bottom, poster: img.getAttribute("src"), src: t.querySelector(".tile-loop")!.getAttribute("src") };
       }),
     );
     // Tiles in wall order, which is the cases' order: their ids, and the numbers they say.
-    const ids = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
-    expect(tiles.length).toBe(10);
+    const ids = [1, 2, 3, 4, 5, 7, 9, 11];
+    expect(tiles.length).toBe(8);
     const vh = 900;
     tiles.forEach((tile, i) => {
       const id = ids[i];
@@ -221,16 +255,21 @@ describe("wall media", () => {
       const near = tile.top < 2 * vh && tile.bottom > -vh;
       // Posters, like loops, wait until their tile is within one screen of the viewport.
       expect(plain(tile.poster), `poster of tile ${id}`).toBe(near ? `/media/c${id}.webp` : null);
-      if (loops.some((l) => l.id === id)) expect(near, `tile ${id} loaded but is far from the screen`).toBe(true);
+      if (loops.some((l) => l.id === id)) {
+        expect(near, `tile ${id} loaded but is far from the screen`).toBe(true);
+        expect(plain(tile.src), `loop of tile ${id}`).toBe(`/media/c${id}-loop.mp4`);
+      }
     });
     expect(loops.some((l) => l.id === 1)).toBe(true);
-    expect(loops.some((l) => l.id === 8)).toBe(false);
+    // Tria, the last tile, is far down the wall.
+    expect(loops.some((l) => l.id === 11)).toBe(false);
 
     // Every poster answers, and the first one is painted.
     for (const id of ids) expect((await fetch(`${full.url}/media/c${id}.webp`)).status, `c${id}.webp`).toBe(200);
     expect(await page.evaluate(() => (document.querySelector(".wall .tile-poster") as HTMLImageElement).naturalWidth > 0)).toBe(true);
-    // The first tile plays its loop.
-    expect(await page.evaluate(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused)).toBe(true);
+    // The first tile plays its loop, and the tile says so.
+    expect(await page.evaluate(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused)).toBe(true);
+    expect(await page.evaluate(() => document.querySelector(".wall .tile")!.classList.contains("live"))).toBe(true);
     // Scrolling down the wall brings every poster in.
     for (let y = 0; y <= 3000; y += 600) {
       await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
@@ -241,7 +280,7 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("every badge loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
+  test("every tile loop request aborted: posters stay, no video keeps a source, no loop is asked again within 5 s", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     // The page's videos that fired an error, to know when the failures have happened.
     await context.addInitScript(() => {
@@ -253,7 +292,7 @@ describe("wall media", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     const asked: string[] = [];
-    await page.route(/\/media\/c\d-ring\.mp4/, (route) => {
+    await page.route(/\/media\/c\d+-loop\.mp4/, (route) => {
       asked.push(route.request().url());
       return route.abort();
     });
@@ -285,9 +324,10 @@ describe("wall media", () => {
       page.evaluate(() =>
         [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => {
           const img = t.querySelector<HTMLImageElement>(".tile-poster")!;
-          const video = t.querySelector<HTMLVideoElement>("video")!;
+          const video = t.querySelector<HTMLVideoElement>(".tile-loop")!;
           return {
             label: t.getAttribute("aria-label")!.slice(0, 8),
+            live: t.classList.contains("live"),
             hasPoster: img.hasAttribute("src"),
             posterDrawn: img.complete && img.naturalWidth > 0 && getComputedStyle(img).visibility === "visible" && !t.classList.contains("no-poster"),
             videoPlaying: !video.paused,
@@ -300,6 +340,7 @@ describe("wall media", () => {
       for (const t of tiles) {
         expect(t.videoSrc, `source of ${t.label} ${when}`).toBeNull();
         expect(t.videoPlaying, `loop of ${t.label} playing ${when}`).toBe(false);
+        expect(t.live, `${t.label} says its loop plays ${when}`).toBe(false);
         if (t.hasPoster) expect(t.posterDrawn, `poster of ${t.label} visible ${when}`).toBe(true);
       }
     };
@@ -315,10 +356,10 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("calm: the case badges still play, the ticker stands; the pause button shows off and stops the loops", async () => {
+  test("calm: the tile loops still play, the ticker stands; the pause button shows off and stops the loops", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, { reducedMotion: "reduce" });
-    const first = () => page.evaluate(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused);
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    const first = () => page.evaluate(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused);
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 8000 });
     expect(await page.evaluate(() => getComputedStyle(document.querySelector(".ticker-row")!).animationName)).toBe("none");
     expect(await page.getAttribute(".pause-btn", "aria-pressed")).toBe("false");
     await page.click(".pause-btn");
@@ -326,7 +367,7 @@ describe("wall media", () => {
     expect(await first()).toBe(false);
     expect(await page.getAttribute(".pause-btn", "aria-pressed")).toBe("true");
     await page.click(".pause-btn");
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 5000 });
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -351,15 +392,16 @@ describe("wall media", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     await page.goto(`${full.url}/?lang=ru`, { waitUntil: "load" });
-    await page.waitForFunction(() => (document.querySelector(".wall .tile video") as HTMLVideoElement).readyState >= 3, null, { timeout: 8000 });
+    await page.waitForFunction(() => (document.querySelector(".wall .tile-loop") as HTMLVideoElement).readyState >= 3, null, { timeout: 8000 });
     await page.waitForTimeout(1500);
     const before = await page.evaluate(() => ({
       plays: (window as unknown as { __plays: number }).__plays,
-      playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
-      src: document.querySelector(".wall .tile video")!.getAttribute("src"),
+      playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile-loop")].filter((v) => !v.paused).length,
+      src: document.querySelector(".wall .tile-loop")!.getAttribute("src"),
     }));
     expect(before.playing).toBe(0);
-    expect(before.src).toContain("/media/c1-ring.mp4");
+    expect(before.src).toContain("/media/c1-loop.mp4");
+    expect(await page.evaluate(() => document.querySelector(".wall .tile")!.classList.contains("live"))).toBe(false);
     expect(before.plays).toBeGreaterThan(0);
     // No retry loop: scrolling brings more loops in reach, yet nothing asks to play again.
     await page.mouse.wheel(0, 400);
@@ -369,7 +411,7 @@ describe("wall media", () => {
     await page.mouse.click(700, 300);
     await page.waitForFunction(
       () => {
-        const on = [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video[src]")].filter((v) => {
+        const on = [...document.querySelectorAll<HTMLVideoElement>(".wall .tile-loop[src]")].filter((v) => {
           const r = v.closest(".tile")!.getBoundingClientRect();
           return r.bottom > 0 && r.top < innerHeight && v.readyState >= 3;
         });
@@ -378,20 +420,26 @@ describe("wall media", () => {
       null,
       { timeout: 3000 },
     );
+    await page.waitForSelector(".wall .tile.live", { timeout: 3000 });
     expect(pageErrors).toEqual([]);
     await context.close();
   });
 
-  test("phone loads phone posters and the same badge loops, at most 4 playing", async () => {
+  test("phone loads phone posters and the phone loops, at most 4 playing", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`, phone);
     await page.waitForTimeout(3500);
     const r = await page.evaluate(() => ({
       poster: (document.querySelector(".wall .tile-poster") as HTMLImageElement).currentSrc,
-      src: document.querySelector(".wall .tile video")!.getAttribute("src"),
-      playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].filter((v) => !v.paused).length,
+      src: document.querySelector(".wall .tile-loop")!.getAttribute("src"),
+      playing: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile-loop")].filter((v) => !v.paused).length,
+      asked: performance.getEntriesByType("resource").map((e) => new URL(e.name).pathname).filter((p) => /-loop(-phone)?\.mp4$/.test(p)),
     }));
     expect(plain(new URL(r.poster).pathname + new URL(r.poster).search)).toBe("/media/c1-phone.webp");
-    expect(plain(r.src)).toBe("/media/c1-ring.mp4");
+    expect(plain(r.src)).toBe("/media/c1-loop-phone.mp4");
+    // Only the phone loops are asked for: the page opened at <= 700 px.
+    expect(r.asked.length).toBeGreaterThan(0);
+    expect(r.asked.filter((p) => !p.endsWith("-loop-phone.mp4"))).toEqual([]);
+    expect(r.playing).toBeGreaterThan(0);
     expect(r.playing).toBeLessThanOrEqual(4);
     expect(errors).toEqual([]);
     await context.close();
@@ -399,17 +447,17 @@ describe("wall media", () => {
 
   test("the pause button stops the loops and the ticker", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 8000 });
     await page.click(".pause-btn");
     await page.waitForTimeout(100);
     const r = await page.evaluate(() => ({
-      loops: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].every((v) => v.paused),
+      loops: [...document.querySelectorAll<HTMLVideoElement>(".wall .tile-loop")].every((v) => v.paused),
       ticker: getComputedStyle(document.querySelector(".ticker-row")!).animationPlayState,
     }));
     expect(r.loops).toBe(true);
     expect(r.ticker).toBe("paused");
     await page.click(".pause-btn");
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 5000 });
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -424,23 +472,34 @@ describe("wall media", () => {
     await context.close();
   });
 
-  test("a tile is a still poster: its only video is the round badge's loop", async () => {
+  test("a tile's only video is its own loop over the poster, which covers the whole tile", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    await page.waitForFunction(() => document.querySelector(".wall .tile")!.classList.contains("live"), null, { timeout: 8000 });
+    // The loop fades in over the poster once it plays.
+    await page.waitForFunction(() => getComputedStyle(document.querySelector(".wall .tile-loop")!).opacity === "1", null, { timeout: 3000 });
     const r = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => ({
-        videos: t.querySelectorAll("video").length,
-        inRing: !!t.querySelector(".tile-ring > video"),
-        poster: t.querySelector(".tile-poster")!.tagName,
-      })),
+      [...document.querySelectorAll<HTMLElement>(".wall .tile")].map((t) => {
+        const v = t.querySelector<HTMLVideoElement>(":scope > .tile-loop");
+        const p = t.querySelector<HTMLElement>(".tile-poster")!;
+        return {
+          videos: t.querySelectorAll("video").length,
+          loop: !!v,
+          poster: p.tagName,
+          // The loop's layout box is the tile's, and the poster's too.
+          covers: !!v && v.offsetParent === t && v.offsetLeft === 0 && v.offsetTop === 0 && Math.abs(v.offsetWidth - t.offsetWidth) <= 1 && Math.abs(v.offsetHeight - t.offsetHeight) <= 1,
+          sameAsPoster: !!v && v.offsetWidth === p.offsetWidth && v.offsetHeight === p.offsetHeight,
+        };
+      }),
     );
-    expect(r).toEqual(Array.from({ length: 10 }, () => ({ videos: 1, inRing: true, poster: "IMG" })));
-    expect(plain(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile video")!.getAttribute("poster")))).toBe("/media/c1-ring.webp");
+    expect(r).toEqual(Array.from({ length: 8 }, () => ({ videos: 1, loop: true, poster: "IMG", covers: true, sameAsPoster: true })));
+    // No round badge any more, and the loop has no poster picture of its own.
+    expect(await page.locator(".wall .tile-ring").count()).toBe(0);
+    expect(await page.evaluate(() => document.querySelector<HTMLVideoElement>(".wall .tile-loop")!.hasAttribute("poster"))).toBe(false);
     expect(errors).toEqual([]);
     await context.close();
   });
 
-  test("Waldorf's tile: «В прессе» and four publication logos, drawn with its badge; other tiles show none", async () => {
+  test("Waldorf's tile: «В прессе» and four publication logos, drawn after the first posters; other tiles show none", async () => {
     const { context, page, errors } = await open(browser, `${full.url}/?lang=ru`);
     const seen = () =>
       page.evaluate(() =>
@@ -519,13 +578,13 @@ describe("wall media", () => {
 
   test("opening a case pauses the wall loops; closing resumes them", async () => {
     const { context, page } = await open(browser, `${full.url}/?lang=ru`);
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 8000 });
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 8000 });
     await page.click(".wall .tile");
     await page.waitForSelector("dialog.case[open]");
-    expect(await page.evaluate(() => [...document.querySelectorAll<HTMLVideoElement>(".wall .tile video")].every((v) => v.paused))).toBe(true);
+    expect(await page.evaluate(() => [...document.querySelectorAll<HTMLVideoElement>(".wall .tile-loop")].every((v) => v.paused))).toBe(true);
     await page.keyboard.press("Escape");
     await page.waitForSelector("dialog.case:not([open])", { state: "attached" });
-    await page.waitForFunction(() => !(document.querySelector(".wall .tile video") as HTMLVideoElement).paused, null, { timeout: 5000 });
+    await page.waitForFunction(() => !(document.querySelector(".wall .tile-loop") as HTMLVideoElement).paused, null, { timeout: 5000 });
     await context.close();
   });
 });
