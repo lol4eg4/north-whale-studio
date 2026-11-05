@@ -176,7 +176,7 @@ describe("sound", () => {
     await context.close();
   });
 
-  test("iPhone audio session: sound on asks to play like media, sound off gives it back", async () => {
+  test("iPhone audio session: sound on mixes with the visitor's own music, sound off gives it back", async () => {
     const { context, page, errors } = await open(browser, server.url);
     await context.addInitScript(() => {
       (navigator as unknown as { audioSession: { type: string } }).audioSession = { type: "auto" };
@@ -186,7 +186,7 @@ describe("sound", () => {
     const btn = page.locator(".ctrl .sound-btn");
     expect(await type()).toBe("auto");
     await btn.click();
-    expect(await type()).toBe("playback");
+    expect(await type()).toBe("ambient");
     await btn.click();
     expect(await type()).toBe("auto");
     expect(errors).toEqual([]);

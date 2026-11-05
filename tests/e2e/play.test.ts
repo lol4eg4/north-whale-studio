@@ -159,6 +159,30 @@ test("the dock never covers the free concept offer while the page scrolls, and c
   }
 });
 
+// On a 320px phone the sound and pause pill sat on the offer's title at load: it steps aside while
+// it would cover the offer, and is back once the offer has scrolled past.
+test("the sound and pause pill never covers the free concept offer on a phone", async () => {
+  for (const [width, height] of [[320, 568], [360, 640], [390, 844], [1280, 720]]) {
+    const { context, page, errors } = await open(browser, server.url, { viewport: { width, height } });
+    const hits: number[] = [];
+    for (let y = 0; y <= 1200; y += 50) {
+      await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const hit = await page.evaluate(() => {
+        const o = document.querySelector(".hero .offer")!.getBoundingClientRect();
+        const c = document.querySelector<HTMLElement>(".ctrl")!;
+        const d = c.getBoundingClientRect();
+        return getComputedStyle(c).visibility === "visible" && o.left < d.right && o.right > d.left && o.top < d.bottom && o.bottom > d.top;
+      });
+      if (hit) hits.push(y);
+    }
+    expect(hits, `${width}x${height}: pill over the offer at these scroll positions`).toEqual([]);
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector(".ctrl")!).visibility), `${width}x${height}: the pill is back`).toBe("visible");
+    expect(errors).toEqual([]);
+    await context.close();
+  }
+});
+
 test("at the very top the dock comes out once a piece is moved, so «Прибраться» is in reach", async () => {
   const { context, page, errors } = await open(browser, server.url);
   expect(await dockShown(page)).toEqual(["hidden", "hidden"]);

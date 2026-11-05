@@ -88,15 +88,16 @@ export default function init(host: Host) {
     }
     show();
   }
-  // iPhone: Web Audio keeps quiet with the ring switch on unless the page asks to play like media.
-  function playLike(type: "playback" | "auto") {
+  // iPhone: the click sounds mix with the visitor's own music and keep quiet on the ring switch,
+  // like any interface sound. ("playback" would stop their music; it was for the music bed.)
+  function playLike(type: "ambient" | "auto") {
     const session = (navigator as { audioSession?: { type: string } }).audioSession;
     if (session) session.type = type;
   }
 
   // Runs inside a gesture: the browser lets audio start only then.
   function wake(fresh: boolean) {
-    playLike("playback");
+    playLike("ambient");
     engine ??= createEngine(Ctor!);
     // Always resume: a suspend may still be on its way while the state says running.
     engine.ctx.resume().then(() => fresh && engine!.play("on"), () => {});
