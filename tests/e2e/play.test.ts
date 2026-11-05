@@ -128,6 +128,33 @@ test("the dock shows once the page is scrolled and hides again at the very top",
   await context.close();
 });
 
+// The owner saw «Рандомный кейс» cover «Получить концепт» on a laptop: the dock waits while it
+// would cover the free concept offer, and comes out once the offer has scrolled past its corner.
+test("the dock never covers the free concept offer while the page scrolls, and comes out below it", async () => {
+  for (const [width, height] of [[1280, 720], [1366, 768], [1440, 900], [1920, 1080], [1024, 768]]) {
+    const { context, page, errors } = await open(browser, server.url, { viewport: { width, height } });
+    const hits: number[] = [];
+    for (let y = 0; y <= 1200; y += 50) {
+      await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const hit = await page.evaluate(() => {
+        const o = document.querySelector(".hero .offer")!.getBoundingClientRect();
+        return [...document.querySelectorAll<HTMLElement>(".dive-btn, .tidy-btn")]
+          .filter((b) => getComputedStyle(b).visibility === "visible")
+          .some((b) => {
+            const d = b.getBoundingClientRect();
+            return o.left < d.right && o.right > d.left && o.top < d.bottom && o.bottom > d.top;
+          });
+      });
+      if (hit) hits.push(y);
+    }
+    expect(hits, `${width}x${height}: dock over the offer at these scroll positions`).toEqual([]);
+    expect(await dockShown(page), `${width}x${height}: the dock is out once the offer is past`).toEqual(["visible", "visible"]);
+    expect(errors).toEqual([]);
+    await context.close();
+  }
+});
+
 test("at the very top the dock comes out once a piece is moved, so «Прибраться» is in reach", async () => {
   const { context, page, errors } = await open(browser, server.url);
   expect(await dockShown(page)).toEqual(["hidden", "hidden"]);
