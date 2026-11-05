@@ -74,16 +74,16 @@ html.calm .hero .offer { transition: none; }
   .hero-side { order: 2; }
 }
 @media (max-width: 700px) {
-  .hero { padding-bottom: 14px; }
+  .hero { padding-top: 16px; padding-bottom: 14px; }
   .hero .kicker { margin-bottom: 10px; align-items: center; flex-wrap: nowrap; }
   .hero .kicker span:first-child { display: none; }
   .hero .hero-lang { display: flex; margin-left: auto; }
-  .hero .offer { gap: 12px; padding: 16px 16px 14px; }
-  .offer-t { font-size: min(28px, 7.4vw); }
+  .hero .offer { gap: 10px; padding: 14px 16px 12px; }
+  .offer-t { font-size: min(26px, 7vw); }
   .offer-cta { font-size: 17px; padding: 12px 18px; }
   .hero .kicker span:nth-child(2)::before { display: none; }
   .hero-title { font-size: min(44px, 11.3vw); }
-  .hero-row { margin-top: 16px; gap: 16px; }
+  .hero-row { margin-top: 16px; gap: 14px; }
   .hero-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
   .hero .watch { font-size: 16px; padding: 6px 16px 6px 6px; }
   .hero .watch .badge { width: 28px; height: 28px; }
