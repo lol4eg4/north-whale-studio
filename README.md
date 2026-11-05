@@ -23,7 +23,7 @@ The studio's one-page site: a wall of live cases, a case window, services, a man
 - `plugins/content/data/`: all texts, cases, services, team and contacts, in Russian and English.
 - `platform/`: the frame, motion and springs, text binding, browser memory and the shared UI parts.
 - `build.ts`: bundles `platform/main.ts` with the plugins `app.json` enables. `serve.ts`: the server.
-- `site/`: `index.html`, fonts, media (case videos, team photos, music), the whale, the link preview picture.
+- `site/`: `index.html`, fonts, media (case videos and tile loops, team photos), the whale, the link preview picture.
 - `tools/media.ts`: builds `site/media` from the studio's source files, settings in `tools/media.json`.
 - `tools/export.ts`: writes the static site for Netlify. `netlify.toml`: Netlify's build settings. `deploy/`: its cache headers and redirects.
 - `tests/`: server, build, token and plugin checks; `tests/e2e/`: browser checks.
@@ -31,13 +31,13 @@ The studio's one-page site: a wall of live cases, a case window, services, a man
 ## Docs
 
 - [docs/tutorial-first-run.md](docs/tutorial-first-run.md): the site on your computer, step by step.
-- [docs/how-to-update-content.md](docs/how-to-update-content.md): change texts, cases, contacts, the clients' sheet, the team, the music.
+- [docs/how-to-update-content.md](docs/how-to-update-content.md): change texts, cases and their order, the free concept offer, contacts, the clients' sheet, the team.
 - [docs/how-to-publish-on-netlify.md](docs/how-to-publish-on-netlify.md): put the site on Netlify. [docs/how-to-connect-domain-namecheap.md](docs/how-to-connect-domain-namecheap.md): the customer points northwhale.studio at it.
 - [docs/reference-site.md](docs/reference-site.md): commands, settings, addresses, data files, media limits, plugins.
 - [docs/explanation-site-design.md](docs/explanation-site-design.md): why the site is built this way.
 - [docs/product/system-architecture.md](docs/product/system-architecture.md): the blocks, their layers, APIs and events. Also [scope](docs/product/scope.md) and [user stories](docs/product/user-stories.md).
-- [docs/designs/](docs/designs/): the brief, the build plan, the user stories and the visual check report.
-- [DESIGN.md](DESIGN.md): the design system. [docs/credits.md](docs/credits.md): the music and its licence, where each logo came from. [TODOS.md](TODOS.md): deferred work. [CHANGELOG.md](CHANGELOG.md): what shipped.
+- [docs/designs/](docs/designs/): the brief, the build plan, the user stories and the visual check report. [docs/designs/owner-edits/](docs/designs/owner-edits/): the same for the owner's edits of November 2026.
+- [DESIGN.md](DESIGN.md): the design system. [docs/credits.md](docs/credits.md): where each logo came from. [TODOS.md](TODOS.md): deferred work. [CHANGELOG.md](CHANGELOG.md): what shipped.
 
 ## Staging, the public site and the bug widget
 

@@ -4,20 +4,19 @@ Deferred on purpose. Each item names what it waits for.
 
 ## Waits for the studio's own data
 
-- DeckForge (8) website link: the studio wrote «Visit the website» with no address; play.deckforge.net from their YouTube shows the host's «renew your subscription» page.
 - Antiquerus (7) link: the studio sent none, so its page has no outside link.
 - Pictures for AG1 (2: advertorials, landing pages): the page shows only the video.
 - Brand films for Waldorf Astoria Berlin (1) and King’s Resort & Casino (5): their pages name a film, but the case videos are the website recordings.
 - Like Center logo for the clients' sheet: no vector logo found (likecentre.ru and like.center do not answer from the server). Add it to `brands.json` when the studio sends the file.
 - Contacts: Behance and VK addresses. Left out of the page until they arrive (`socials` in `plugins/content/data/contacts.json` is empty; the bot and support links are real; the `<noscript>` line in `site/index.html` repeats the bot link).
-- Subtitles for cases 3 and 8 (the cases with sound): add `<track>` files when the texts arrive.
+- Subtitles for case 3, Dear Passengers (the case with sound): add `<track>` files when the texts arrive.
 - Showreel: the studio has none yet. The hero keeps no slot for it.
-- Case previews for King’s Resort & Casino (5), Antiquerus (7), Skyeng (9), Axie Infinity (10) and Tria (11): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`). DeckForge (8) has the studio's art, its wordmark cropped off (the plate names the game).
+- Case previews for King’s Resort & Casino (5), Antiquerus (7), Skyeng (9) and Tria (11): frames from the videos until the studio sends its pictures (`poster` in `tools/media.json`).
 
 ## Waits for the public site
 
 - Visit counter: `plugins/visits` has only `off.ts`. The public site on Netlify has no server of ours, so it needs an outside service.
-- Real iPhone in Low Power Mode: check that case rings show their frame, then play after the first tap. Tested only in Chromium with `play()` refused (`tests/e2e/wall.test.ts`).
+- Real iPhone in Low Power Mode: check that case tiles show their cover, then their loops play after the first tap. Tested only in Chromium with `play()` refused (`tests/e2e/wall.test.ts`).
 - A share card per case (`/#case-N` shows the site card today).
 - Analytics: none until the studio picks a service.
 
@@ -39,3 +38,4 @@ Deferred on purpose. Each item names what it waits for.
 ## Completed
 
 - Own domain: `bun run export` sets `PUBLIC_ORIGIN=https://northwhale.studio`, so `og:image` is absolute. **Completed:** 2026-10-27.
+- DeckForge (8) website link: not needed, the owner removed the case. **Completed:** 2026-11-05.
