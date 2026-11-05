@@ -51,3 +51,5 @@
 .tile:focus-visible .plate { rotate: 0.6deg; }
 .tile.piece.lifted { --pc: 0px; clip-path: none; }
 html.calm :is(.tile, .tile-poster, .tile-loop, .plate, .plate-more, .plate-stat) { transition: none; }
+/* The calm version still plays the case previews: they fade in over the cover, never cut to another frame. */
+html.calm .tile-loop { transition: opacity 0.5s; }
