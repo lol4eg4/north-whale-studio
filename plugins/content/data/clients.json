@@ -66,17 +66,6 @@
   "phone": true
  },
  {
-  "caseId": 8,
-  "name": {
-   "ru": "DeckForge",
-   "en": "DeckForge"
-  },
-  "shape": "pill",
-  "bg": "ink",
-  "fg": "lemon",
-  "phone": true
- },
- {
   "caseId": 9,
   "name": {
    "ru": "Skyeng",

@@ -14,6 +14,7 @@ export type Slot =
   | { k: "team" }
   | { k: "whale" }
   | { k: "telegram" }
+  | { k: "concept" } // the free concept offer, to the bot
   | { k: "sheet" } // the studio's clients as one sheet of logos (the reference's sticker sheet)
   | { k: "deeper" };
 
@@ -24,15 +25,15 @@ export const W: Slot[] = [
   { k: "tag", i: 0 },
   { k: "tag", i: 1 },
   { k: "client", i: 0 },
-  // AG1, Dear Passengers and a column: the starburst, a client, a badge.
+  // AG1, Tria and a column: the starburst, a client, a badge.
   { k: "tile", id: 2 },
-  { k: "tile", id: 3 },
+  { k: "tile", id: 11 },
   { k: "star" },
   { k: "client", i: 1 },
   { k: "tag", i: 2 },
   { k: "tick" },
-  // Mabrook beside a block of the services, two clients, the whale, Telegram and «Ныряй глубже».
-  { k: "tile", id: 4 },
+  // Skyeng beside a block of the services, two clients, the whale, Telegram and «Ныряй глубже».
+  { k: "tile", id: 9 },
   { k: "svc2", id: 1 },
   { k: "svc", id: 2, wide: true },
   { k: "svc", id: 3 },
@@ -43,23 +44,21 @@ export const W: Slot[] = [
   { k: "telegram" },
   { k: "deeper" },
   { k: "client", i: 3 },
-  // King's, Antiquerus and a column: the last badge, two clients.
-  { k: "tile", id: 5 },
+  // Mabrook and King's: two big tiles a band. On tablets King's pairs with Antiquerus.
+  { k: "tile", id: 4 },
+  { k: "tile", id: 5, narrow: true },
+  // Antiquerus, Dear Passengers and a column: the last badge, two clients. On tablets Dear
+  // Passengers pairs with the team block.
   { k: "tile", id: 7 },
+  { k: "tile", id: 3 },
   { k: "tag", i: 3 },
   { k: "client", i: 4 },
   { k: "client", i: 5 },
-  // DeckForge and Skyeng, then Axie Infinity and Tria: two big tiles a band, in the cases' order.
-  // On tablets DeckForge pairs with Antiquerus, Skyeng with the team block, Axie Infinity with Tria.
-  { k: "tile", id: 8, narrow: true },
-  { k: "tile", id: 9 },
-  { k: "tile", id: 10, narrow: true },
-  { k: "tile", id: 11, narrow: true },
-  // Two rows close the wall: the team block, the clients' sheet and the last two clients.
+  // Two rows close the wall: the team block, the clients' sheet, the last client and the free concept.
   { k: "team" },
   { k: "sheet" },
-  { k: "client", i: 7 }, // Skyeng, where Sergey Ibadov's sticker was
-  { k: "client", i: 6 },
+  { k: "client", i: 6 }, // Skyeng
+  { k: "concept" },
 ];
 
 // Same tilt on every visit: mulberry32 seeded 21, one draw per sticker in DOM order, ±7 deg.

@@ -6,7 +6,7 @@
 //   «Прибраться»      every moved piece home, the wall back in its order, toast with the count.
 import type { Host } from "../../platform/host.ts";
 import { binder } from "../../platform/text-binder.ts";
-import { h, icon, toast } from "../../platform/ui/parts.ts";
+import { coversClear, h, icon, toast } from "../../platform/ui/parts.ts";
 import type { CaseApi } from "../case/api.ts";
 import type { CaseItem, ContentApi } from "../content/api.ts";
 import { arrangeDense, frameScroll, pickCase, ROULETTE_STEPS, rouletteStart, rouletteTimes, type Span } from "./plan.ts";
@@ -50,14 +50,20 @@ export default function init(host: Host) {
   motion.add(tidyBtn, { kind: "dock" });
 
   // The dock waits for the first scroll: on the first screen it would cover the wall's corner.
-  // It stays out when something is moved (tidy must be reachable) or a dock button has focus.
+  // It also waits while it would cover a call to action marked data-dock-clear (the hero's free
+  // concept offer). It stays out when something is moved (tidy must be reachable) or a dock
+  // button has focus.
+  const covers = () => coversClear([diveBtn, tidyBtn].map((b) => b.getBoundingClientRect()));
   const atTop = () => {
-    const top = scrollY < 40 && !motion.moved().length && !dock.contains(document.activeElement);
+    const top = (scrollY < 40 || covers()) && !motion.moved().length && !dock.contains(document.activeElement);
     if (!top && dock.classList.contains("top") && !motion.calm)
       for (const el of [diveBtn, tidyBtn]) el.animate([{ opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1 }], { duration: 450, easing: motion.spring.easing });
     dock.classList.toggle("top", top);
   };
   addEventListener("scroll", atTop, { passive: true });
+  addEventListener("resize", atTop, { passive: true });
+  // Late fonts move the offer without a scroll.
+  document.fonts?.addEventListener("loadingdone", () => requestAnimationFrame(atTop));
   dock.addEventListener("focusout", () => requestAnimationFrame(atTop));
   atTop();
 

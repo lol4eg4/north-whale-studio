@@ -16,12 +16,12 @@ export interface CaseItem {
   vertical: boolean;
   color: string; // token name: the open case's own colour
   press: Press[]; // publications that wrote about the client: "As seen in" on the tile, cards in the case
-  logos: Logo[]; // a logo row under the case results: DeckForge's partners, Dear Passengers' platforms
+  logos: Logo[]; // a logo row under the case results: Dear Passengers' platforms
   media: {
     poster: string; // the tile's still
     posterPhone: string; // used at <= 700 px
-    ring: string | null; // the round badge's loop; null for a still
-    ringPoster: string; // the badge's still until the loop plays
+    loop: string | null; // the tile's silent loop over the poster; null for a still
+    loopPhone: string | null; // the same in the phone crop, used at <= 700 px
     full: string | null; // full video for the open case; null for a still
     still: string | null; // full-size picture for a still case
   };
@@ -91,6 +91,7 @@ export interface Contacts {
 export interface ContentApi {
   language(): Lang;
   setLanguage(lang: Lang): void;
+  languageSwitch(): HTMLElement; // one more RU / EN switch, kept in step with the others
   text(key: string): string;
   format(key: string, params: Record<string, string | number>): string;
   cases(): CaseItem[];

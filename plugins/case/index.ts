@@ -1,6 +1,6 @@
 // Open case: a native modal dialog over the wall, kept in step with the address (history.ts).
 //
-//   [ media frame + player ][ North Whale Studio · Кейс 03 из 10     [× Назад к стене Esc] ]
+//   [ media frame + player ][ North Whale Studio · Кейс 03 из 08     [× Назад к стене Esc] ]
 //   [                      ][ eyebrow / client / client · category / lead                 ]
 //   [                      ][ how we did it, cards: one batch, our role, results; links    ]
 //   [                      ][ [Дальше: <next case> →] [Написать нам] Скопировать ссылку    ]

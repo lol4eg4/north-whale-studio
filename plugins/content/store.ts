@@ -17,12 +17,13 @@ type Local = { ru: string; en: string };
 const texts: Record<Lang, Record<string, string>> = { ru, en };
 const pages: Record<Lang, Record<string, CasePage>> = { ru: pagesRu, en: pagesEn };
 
-// Address first, then the last visit, then the browser; anything but Russian reads English.
-export function pickLanguage(search: string, remembered: string | null, browser: readonly string[]): Lang {
+// Address first, then the visitor's own choice from an earlier visit; otherwise Russian, the site's
+// main language, whatever the browser's language.
+export function pickLanguage(search: string, chosen: string | null): Lang {
   const asked = new URLSearchParams(search).get("lang");
   if (asked === "ru" || asked === "en") return asked;
-  if (remembered === "ru" || remembered === "en") return remembered;
-  return (browser[0] ?? "").toLowerCase().startsWith("ru") ? "ru" : "en";
+  if (chosen === "ru" || chosen === "en") return chosen;
+  return "ru";
 }
 
 export function createStore(getLang: () => Lang, warn: (msg: string) => void = console.error) {
@@ -61,8 +62,8 @@ export function createStore(getLang: () => Lang, warn: (msg: string) => void = c
         media: {
           poster: media(`/media/c${c.id}.webp`),
           posterPhone: media(`/media/c${c.id}-phone.webp`),
-          ring: still ? null : media(`/media/c${c.id}-ring.mp4`),
-          ringPoster: media(`/media/c${c.id}-ring.webp`),
+          loop: still ? null : media(`/media/c${c.id}-loop.mp4`),
+          loopPhone: still ? null : media(`/media/c${c.id}-loop-phone.mp4`),
           full: still ? null : media(`/media/c${c.id}-full.mp4`),
           still: still ? media(`/media/c${c.id}-full.webp`) : null,
         },

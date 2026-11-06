@@ -1,6 +1,6 @@
-// Case tile: a still poster, the number pill, the plate and the round badge, the tile's only
-// moving part. The part shows what it is given: when the posters load, when the badge's loop gets
-// a source and when it plays is the owner's call.
+// Case tile: a still poster with the case's silent loop over it, the number pill and the plate.
+// The part shows what it is given: when the posters load, when the loop gets a source and when it
+// plays is the owner's call. The loop fades in over the poster once it plays.
 import { h } from "./parts.ts";
 import "./tile.css";
 
@@ -16,16 +16,15 @@ export interface TileText {
 export interface TileArt {
   poster: string;
   posterPhone: string; // used at <= 700 px
-  ringPoster: string; // the badge's still until its loop plays, loaded by loadRing() with the press logos
   eager?: boolean; // first tiles: load the poster at once, the rest wait for loadPoster()
 }
 
 export interface CaseTile {
   el: HTMLButtonElement;
-  video: HTMLVideoElement; // the round badge's loop
+  video: HTMLVideoElement; // the loop over the poster
   set(text: TileText): void;
   loadPoster(): void;
-  loadRing(): void;
+  loadLogos(): void;
 }
 
 // A publication's logo in one colour (currentColor), the way the reference draws them.
@@ -48,6 +47,7 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const source = h("source", { media: "(max-width: 700px)" });
   const picture = h("picture", {}, source, poster);
   const video = h("video", {
+    class: "tile-loop",
     muted: true,
     playsinline: true,
     loop: true,
@@ -58,7 +58,6 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
     tabindex: "-1",
   });
   video.muted = true; // the attribute alone does not mute in every browser
-  const ring = h("span", { class: "tile-ring", "aria-hidden": "true" }, video);
   const number = h("span", { class: "tile-no" });
   const kicker = h("span", { class: "plate-k" });
   const title = h("span", { class: "plate-t" });
@@ -68,11 +67,14 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
   const plate = h("span", { class: "plate" }, kicker, title, more, seen);
   // The paper's corner: a small tab that curls up when the tile is hovered.
   const peel = h("span", { class: "tile-peel", "aria-hidden": "true" });
-  const el = h("button", { type: "button", class: "tile" }, picture, ring, number, plate, peel);
+  const el = h("button", { type: "button", class: "tile" }, picture, video, number, plate, peel);
 
   // A missing poster leaves the dark tile with its plate: the placeholder state.
   poster.addEventListener("load", () => el.classList.remove("no-poster"));
   poster.addEventListener("error", () => el.classList.add("no-poster"));
+  // The loop covers the poster from its first played frame until its source is dropped.
+  video.addEventListener("playing", () => el.classList.add("live"));
+  video.addEventListener("emptied", () => el.classList.remove("live"));
 
   const api: CaseTile = {
     el,
@@ -82,9 +84,8 @@ export function caseTile(text: TileText, art: TileArt): CaseTile {
       source.srcset = art.posterPhone;
       poster.src = art.poster;
     },
-    loadRing() {
-      video.poster = art.ringPoster;
-      seen.classList.add("on"); // the logos load with the badge, after the first screen's posters
+    loadLogos() {
+      seen.classList.add("on"); // the press logos load after the first screen's posters
     },
     set(t) {
       el.setAttribute("aria-label", t.label);

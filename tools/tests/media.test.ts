@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { cases, outDir, MUSIC, outputs, probe, RING_SIZE, TOTAL_LIMIT } from "../media.ts";
+import { cases, outDir, outputs, probe, TOTAL_LIMIT } from "../media.ts";
 import { readdir, stat } from "node:fs/promises";
 
 const path = (file: string) => join(outDir, file);
@@ -25,15 +25,8 @@ describe("media files", () => {
     });
   }
 
-  test("music exists, is within its limit and is an audio-only loop of 30-120 s", async () => {
-    const bytes = await size(MUSIC.file);
-    expect(bytes).toBeGreaterThan(1000);
-    expect(bytes).toBeLessThanOrEqual(MUSIC.limit);
-    const info = await probe(path(MUSIC.file));
-    expect(info.duration).toBeGreaterThanOrEqual(30);
-    expect(info.duration).toBeLessThanOrEqual(120);
-    expect(info.audio).toBe(true);
-    expect(info.width).toBe(0);
+  test("no round badge and no music is left", async () => {
+    expect((await readdir(outDir)).filter((f) => /-ring\.(mp4|webp)$|^music\./.test(f))).toEqual([]);
   });
 
   test("site/media is within the total budget", async () => {
@@ -52,21 +45,37 @@ describe("streams", () => {
   }
 
   for (const c of cases.filter((c) => c.kind === "video")) {
-    test(`case ${c.id}: the round badge's loop is ${RING_SIZE} square, silent, at most 8 s and 30 fps`, async () => {
-      const info = await probe(path(`c${c.id}-ring.mp4`));
-      expect([info.width, info.height]).toEqual([RING_SIZE, RING_SIZE]);
-      expect(info.audio).toBe(false);
-      expect(info.duration).toBeLessThanOrEqual(8.05);
-      expect(info.fps).toBeLessThanOrEqual(30);
+    test(`case ${c.id}: both loops are silent, at most 8 s and 30 fps; the phone loop is ${c.size === "t" ? "720x1080" : "720x900"}`, async () => {
+      const tile = await probe(path(`c${c.id}-loop.mp4`));
+      const phone = await probe(path(`c${c.id}-loop-phone.mp4`));
+      for (const info of [tile, phone]) {
+        expect(info.audio).toBe(false);
+        expect(info.duration).toBeLessThanOrEqual(8.05);
+        expect(info.fps).toBeLessThanOrEqual(30);
+      }
+      expect([phone.width, phone.height]).toEqual(c.size === "t" ? [720, 1080] : [720, 900]);
+    });
+
+    // A picture poster has its own aspect; a frame of the video has the loop's.
+    test(`case ${c.id}: the tile loop is as wide as the tile's still${typeof c.poster === "number" ? " and as high" : ""}`, async () => {
+      const still = await probe(path(`c${c.id}.webp`));
+      const tile = await probe(path(`c${c.id}-loop.mp4`));
+      expect(tile.width).toBe(still.width);
+      if (typeof c.poster === "number") expect(Math.abs(tile.height - still.height)).toBeLessThanOrEqual(2);
     });
   }
 
-  test("case 8 is a wide tile from the studio's art and a vertical 720x1280 video in full", async () => {
-    const tile = await probe(path("c8.webp"));
-    expect(tile.width).toBe(1280);
-    expect(tile.width).toBeGreaterThan(tile.height);
-    const full = await probe(path("c8-full.mp4"));
-    expect([full.width, full.height]).toEqual([720, 1280]);
+  test("every video case names its loop: loopStart from 0, loopLength up to 8 s", () => {
+    for (const c of cases.filter((c) => c.kind === "video")) {
+      expect(c.loopStart, `case ${c.id}`).toBeGreaterThanOrEqual(0);
+      expect(c.loopLength, `case ${c.id}`).toBeGreaterThan(0);
+      expect(c.loopLength, `case ${c.id}`).toBeLessThanOrEqual(8);
+    }
+  });
+
+  test("cases 8 and 10 are gone", async () => {
+    expect(cases.filter((c) => c.id === 8 || c.id === 10)).toEqual([]);
+    expect((await readdir(outDir)).filter((f) => /^c(8|10)[-.]/.test(f))).toEqual([]);
   });
 
   test("no file of the old wall loops is left", async () => {
@@ -77,8 +86,7 @@ describe("streams", () => {
 describe("faststart", () => {
   const files = [
     ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-full.mp4`] : [])),
-    ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-ring.mp4`] : [])),
-    MUSIC.file,
+    ...cases.flatMap((c) => (c.kind === "video" ? [`c${c.id}-loop.mp4`, `c${c.id}-loop-phone.mp4`] : [])),
   ];
   for (const file of files) {
     test(`${file}: moov comes before mdat`, async () => {
